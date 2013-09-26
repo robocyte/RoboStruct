@@ -270,12 +270,12 @@ void MainFrame::SaveBundleFile(std::string path)
 		int num_visible_points(0);
 		int num_images = std::count_if(m_images.begin(), m_images.end(), [](ImageData &img) { return img.m_camera.m_adjusted; });
 
-		for (auto point : m_points) if (point.m_views.size() > 0) num_visible_points++;
+		for (const auto &point : m_points) if (point.m_views.size() > 0) num_visible_points++;
 
 		txt_file << num_images << " " << num_visible_points << std::endl;
 
 		// Write cameras
-		for (auto image : m_images)
+		for (const auto &image : m_images)
 		{
 			if (!image.m_camera.m_adjusted) continue;
 
@@ -294,25 +294,25 @@ void MainFrame::SaveBundleFile(std::string path)
 		}
 
 		// Write points
-		for (int i = 0; i < num_points; i++)
+		for (const auto &point : m_points)
 		{
-			int num_visible(m_points[i].m_views.size());
-			if (num_visible > 0)
+			int num_visible();
+			if (point.m_views.size() > 0)
 			{
 				// Position
-				const double *pos = m_points[i].m_pos;
+				const double *pos = point.m_pos;
 				txt_file << pos[0] << " " << pos[1] << " " << pos[2] << std::endl;
 
 				// Color
-				const float *col = m_points[i].m_color;
+				const float *col = point.m_color;
 				txt_file << util::iround(col[0]) << " " << util::iround(col[1]) << " " << util::iround(col[2]) << std::endl;
 
 				// View data
-				txt_file << num_visible;
-				for (int j = 0; j < num_visible; j++)
+				txt_file << point.m_views.size();
+				for (const auto &view : point.m_views)
 				{
-					int img = m_points[i].m_views[j].first;
-					int key = m_points[i].m_views[j].second;
+					int img = view.first;
+					int key = view.second;
 
 					double x = m_images[img].m_keys[key].m_x;
 					double y = m_images[img].m_keys[key].m_y;
