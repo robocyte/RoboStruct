@@ -1,0 +1,21 @@
+	m_window_viewport = new wxAuiNotebook(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_NB_TAB_EXTERNAL_MOVE | wxAUI_NB_TAB_SPLIT | wxNO_BORDER );
+	m_mgr.AddPane(m_window_viewport, wxAuiPaneInfo().CentrePane().Name("Viewport").Caption("Viewport").CaptionVisible(true).MaximizeButton(true).MinimizeButton(false).PinButton(false).CloseButton(false));
+
+
+	
+	int GLCanvasAttributes[] = {WX_GL_RGBA, 1, WX_GL_DOUBLEBUFFER, 1, WX_GL_SAMPLES, 8, 0};
+	m_gl_canvas = new wxGLCanvas(m_panel8, -1, GLCanvasAttributes);
+
+
+
+	wxBoxSizer* bSizer3 = new wxBoxSizer(wxHORIZONTAL);
+	
+	m_tc_log = new wxTextCtrl(m_window_log, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_DONTWRAP | wxTE_MULTILINE | wxTE_READONLY |wxNO_BORDER);
+	bSizer3->Add(m_tc_log, 1, wxEXPAND, 5);
+	
+	m_toolbar_log = new wxAuiToolBar(m_window_log, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_VERTICAL);
+	m_toolbar_log->SetToolBitmapSize(wxSize(24, 24));
+	m_toolbar_log->SetToolPacking(2);
+
+	m_toolbar_log->AddTool(ID_SAVE_LOG,		"Save Log",		wxIcon("save_icon", wxBITMAP_TYPE_ICO_RESOURCE, 22, 22),	wxNullBitmap, wxITEM_NORMAL, "Save the log to a .txt file", "Save the log to a .txt file", NULL);
+	m_toolbar_log->AddTool(ID_CLEAR_LOG,	"Clear log",	wxIcon("delete_icon", wxBITMAP_TYPE_ICO_RESOURCE, 22, 22),	wxNullBitmap, wxITEM_NORMAL, "Clear the log window", "Clear the log window", NULL);

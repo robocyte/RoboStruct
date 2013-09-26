@@ -1,0 +1,31 @@
+// Main application icon
+aaaamain			ICON	"RoboStruct.ico"
+
+// Menu/toolbar icons
+start_icon			ICON	"Start.ico"
+image_browser_icon	ICON	"Image browser.ico"
+image_preview_icon	ICON	"Image preview.ico"
+options_icon		ICON	"Options.ico"
+log_icon			ICON	"Log.ico"
+home_icon			ICON	"Home.ico"
+turntable_icon		ICON	"Turntable.ico"
+trackball_icon		ICON	"Trackball.ico"
+grid_icon			ICON	"Grid.ico"
+points_icon			ICON	"Points.ico"
+camera_icon			ICON	"Camera.ico"
+frustrum_icon		ICON	"Frustrum.ico"
+
+// Button icons
+save_icon			ICON	"Save.ico"
+delete_icon			ICON	"Delete.ico"
+
+// Cursors
+rotate_cursor		CURSOR	"Rotate.cur"
+pan_cursor			CURSOR	"Pan.cur"
+zoom_cursor			CURSOR	"Zoom.cur"
+
+// Enable visual styles
+#define wxUSE_NO_MANIFEST 0
+
+// wxWidgets standard icons, cursors...
+//#include "wx/msw/wx.rc"

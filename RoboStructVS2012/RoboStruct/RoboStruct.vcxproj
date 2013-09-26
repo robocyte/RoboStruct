@@ -1,0 +1,235 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{6624595B-FE1D-462D-84E6-06E69397A828}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>RoboStruct</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\- Visual Studio Property Sheets -\Static Runtime Debug.props" />
+    <Import Project="..\..\..\- Visual Studio Property Sheets -\OpenCV Debug.props" />
+    <Import Project="..\..\..\- Visual Studio Property Sheets -\wxWidgets Debug.props" />
+    <Import Project="..\..\..\- Visual Studio Property Sheets -\OpenGL.props" />
+    <Import Project="..\..\..\- Visual Studio Property Sheets -\GLEW Debug.props" />
+    <Import Project="..\..\..\- Visual Studio Property Sheets -\GLocyte Debug.props" />
+    <Import Project="..\..\..\- Visual Studio Property Sheets -\GLM.props" />
+    <Import Project="..\..\..\- Visual Studio Property Sheets -\OpenCTM Debug.props" />
+    <Import Project="..\..\..\- Visual Studio Property Sheets -\Daisy Debug.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="D:\Design\Dev\- Visual Studio Property Sheets -\Static Runtime.props" />
+    <Import Project="D:\Design\Dev\- Visual Studio Property Sheets -\OpenCV.props" />
+    <Import Project="D:\Design\Dev\- Visual Studio Property Sheets -\wxWidgets.props" />
+    <Import Project="D:\Design\Dev\- Visual Studio Property Sheets -\OpenGL.props" />
+    <Import Project="D:\Design\Dev\- Visual Studio Property Sheets -\OpenMP.props" />
+    <Import Project="..\..\..\- Visual Studio Property Sheets -\GLEW.props" />
+    <Import Project="..\..\..\- Visual Studio Property Sheets -\GLocyte.props" />
+    <Import Project="..\..\..\- Visual Studio Property Sheets -\GLM.props" />
+    <Import Project="..\..\..\- Visual Studio Property Sheets -\OpenCTM.props" />
+    <Import Project="..\..\..\- Visual Studio Property Sheets -\Daisy.props" />
+    <Import Project="..\..\..\- Visual Studio Property Sheets -\CBlas.props" />
+    <Import Project="..\..\..\- Visual Studio Property Sheets -\CLapack.props" />
+    <Import Project="..\..\..\- Visual Studio Property Sheets -\CMinpack.props" />
+    <Import Project="..\..\..\- Visual Studio Property Sheets -\F2C.props" />
+    <Import Project="..\..\..\- Visual Studio Property Sheets -\Matrix.props" />
+    <Import Project="..\..\..\- Visual Studio Property Sheets -\Eigen.props" />
+    <Import Project="..\..\..\- Visual Studio Property Sheets -\CXSparse.props" />
+    <Import Project="..\..\..\- Visual Studio Property Sheets -\GFlags.props" />
+    <Import Project="..\..\..\- Visual Studio Property Sheets -\GLog.props" />
+    <Import Project="..\..\..\- Visual Studio Property Sheets -\Ceres.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)..\bin\</OutDir>
+    <TargetName>$(ProjectName)d</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)..\bin\</OutDir>
+    <GenerateManifest>true</GenerateManifest>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN64;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\include;$(SolutionDir)..\wxfb;$(OPENCV_64_DIR)\3rdparty\libjpeg;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN64;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\include;$(SolutionDir)..\wxfb;$(OPENCV_64_DIR)\3rdparty\libjpeg;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4996;4351</DisableSpecificWarnings>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+    </Link>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\wxfb;$(SolutionDir)..\include;$(SolutionDir)..\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\res\resources.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\BundleAdjust.cpp" />
+    <ClCompile Include="..\..\src\CameraData.cpp" />
+    <ClCompile Include="..\..\src\Distortion.cpp" />
+    <ClCompile Include="..\..\src\ExifReader.cpp" />
+    <ClCompile Include="..\..\src\FivePoint.cpp">
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4996;4351;4244</DisableSpecificWarnings>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ImageData.cpp" />
+    <ClCompile Include="..\..\src\MainFrame.cpp" />
+    <ClCompile Include="..\..\src\MainFrameGLCanvas.cpp" />
+    <ClCompile Include="..\..\src\MainFrameInteraction.cpp" />
+    <ClCompile Include="..\..\src\MainFrameIO.cpp" />
+    <ClCompile Include="..\..\src\MainFrameOptions.cpp" />
+    <ClCompile Include="..\..\src\Poly.cpp" />
+    <ClCompile Include="..\..\src\Projection.cpp" />
+    <ClCompile Include="..\..\src\RoboStruct.cpp" />
+    <ClCompile Include="..\..\src\Sfm.cpp" />
+    <ClCompile Include="..\..\src\Triangulation.cpp" />
+    <ClCompile Include="..\..\wxfb\RoboStruct_GUI.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\include\EigenTools.hpp" />
+    <ClInclude Include="..\..\include\FivePoint.hpp" />
+    <ClInclude Include="..\..\include\CameraData.hpp" />
+    <ClInclude Include="..\..\include\ExifReader.hpp" />
+    <ClInclude Include="..\..\include\ImageData.hpp" />
+    <ClInclude Include="..\..\include\Keys.hpp" />
+    <ClInclude Include="..\..\include\MainFrame.hpp" />
+    <ClInclude Include="..\..\include\MatchData.hpp" />
+    <ClInclude Include="..\..\include\Options.hpp" />
+    <ClInclude Include="..\..\include\PointData.hpp" />
+    <ClInclude Include="..\..\include\Poly.hpp" />
+    <ClInclude Include="..\..\include\Projection.hpp" />
+    <ClInclude Include="..\..\include\RoboStruct.hpp" />
+    <ClInclude Include="..\..\include\Sfm.hpp" />
+    <ClInclude Include="..\..\include\TrackData.hpp" />
+    <ClInclude Include="..\..\include\TransformData.hpp" />
+    <ClInclude Include="..\..\include\Triangulation.hpp" />
+    <ClInclude Include="..\..\include\Utilities.hpp" />
+    <ClInclude Include="..\..\wxfb\RoboStruct_GUI.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\wxfb\RoboStruct.fbp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
