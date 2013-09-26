@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<glslprog glslversion="330" name="grid">
+	<attribute name="position" type="vec3"/>
+	<block name="camera_matrices" binding="0"/>
+	<uniform name="model_matrix" type="mat4"/>
+	<vertexshader source="
+ 		#version 330
+
+		layout(location = 0) in vec3 position;
+
+		layout(std140) uniform camera_matrices
+		{
+			mat4 perspective_matrix;
+			mat4 view_matrix;
+			mat4 projection_matrix;
+		};
+
+		uniform mat4 model_matrix;
+		
+		smooth out vec4 vertex_color;
+
+		void main()
+		{
+			vertex_color = vec4(0.3, 0.3, 0.3, 1.0);
+
+			gl_Position = projection_matrix * model_matrix * vec4(position, 1.0);
+		}
+		"/>
+	<fragmentshader source="
+		#version 330
+
+		smooth in vec4 vertex_color;
+
+		out vec4 fragment_color;
+
+		void main()
+		{
+			fragment_color = vertex_color;
+		}
+		"/>
+</glslprog>
+

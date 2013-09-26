@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<glslprog glslversion="330" name="tbndisplay">
+	<attribute name="position" type="vec3"/>
+	<attribute name="normal" type="vec3"/>
+	<attribute name="tangent" type="vec4"/>
+	<attribute name="weights" type="vec4"/>
+	<attribute name="bone_indices" type="vec4"/>
+	<block name="camera_matrices" binding="0"/>
+	<uniform name="model_matrix" type="mat4"/>
+	<uniform name="bone_matrices" type="mat4_vec"/>
+	<vertexshader source="
+ 		#version 330
+
+		layout(location = 0) in vec3 position;
+		layout(location = 1) in vec3 normal;
+		layout(location = 2) in vec4 tangent;
+		layout(location = 5) in vec4 weights;
+		layout(location = 6) in vec4 bone_indices;
+
+		out vec3 vertex_normal;
+		out vec4 vertex_tangent;
+		out vec4 vertex_weights;
+		out vec4 vertex_bone_indices;
+
+		void main()
+		{
+			gl_Position = vec4(position, 1.0);
+			
+			vertex_normal		= normal;
+			vertex_tangent		= tangent;
+			vertex_weights		= weights;
+			vertex_bone_indices	= bone_indices;
+		}
+		"/>
+	<geometryshader source="
+		#version 330
+		
+		layout(points) in;
+		layout(line_strip) out;
+		layout(max_vertices = 6) out;
+		
+		layout(std140) uniform camera_matrices
+		{
+			mat4 perspective_matrix;
+			mat4 view_matrix;
+			mat4 projection_matrix;
+		};
+
+		uniform mat4 model_matrix;
+		uniform mat4 bone_matrices[120];
+		
+		in vec3 vertex_normal[];
+		in vec4 vertex_tangent[];
+		in vec4 vertex_weights[];
+		in vec4 vertex_bone_indices[];
+	
+		out vec3 vertex_color;
+		
+		void main()
+		{
+			float final_weight = 1.0 - (vertex_weights[0].x + vertex_weights[0].y + vertex_weights[0].z);
+			mat4 bone_matrix	= bone_matrices[int(vertex_bone_indices[0].x)] * vertex_weights[0].x
+								+ bone_matrices[int(vertex_bone_indices[0].y)] * vertex_weights[0].y
+								+ bone_matrices[int(vertex_bone_indices[0].z)] * vertex_weights[0].z
+								+ bone_matrices[int(vertex_bone_indices[0].w)] * final_weight;
+
+			mat4 final_transform	= projection_matrix * model_matrix * bone_matrix;
+			vec4 base_position		= final_transform * gl_in[0].gl_Position;
+			vec3 bitangent			= cross(vertex_normal[0], vertex_tangent[0].xyz) * vertex_tangent[0].w;
+
+					
+			vertex_color	= vec3(0.0, 1.0, 0.0);
+			gl_Position		= base_position;
+			EmitVertex();
+			gl_Position		= final_transform * vec4(gl_in[0].gl_Position.xyz + vertex_normal[0], 1.0);
+			EmitVertex();
+			EndPrimitive();
+					
+			vertex_color	= vec3(1.0, 0.0, 0.0);
+			gl_Position		= base_position;
+			EmitVertex();
+			gl_Position		= final_transform * vec4(gl_in[0].gl_Position.xyz + vertex_tangent[0].xyz, 1.0);
+			EmitVertex();
+			EndPrimitive();
+
+			vertex_color	= vec3(0.0, 0.0, 1.0);
+			gl_Position		= base_position;
+			EmitVertex();
+			gl_Position		= final_transform * vec4(gl_in[0].gl_Position.xyz + bitangent, 1.0);
+			EmitVertex();
+			EndPrimitive();
+		}
+		"/>
+	<fragmentshader source="
+		#version 330
+
+		in vec3 vertex_color;
+
+		out vec4 fragment_color;
+
+		void main()
+		{
+			fragment_color = vec4(vertex_color, 1.0);
+		}
+		"/>
+</glslprog>
+
