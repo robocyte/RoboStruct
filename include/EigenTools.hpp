@@ -5,13 +5,14 @@
 #include "Eigen/Dense"
 #include "unsupported/Eigen/NonLinearOptimization"
 
-typedef Eigen::MatrixXd				Mat;
-typedef Eigen::Matrix3d				Mat3;
-typedef Eigen::Matrix<double, 3, 4> Mat34;
-typedef Eigen::VectorXd				Vec;
-typedef Eigen::Vector2d				Vec2;
-typedef Eigen::Vector3d				Vec3;
-typedef Eigen::Vector4d				Vec4;
+typedef Eigen::MatrixXd							Mat;
+typedef Eigen::Matrix3d							Mat3;
+typedef Eigen::Matrix<double, 3, 4>				Mat34;
+typedef Eigen::VectorXd							Vec;
+typedef Eigen::Vector2d							Vec2;
+typedef Eigen::Vector3d							Vec3;
+typedef Eigen::Vector4d							Vec4;
+typedef Eigen::Matrix<double, 6, 1, 0, 6, 1>	Vec6;
 
 typedef std::vector<Mat>	MatVec;
 typedef std::vector<Mat3>	Mat3Vec;

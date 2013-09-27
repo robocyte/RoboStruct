@@ -7,18 +7,6 @@ CameraData::CameraData()
 	, m_ccd_width(0)
 	, m_focal(0.0)
 {
-	m_constrained[0] = m_constrained[1] = m_constrained[2] = false; 
-	m_constrained[3] = m_constrained[4] = m_constrained[5] = false; 
-	m_constrained[6] = false;
-
-	m_constraints[0] = m_constraints[1] = m_constraints[2] = 0.0;
-	m_constraints[3] = m_constraints[4] = m_constraints[5] = 0.0;
-	m_constraints[6] = 0.0;
-
-	m_constraint_weights[0] = m_constraint_weights[1] = m_constraint_weights[2] = 0.0;
-	m_constraint_weights[3] = m_constraint_weights[4] = m_constraint_weights[5] = 0.0;
-	m_constraint_weights[6] = 0.0;
-
 	m_k[0] = m_k[1] = 0.0;
 }
 

@@ -462,10 +462,6 @@ int MainFrame::SetupInitialCameraPair(int i_best, int j_best, std::vector<camera
 		v2_t p_norm = v2_new(proj1_norm[0] / proj1_norm[2], proj1_norm[1] / proj1_norm[2]);
 		v2_t q_norm = v2_new(proj2_norm[0] / proj2_norm[2], proj2_norm[1] / proj2_norm[2]);
 
-		// Undo radial distortion
-		p_norm = this->UndistortNormalizedPoint(p_norm, cameras[0]);
-		q_norm = this->UndistortNormalizedPoint(q_norm, cameras[1]);
-
 		Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> R1(cameras[0].R);
 		Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> R2(cameras[1].R);
 		Eigen::Map<Eigen::Vector3d> t1(cameras[0].t);
@@ -1089,12 +1085,13 @@ double MainFrame::RunSFM(int num_pts, int num_cameras, int start_camera,
 			double dt[3] = { init_camera_params[i].t[0], init_camera_params[i].t[1], init_camera_params[i].t[2] };
 
 			// Compute inverse distortion parameters
-			double k_dist[6] = { 0.0, 1.0, 0.0, init_camera_params[i].k[0], 0.0, init_camera_params[i].k[1] };
+			Vec6 k_dist; k_dist << 0.0, 1.0, 0.0, init_camera_params[i].k[0], 0.0, init_camera_params[i].k[1];
 			double w_2 = 0.5 * data.GetWidth();
 			double h_2 = 0.5 * data.GetHeight();
 			double max_radius = sqrt(w_2 * w_2 + h_2 * h_2) / init_camera_params[i].f;
+			Eigen::Map<Vec6> k_inv(init_camera_params[i].k_inv);
 
-			InvertDistortion(0.0, max_radius, k_dist, init_camera_params[i].k_inv);
+			k_inv = InvertDistortion(0.0, max_radius, k_dist);
 
 			int num_keys = GetNumKeys(added_order[i]);
 			int num_pts_proj = 0;
@@ -1542,7 +1539,6 @@ int MainFrame::BundleAdjustAddAllNewPoints(int num_points, int num_cameras, std:
 
 		// Check if at least two cameras fix the position of the point
 		bool conditioned(false);
-		bool good_distance(false);
 		double max_angle(0.0);
 
 		for (int j = 0; j < num_views; j++)
@@ -1580,12 +1576,10 @@ int MainFrame::BundleAdjustAddAllNewPoints(int num_points, int num_cameras, std:
 
 				// Check that the angle between the rays is large enough
 				if (util::rad2deg(angle) >= m_options.ray_angle_threshold) conditioned = true;
-
-				good_distance = true;
 			}
 		}
 		
-		if (!conditioned || !good_distance)
+		if (!conditioned)
 		{
 			num_ill_conditioned++;
 			continue;
@@ -1605,11 +1599,12 @@ int MainFrame::BundleAdjustAddAllNewPoints(int num_points, int num_cameras, std:
 			Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> Ke(K);
 			Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> R(cam.R);
 			Eigen::Map<Vec3> t(cam.t);
+			Eigen::Map<Vec6> k_inv(cam.k_inv);
 		
 			Vec3 pn = Ke.inverse() * Vec3(key.m_x, key.m_y, 1.0);
-			v2_t pu = this->UndistortNormalizedPoint(v2_new(-pn.x(), -pn.y()), cam);
+			Vec2 pu = UndistortNormalizedPoint(Vec2(-pn.x(), -pn.y()), k_inv);
 
-			observations.push_back(Observation(Vec2(Vx(pu), Vy(pu)), R, -(R * t)));
+			observations.push_back(Observation(pu, R, -(R * t)));
 		}
 
 		auto point = Triangulate(observations);

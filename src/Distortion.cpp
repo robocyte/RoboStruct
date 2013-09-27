@@ -2,11 +2,7 @@
 
 #include "EigenTools.hpp"
 
-#include "vector.h"
-
-#include "MainFrame.hpp"
-
-void MainFrame::InvertDistortion(double r0, double r1, double *k_in, double *k_out)
+Vec6 InvertDistortion(double r0, double r1, const Vec6 &k_in)
 {
 	int num_eqns = 20;
 	int num_vars = 6;
@@ -22,7 +18,7 @@ void MainFrame::InvertDistortion(double r0, double r1, double *k_in, double *k_o
 		double a = 0.0;
 		for (int j = 0; j < 6; j++)
 		{
-			a += p * k_in[j];
+			a += p * k_in(j);
 			p *= t;
 		}
 
@@ -36,14 +32,12 @@ void MainFrame::InvertDistortion(double r0, double r1, double *k_in, double *k_o
 		b(i) = t;
 	}
 
-	x = A.colPivHouseholderQr().solve(b);
-
-	for (int i = 0; i < num_vars; ++i) k_out[i] = x(i);
+	return A.colPivHouseholderQr().solve(b);
 }
 
-v2_t MainFrame::UndistortNormalizedPoint(v2_t p, camera_params_t c) 
+Vec2 UndistortNormalizedPoint(const Vec2 &p, const Vec6 & k_inverse)
 {
-	double r = Vec2(Vx(p), Vy(p)).norm();
+	double r = p.norm();
 	if (r == 0.0) return p;
 
 	double t = 1.0;
@@ -51,9 +45,9 @@ v2_t MainFrame::UndistortNormalizedPoint(v2_t p, camera_params_t c)
 
 	for (int i = 0; i < 6; i++)
 	{
-		a += t * c.k_inv[i];
+		a += t * k_inverse(i);
 		t *= r;
 	}
 
-	return v2_scale(a / r, p);
+	return (a / r) * p;
 }

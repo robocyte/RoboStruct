@@ -1,5 +1,6 @@
 ﻿#include <numeric>
 #include <unordered_set>
+#include <queue>
 
 #include "wx/progdlg.h"
 #include "wx/textdlg.h"

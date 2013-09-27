@@ -253,7 +253,7 @@ void MainFrame::ExportToCMVS()
 
 void MainFrame::SaveBundleFile(std::string path)
 {
-	// TODO: make this function safer, check if we have results to save!!
+	// TODO: Check if we have results to save!!
 	std::string filename = path + "\\bundle.rd.out";
 	std::ofstream txt_file(filename.c_str());
 
@@ -337,7 +337,7 @@ void MainFrame::SavePlyFile()
 	{
 		wxLogMessage("Writing geometry and cameras to file %s...", filename.c_str());
 
-		int num_cameras = std::count_if(m_images.begin(), m_images.end(), [](ImageData &img) { return img.m_camera.m_adjusted; });
+		int num_cameras = std::count_if(m_images.begin(), m_images.end(), [](const ImageData &img) { return img.m_camera.m_adjusted; });
 		int num_points = (int)m_points.size();
 
 		// Output the header
@@ -410,7 +410,7 @@ void MainFrame::SaveMayaFile()
 		wxLogMessage("Writing geometry and cameras to file %s...", filename.c_str());
 
 		int num_points = (int)m_points.size();
-		int num_cameras = std::count_if(m_images.begin(), m_images.end(), [](ImageData &img) { return img.m_camera.m_adjusted; });
+		int num_cameras = std::count_if(m_images.begin(), m_images.end(), [](const ImageData &img) { return img.m_camera.m_adjusted; });
 
 		// Write header and default cameras
 		maya_file << "//Maya ASCII 2008 scene\n";

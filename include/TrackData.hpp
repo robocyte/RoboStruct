@@ -1,6 +1,5 @@
 #pragma once
 
-#include <queue>
 #include <vector>
 
 typedef std::pair<int, int>		ImageKey;

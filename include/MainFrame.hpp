@@ -129,8 +129,6 @@ private:
 	void				RefineCameraParameters(std::vector<v3_t> &points, std::vector<v2_t> &projs, int *pt_idxs, camera_params_t &camera, std::vector<int> &inliers);
 	int					BundleAdjustAddAllNewPoints(int num_points, int num_cameras, std::vector<int> &added_order, camera_params_t *cameras, v3_t *points, v3_t *colors, std::vector<ImageKeyVector> &pt_views);
 	int					RemoveBadPointsAndCameras(int num_points, int num_cameras, const std::vector<int> &added_order, camera_params_t *cameras, v3_t *points, v3_t *colors, std::vector<ImageKeyVector> &pt_views);
-	void				InvertDistortion(double r0, double r1, double *k_in, double *k_out);
-	v2_t				UndistortNormalizedPoint(v2_t p, camera_params_t c);
 
 protected:
 	// Handlers for MainFrame events
