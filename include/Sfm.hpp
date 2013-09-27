@@ -4,12 +4,12 @@
 
 typedef struct
 {
-	double R[9];							// Rotation
-	double t[3];							// Translation
-	double f;								// Focal length
-	double init_f;							// Initial focal length from EXIF
-	double k[2];							// Undistortion parameters
-	double k_inv[6];		// Inverse undistortion parameters
+	double R[9];		// Rotation
+	double t[3];		// Translation
+	double f;			// Focal length
+	double init_f;		// Initial focal length from EXIF
+	double k[2];		// Undistortion parameters
+	double k_inv[6];	// Inverse undistortion parameters
 } camera_params_t;
 
 struct ECamera
