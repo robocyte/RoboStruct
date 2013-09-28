@@ -550,7 +550,7 @@ void MainFrame::ComputeTracks()
 
 	// Print track stats
 	std::vector<int> stats(num_images + 1);
-	for (auto track : m_tracks) stats[track.m_views.size()] += 1;
+	for (const auto &track : m_tracks) stats[track.m_views.size()] += 1;
 	for (int i = 2; i < (num_images + 1); i++) wxLogMessage("[ComputeTracks] %i projections: %i", i, stats[i]);
 }
 
