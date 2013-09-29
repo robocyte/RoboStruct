@@ -125,7 +125,7 @@ private:
 	void				InitializeCameraParams(camera_params_t &camera);
 	void				GetIntrinsics(const camera_params_t &camera, double *K);
 	void				FixIntrinsics(double *P, double *K, double *R, double *t);
-	double				RunSFM(int num_pts, int num_cameras, int start_camera, camera_params_t *init_camera_params, v3_t *init_pts, const std::vector<int> &added_order, v3_t *colors, std::vector<ImageKeyVector> &pt_views);
+	double				RunSFM(int num_pts, int num_cameras, camera_params_t *init_camera_params, v3_t *init_pts, const std::vector<int> &added_order, v3_t *colors, std::vector<ImageKeyVector> &pt_views);
 	void				RefineCameraParameters(std::vector<v3_t> &points, std::vector<v2_t> &projs, int *pt_idxs, camera_params_t &camera, std::vector<int> &inliers);
 	int					BundleAdjustAddAllNewPoints(int num_points, int num_cameras, std::vector<int> &added_order, camera_params_t *cameras, v3_t *points, v3_t *colors, std::vector<ImageKeyVector> &pt_views);
 	int					RemoveBadPointsAndCameras(int num_points, int num_cameras, const std::vector<int> &added_order, camera_params_t *cameras, v3_t *points, v3_t *colors, std::vector<ImageKeyVector> &pt_views);

@@ -196,7 +196,7 @@ void MainFrame::BundleAdjust()
 
 	wxLogMessage("[BundleAdjust] Adjusting cameras %d and %d...", i_best, j_best);
 	curr_num_pts = this->SetupInitialCameraPair(i_best, j_best, cameras, points, colors, pt_views);
-	RunSFM(curr_num_pts, 2, 0, cameras.data(), points.data(), added_order, colors.data(), pt_views);
+	RunSFM(curr_num_pts, 2, cameras.data(), points.data(), added_order, colors.data(), pt_views);
 	curr_num_cameras = 2;
 
 	// Main loop
@@ -242,7 +242,7 @@ void MainFrame::BundleAdjust()
 		curr_num_pts = this->BundleAdjustAddAllNewPoints(curr_num_pts, curr_num_cameras, added_order, cameras.data(), points.data(), colors.data(), pt_views);
 		wxLogMessage("[BundleAdjust] Number of points = %d", curr_num_pts);
 
-		RunSFM(curr_num_pts, curr_num_cameras, 0, cameras.data(), points.data(), added_order, colors.data(), pt_views);
+		RunSFM(curr_num_pts, curr_num_cameras, cameras.data(), points.data(), added_order, colors.data(), pt_views);
 
 		this->RemoveBadPointsAndCameras(curr_num_pts, curr_num_cameras + 1, added_order, cameras.data(), points.data(), colors.data(), pt_views);
 
@@ -846,8 +846,7 @@ bool MainFrame::EstimateRelativePose(int i1, int i2, camera_params_t &camera1, c
 	return true;
 }
 
-double MainFrame::RunSFM(int num_pts, int num_cameras, int start_camera,
-							camera_params_t *init_camera_params, v3_t *init_pts, const std::vector<int> &added_order,
+double MainFrame::RunSFM(int num_pts, int num_cameras, camera_params_t *init_camera_params, v3_t *init_pts, const std::vector<int> &added_order,
 							v3_t *colors, std::vector<ImageKeyVector> &pt_views)
 {
 	const int		min_outliers	= 40;
