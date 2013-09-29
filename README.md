@@ -17,17 +17,18 @@ Usage
 
 The program is still unfinished but a working executable (Windows, 64 bit) can be found in /bin.
 Just put the /bin folder anywhere on your harddrive. Select another folder containing .jpg files and hit the big play button, et voila.
-Important: jpg. files must contain the focal length information!
+IMPORTANT: The jpg. files must contain EXIF tags with focal length!
 Depending on your computer's memory and speed, it may be advisable to resize the source images.
 For reference, on my system (Core i7 quadcore, 16 GB Ram), image sizes up to 3000 x 2000 pixels are tested and work well.
 
 As with many other feature based sfm programs it is recommended to take pictures with wide angle lenses and a
-sufficient but not too large baseline. Naturally, rich textured, uniformely lit and non-reflective surfaces are
+sufficient but not too large baseline. Rich textured, uniformely lit and non-reflective surfaces are
 optimal candidates for reconstruction.
 
 In order to see something in the 3d viewport, a graphics card capable of OpenGL 3.3 and above is needed.
 
-Finally, results can be exported as .ply and .out files (from bundler), also exporting to MAYA and CMVS is possible.
+Results will be automatically saved as a .ply file in the directory of the source images,
+exporting the solution to MAYA, .out files (from bundler) and CMVS is also possible.
 
 
 Compiling
