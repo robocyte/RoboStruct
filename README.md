@@ -49,4 +49,4 @@ glm          http://glm.g-truc.net/0.9.4/index.html
 GLEW         http://glew.sourceforge.net/
 glocyte      coming soon...
 
-The program is currently developed for Windows, a Visual Studio 2013 solution is provided.
+The program is currently developed for Windows, a Visual Studio 2012 solution is provided.
