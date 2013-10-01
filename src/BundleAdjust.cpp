@@ -455,8 +455,8 @@ int MainFrame::SetupInitialCameraPair(int i_best, int j_best, std::vector<camera
 
 		// Put the translation in standard form
 		Observations observations;
-		observations.push_back(Observation(Vec2(p_norm1.head<2>() / p_norm1(2)), R1, -(R1 * t1)));
-		observations.push_back(Observation(Vec2(p_norm2.head<2>() / p_norm2(2)), R2, -(R2 * t2)));
+		observations.push_back(Observation(Vec2(p_norm1.head<2>() / p_norm1.z()), R1, -(R1 * t1)));
+		observations.push_back(Observation(Vec2(p_norm2.head<2>() / p_norm2.z()), R2, -(R2 * t2)));
 
 		double error;
 		auto pt = Triangulate(observations, &error);
@@ -819,15 +819,11 @@ bool MainFrame::EstimateRelativePose(int i1, int i2, camera_params_t &camera1, c
 	m_images[i1].m_camera.m_adjusted = true;
 	m_images[i2].m_camera.m_adjusted = true;
 
-	double Rb[9], tb[3];
-	Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> Re(Rb);
-	Eigen::Map<Eigen::Vector3d> te(tb);
+	Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> Re(camera2.R);
+	Eigen::Map<Eigen::Vector3d> te(camera2.t);
 
 	Re = R;
 	te = -(R.transpose() * t);
-
-	memcpy(camera2.R, Rb, sizeof(double) * 9);
-	memcpy(camera2.t, tb, sizeof(double) * 3);
 
 	return true;
 }
@@ -1260,11 +1256,9 @@ bool MainFrame::FindAndVerifyCamera(int num_points, v3_t *points_solve, v2_t *pr
 		return false;
 	}
 
-	double Kinit[9], Rinit[9], tinit[3];
-
-	Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> Ke(Kinit);
-	Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> Re(Rinit);
-	Eigen::Map<Vec3> te(tinit);
+	Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> Ke(K);
+	Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> Re(R);
+	Eigen::Map<Vec3> te(t);
 	Mat3 Ke2 = Ke;
 	Mat3 Re2 = Re;
 	Vec3 te2 = te;
@@ -1275,27 +1269,18 @@ bool MainFrame::FindAndVerifyCamera(int num_points, v3_t *points_solve, v2_t *pr
 	Re = Re2;
 	te = te2;
 
-	// Check cheirality constraint
 	wxLogMessage("[FindAndVerifyCamera] Checking consistency...");
 
-	double Rigid[12] =	{ Rinit[0], Rinit[1], Rinit[2], tinit[0],
-						Rinit[3], Rinit[4], Rinit[5], tinit[1],
-						Rinit[6], Rinit[7], Rinit[8], tinit[2] };
+	Mat34 Rigid;
+	Rigid << Re2;
+	Rigid.col(3) = te;
 
 	int num_behind = 0;
 	for (int j = 0; j < num_points; j++)
 	{
-		double p[4] = { Vx(points_solve[j]), Vy(points_solve[j]), Vz(points_solve[j]), 1.0 };
-		double q[3], q2[3];
-
-		matrix_product(3, 4, 4, 1, Rigid, p, q);
-		matrix_product331(Kinit, q, q2);
-
-		double pimg[2] = { -q2[0] / q2[2], -q2[1] / q2[2] };
-		double diff =	(pimg[0] - Vx(projs_solve[j])) * (pimg[0] - Vx(projs_solve[j])) +
-						(pimg[1] - Vy(projs_solve[j])) * (pimg[1] - Vy(projs_solve[j]));
-
-		diff = sqrt(diff);
+		Vec3 q = Ke * (Rigid * Vec4(Vx(points_solve[j]), Vy(points_solve[j]), Vz(points_solve[j]), 1.0));
+		Vec2 pimg = -q.head<2>() / q.z();
+		double diff = (pimg - Vec2(projs_solve[j].p[0], projs_solve[j].p[1])).norm();
 
 		if (diff < m_options.projection_estimation_threshold) inliers.push_back(j);
 		if (diff < (16.0 * m_options.projection_estimation_threshold))
@@ -1307,7 +1292,7 @@ bool MainFrame::FindAndVerifyCamera(int num_points, v3_t *points_solve, v2_t *pr
 			outliers.push_back(j);
 		}
 
-		if (q[2] > 0.0) num_behind++;	// Cheirality constraint violated
+		if (q.z() > 0.0) num_behind++;	// Cheirality constraint violated
 	}
 
 	if (num_behind >= 0.9 * num_points)
@@ -1315,10 +1300,6 @@ bool MainFrame::FindAndVerifyCamera(int num_points, v3_t *points_solve, v2_t *pr
 		wxLogMessage("[FindAndVerifyCamera] Error: camera is pointing away from scene");
 		return false;
 	}
-
-	memcpy(K, Kinit, sizeof(double) * 9);
-	memcpy(R, Rinit, sizeof(double) * 9);
-	memcpy(t, tinit, sizeof(double) * 3);
 
 	return true;
 }
