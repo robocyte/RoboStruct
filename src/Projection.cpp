@@ -218,43 +218,97 @@ int ComputeProjectionMatrixRansac(const Vec3Vec &points, const Vec2Vec &projecti
 
 void DecomposeProjectionMatrix(const Mat &P, Mat3 *K, Mat3 *R, Vec3 *t)
 {
-	Eigen::HouseholderQR<Mat3> qr(P.topLeftCorner<3, 3>().inverse());
-	*K = qr.matrixQR().triangularView<Eigen::Upper>();
-	*R = qr.householderQ();
+	Mat3 Kp = P.block(0, 0, 3, 3);
+	Mat3 Q; Q.setIdentity();
 
-	*K = K->inverse().eval();
-	*R = R->inverse().eval();
-
-	if (R->determinant() < 0)
+	// Set K(2, 1) to zero.
+	if (Kp(2, 1) != 0)
 	{
-		K->col(0) *= -1.0;
-		R->row(0) *= -1.0;
+		double c = -Kp(2, 2);
+		double s = Kp(2, 1);
+		double l = sqrt(c * c + s * s);
+		c /= l; s /= l;
+		Mat3 Qx;
+		Qx <<  1,  0,  0,
+			   0,  c, -s,
+			   0,  s,  c;
+		Kp = Kp * Qx;
+		Q = Qx.transpose() * Q;
 	}
 
-	*K /= (*K)(2, 2);
-
-	if ((*K)(0, 0) < 0)
+	// Set K(2, 0) to zero.
+	if (Kp(2, 0) != 0)
 	{
-		Mat3 D;
-		D << -1,  0,  0,
+		double c = Kp(2, 2);
+		double s = Kp(2, 0);
+		double l = sqrt(c * c + s * s);
+		c /= l; s /= l;
+		Mat3 Qy;
+		Qy <<  c,  0,  s,
+			   0,  1,  0,
+			  -s,  0,  c;
+		Kp = Kp * Qy;
+		Q = Qy.transpose() * Q;
+	}
+
+	// Set K(1, 0) to zero.
+	if (Kp(1, 0) != 0)
+	{
+		double c = -Kp(1, 1);
+		double s = Kp(1, 0);
+		double l = sqrt(c * c + s * s);
+		c /= l; s /= l;
+		Mat3 Qz;
+		Qz <<  c, -s,  0,
+			   s,  c,  0,
+			   0,  0,  1;
+		Kp = Kp * Qz;
+		Q = Qz.transpose() * Q;
+	}
+
+	Mat3 Rp = Q;
+
+	// Ensure that the diagonal is positive and R determinant == 1
+	if (Kp(2, 2) < 0)
+	{
+		Kp = -Kp;
+		Rp = -Rp;
+	}
+
+	if (Kp(1, 1) < 0)
+	{
+		Mat3 S;
+		S <<  1,  0,  0,
 			  0, -1,  0,
 			  0,  0,  1;
-
-		*K = *K *  D;
-		*R =  D * *R;
+		Kp = Kp * S;
+		Rp = S  * Rp;
 	}
 
-	if ((*K)(1, 1) < 0)
+	if (Kp(0, 0) < 0)
 	{
-		(*K)(1, 1) *= -1;
-
-		Mat3 D;
-		D << -1,  0,  0,
+		Mat3 S;
+		S << -1,  0,  0,
 			  0,  1,  0,
-			  0,  0, -1;
-
-		*R =  D * *R;
+			  0,  0,  1;
+		Kp = Kp * S;
+		Rp = S  * Rp;
 	}
 
-	*t = K->partialPivLu().solve(P.col(3));
+	// Compute translation.
+	Eigen::PartialPivLU<Mat3> lu(Kp);
+	Vec3 tp = lu.solve(P.col(3));
+
+	if(Rp.determinant() < 0)
+	{
+		Rp = -Rp;
+		tp = -tp;
+	}
+
+	// Scale K so that K(2, 2) = 1
+	Kp = Kp / Kp(2, 2);
+
+	*K = Kp;
+	*R = Rp;
+	*t = tp;
 }

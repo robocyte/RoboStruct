@@ -83,10 +83,6 @@
     <Import Project="..\..\..\- Visual Studio Property Sheets -\GLM.props" />
     <Import Project="..\..\..\- Visual Studio Property Sheets -\OpenCTM.props" />
     <Import Project="..\..\..\- Visual Studio Property Sheets -\Daisy.props" />
-    <Import Project="..\..\..\- Visual Studio Property Sheets -\CBlas.props" />
-    <Import Project="..\..\..\- Visual Studio Property Sheets -\CLapack.props" />
-    <Import Project="..\..\..\- Visual Studio Property Sheets -\CMinpack.props" />
-    <Import Project="..\..\..\- Visual Studio Property Sheets -\F2C.props" />
     <Import Project="..\..\..\- Visual Studio Property Sheets -\Matrix.props" />
     <Import Project="..\..\..\- Visual Studio Property Sheets -\Eigen.props" />
     <Import Project="..\..\..\- Visual Studio Property Sheets -\CXSparse.props" />

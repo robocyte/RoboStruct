@@ -187,7 +187,6 @@ void MainFrame::BundleAdjust()
 
 	int		max_matches = 0;
 	double	max_score = 0.0;
-	int		curr_num_cameras = 0, curr_num_pts = 0;
 
 	int i_best = -1, j_best = -1;
 	this->BundlePickInitialPair(i_best, j_best);
@@ -195,9 +194,9 @@ void MainFrame::BundleAdjust()
 	added_order[1] = j_best;
 
 	wxLogMessage("[BundleAdjust] Adjusting cameras %d and %d...", i_best, j_best);
-	curr_num_pts = this->SetupInitialCameraPair(i_best, j_best, cameras, points, colors, pt_views);
+	int curr_num_pts = this->SetupInitialCameraPair(i_best, j_best, cameras, points, colors, pt_views);
 	RunSFM(curr_num_pts, 2, cameras.data(), points.data(), added_order, colors.data(), pt_views);
-	curr_num_cameras = 2;
+	int curr_num_cameras = 2;
 
 	// Main loop
 	int round = 0;
@@ -413,16 +412,20 @@ int MainFrame::SetupInitialCameraPair(int i_best, int j_best, std::vector<camera
 
 	this->InitializeCameraParams(cameras[0]);
 	this->InitializeCameraParams(cameras[1]);
-
-	// Put first camera at origin
-	Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> Re(cameras[0].R);
-	Eigen::Map<Eigen::Vector3d> te(cameras[0].t);
-
-	Re.setIdentity();
-	te.setZero();
-
 	cameras[0].f = cameras[0].init_f = m_images[i_best].m_init_focal;
 	cameras[1].f = cameras[1].init_f = m_images[j_best].m_init_focal;
+
+	double K1[9], K2[9];
+	Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> Ke1(K1);
+	Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> Ke2(K2);
+	Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> R1(cameras[0].R);
+	Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> R2(cameras[1].R);
+	Eigen::Map<Eigen::Vector3d> t1(cameras[0].t);
+	Eigen::Map<Eigen::Vector3d> t2(cameras[1].t);
+
+	// Put first camera at origin
+	R1.setIdentity();
+	t1.setZero();
 
 	// Solve for initial locations
 	EstimateRelativePose(i_best, j_best, cameras[0], cameras[1]);
@@ -430,18 +433,14 @@ int MainFrame::SetupInitialCameraPair(int i_best, int j_best, std::vector<camera
 	// Triangulate the initial 3D points
 	wxLogMessage("[SetupInitialCameraPair] Adding initial matches...");
 
-    double K1[9], K2[9];
-    double K1inv[9], K2inv[9];
-
 	this->GetIntrinsics(cameras[0], K1);
-    this->GetIntrinsics(cameras[1], K2);
-    
-    matrix_invert(3, K1, K1inv);
-    matrix_invert(3, K2, K2inv);
+	this->GetIntrinsics(cameras[1], K2);
+
+	Mat3 K1_inv = Ke1.inverse();
+	Mat3 K2_inv = Ke2.inverse();
 
 	int pt_count = 0;
 	auto &list = m_matches.GetMatchList(GetMatchIndex(i_best, j_best));
-
 	int num_matches = list.size();
 
 	for (int i = 0; i < num_matches; i++)
@@ -451,26 +450,13 @@ int MainFrame::SetupInitialCameraPair(int i_best, int j_best, std::vector<camera
 		int key_idx2(list[i].m_idx2);
 
 		// Normalize the point
-		double proj1[3] = { m_images[i_best].m_keys[key_idx1].m_x, m_images[i_best].m_keys[key_idx1].m_y, -1.0 };
-		double proj2[3] = { m_images[j_best].m_keys[key_idx2].m_x, m_images[j_best].m_keys[key_idx2].m_y, -1.0 };
-
-		double proj1_norm[3], proj2_norm[3];
-
-		matrix_product(3, 3, 3, 1, K1inv, proj1, proj1_norm);
-		matrix_product(3, 3, 3, 1, K2inv, proj2, proj2_norm);
-
-		v2_t p_norm = v2_new(proj1_norm[0] / proj1_norm[2], proj1_norm[1] / proj1_norm[2]);
-		v2_t q_norm = v2_new(proj2_norm[0] / proj2_norm[2], proj2_norm[1] / proj2_norm[2]);
-
-		Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> R1(cameras[0].R);
-		Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> R2(cameras[1].R);
-		Eigen::Map<Eigen::Vector3d> t1(cameras[0].t);
-		Eigen::Map<Eigen::Vector3d> t2(cameras[1].t);
+		Vec3 p_norm1 = K1_inv * Vec3(m_images[i_best].m_keys[key_idx1].m_x, m_images[i_best].m_keys[key_idx1].m_y, -1.0);
+		Vec3 p_norm2 = K2_inv * Vec3(m_images[j_best].m_keys[key_idx2].m_x, m_images[j_best].m_keys[key_idx2].m_y, -1.0);
 
 		// Put the translation in standard form
 		Observations observations;
-		observations.push_back(Observation(Eigen::Vector2d(p_norm.p[0], p_norm.p[1]), R1, -(R1 * t1)));
-		observations.push_back(Observation(Eigen::Vector2d(q_norm.p[0], q_norm.p[1]), R2, -(R2 * t2)));
+		observations.push_back(Observation(Vec2(p_norm1.head<2>() / p_norm1(2)), R1, -(R1 * t1)));
+		observations.push_back(Observation(Vec2(p_norm2.head<2>() / p_norm2(2)), R2, -(R2 * t2)));
 
 		double error;
 		auto pt = Triangulate(observations, &error);
@@ -1247,7 +1233,6 @@ bool MainFrame::FindAndVerifyCamera(int num_points, v3_t *points_solve, v2_t *pr
 									 std::vector<int> &inliers, std::vector<int> &inliers_weak, std::vector<int> &outliers)
 {
 	// First, find the projection matrix
-	double P[12];
 	int r = -1;
 
 	Vec3Vec points;
@@ -1257,13 +1242,11 @@ bool MainFrame::FindAndVerifyCamera(int num_points, v3_t *points_solve, v2_t *pr
 		points.push_back(Vec3(Vx(points_solve[i]), Vy(points_solve[i]), Vz(points_solve[i])));
 		projections.push_back(Vec2(Vx(projs_solve[i]), Vy(projs_solve[i])));
 	}
-	Eigen::Map<Eigen::Matrix<double, 3, 4, Eigen::RowMajor>> Pe(P);
-	Mat34 Pe2 = Pe;
-	if (num_points >= 9) r = ComputeProjectionMatrixRansac(points, projections, m_options.ransac_rounds_projection,
-															m_options.projection_estimation_threshold * m_options.projection_estimation_threshold, &Pe2);
 
-	Pe = Pe2;
-	
+	Mat34 P;
+	if (num_points >= 9) r = ComputeProjectionMatrixRansac(points, projections, m_options.ransac_rounds_projection,
+															m_options.projection_estimation_threshold * m_options.projection_estimation_threshold, &P);
+
 	if (r == -1)
 	{
 		wxLogMessage("[FindAndVerifyCamera] Couldn't find projection matrix");
@@ -1271,22 +1254,26 @@ bool MainFrame::FindAndVerifyCamera(int num_points, v3_t *points_solve, v2_t *pr
 	}
 
 	// If number of inliers is too low, fail
-	if (r <= 6 /* 7 */ /* 30 */ /* This constant needs adjustment */)
+	if (r <= 6) // 7, 30 This constant needs adjustment
 	{
 		wxLogMessage("[FindAndVerifyCamera] Too few inliers to use projection matrix");
 		return false;
 	}
 
-	double KRinit[9], Kinit[9], Rinit[9], tinit[3];
-	memcpy(KRinit + 0, P + 0, 3 * sizeof(double));
-	memcpy(KRinit + 3, P + 4, 3 * sizeof(double));
-	memcpy(KRinit + 6, P + 8, 3 * sizeof(double));
+	double Kinit[9], Rinit[9], tinit[3];
 
-	dgerqf_driver(3, 3, KRinit, Kinit, Rinit);
+	Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> Ke(Kinit);
+	Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> Re(Rinit);
+	Eigen::Map<Vec3> te(tinit);
+	Mat3 Ke2 = Ke;
+	Mat3 Re2 = Re;
+	Vec3 te2 = te;
 
-	// We want our intrinsics to have a certain form
-	this->FixIntrinsics(P, Kinit, Rinit, tinit);
-	matrix_scale(3, 3, Kinit, 1.0 / Kinit[8], Kinit);
+	DecomposeProjectionMatrix(P, &Ke2, &Re2, &te2);
+
+	Ke = Ke2;
+	Re = Re2;
+	te = te2;
 
 	// Check cheirality constraint
 	wxLogMessage("[FindAndVerifyCamera] Checking consistency...");
@@ -1341,53 +1328,6 @@ void MainFrame::GetIntrinsics(const camera_params_t &camera, double *K)
 	K[0] = K[4] = camera.f;
 	K[1] = K[2] = K[3] = K[5] = K[6] = K[7] = 0.0;
 	K[8] = 1.0;
-}
-
-void MainFrame::FixIntrinsics(double *P, double *K, double *R, double *t)
-{
-	// Check the parity along the diagonal
-	int neg = (K[0] < 0.0) + (K[4] < 0.0) + (K[8] < 0.0);
-
-	// If odd parity, negate the instrinsic matrix
-	if ((neg % 2) == 1)
-	{
-		matrix_scale(3, 3, K, -1.0, K);
-		matrix_scale(3, 4, P, -1.0, P);
-	}
-
-	// Now deal with case of even parity
-	double fix[9];
-	matrix_ident(3, fix);
-	double tmp[9], tmp2[12];
-
-	if (K[0] < 0.0 && K[4] < 0.0)
-	{
-		fix[0] = -1.0;
-		fix[4] = -1.0;
-	} else if (K[0] < 0.0)
-	{
-		fix[0] = -1.0;
-		fix[8] = -1.0;
-	} else if (K[4] < 0.0)
-	{
-		fix[4] = -1.0;
-		fix[8] = -1.0;
-	}
-
-	matrix_product(3, 3, 3, 3, K, fix, tmp);
-	memcpy(K, tmp, sizeof(double) * 3 * 3);
-
-	double Kinv[9];
-	matrix_invert(3, K, Kinv);
-	matrix_product(3, 3, 3, 4, Kinv, P, tmp2);
-
-	memcpy(R + 0, tmp2 + 0, sizeof(double) * 3);
-	memcpy(R + 3, tmp2 + 4, sizeof(double) * 3);
-	memcpy(R + 6, tmp2 + 8, sizeof(double) * 3);
-
-	t[0] = tmp2[3];
-	t[1] = tmp2[7];
-	t[2] = tmp2[11];
 }
 
 void MainFrame::RefineCameraParameters(std::vector<v3_t> &points, std::vector<v2_t> &projs, int *pt_idxs, camera_params_t &camera, std::vector<int> &inliers)

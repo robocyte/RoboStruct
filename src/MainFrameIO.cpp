@@ -1,8 +1,6 @@
 #include <fstream>
 #include <iomanip>
 
-#include "matrix.h"
-
 #include "ImageData.hpp"
 #include "MainFrame.hpp"
 #include "Utilities.hpp"
@@ -368,25 +366,16 @@ void MainFrame::SavePlyFile()
 		for (auto img : m_images)
 		{
 			if (!img.m_camera.m_adjusted) continue;
-			double t[3];
 
-			double Rinv[9];
-			matrix_invert(3, img.m_camera.m_R, Rinv);
-			memcpy(t, img.m_camera.m_t, 3 * sizeof(double));
+			Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> R(img.m_camera.m_R);
+			Eigen::Map<Vec3> t(img.m_camera.m_t);
 
-			ply_file << t[0] << " " << t[1] << " " << t[2] << " ";
+			ply_file << t.x() << " " << t.y() << " " << t.z() << " ";
 			ply_file << 255 << " " << 0 << " " << 0 << std::endl;
 
-			double p_cam[3] = { 0.0, 0.0, -0.05 };
-			double p[3];
+			Vec3 p = R.inverse() * Vec3(0.0, 0.0, -0.05) + t;
 
-			matrix_product(3, 3, 3, 1, Rinv, p_cam, p);
-
-			p[0] += t[0];
-			p[1] += t[1];
-			p[2] += t[2];
-
-			ply_file << p[0] << " " << p[1] << " " << p[2] << " ";
+			ply_file << p.x() << " " << p.y() << " " << p.z() << " ";
 			ply_file << 0 << " " << 255 << " " << 0 << std::endl;
 		}
 
