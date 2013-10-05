@@ -1624,7 +1624,7 @@ int MainFrame::RemoveBadPointsAndCameras(int num_points, int num_cameras, const 
 
 	for (int i = 0; i < num_points; i++)
 	{
-		double *pos = points[i].p;
+		Vec3 pos(points[i].p[0], points[i].p[1], points[i].p[2]);
 		int num_views = (int)pt_views[i].size();
 
 		if (num_views == 0) continue;
@@ -1634,24 +1634,19 @@ int MainFrame::RemoveBadPointsAndCameras(int num_points, int num_cameras, const 
 		{
 			int v1(pt_views[i][j].first);
 
-			double r1[3];
-			matrix_diff(3, 1, 3, 1, pos, cameras[v1].t, r1);
-			double norm(matrix_norm(3, 1, r1));
-			matrix_scale(3, 1, r1, 1.0 / norm, r1);
+			Eigen::Map<Vec3> t1(cameras[v1].t);
+			Vec3 re1 = pos - t1;
+			re1 *= 1.0 / re1.norm();
 
 			for (int k = j+1; k < num_views; k++)
 			{
 				int v2(pt_views[i][k].first);
 
-				double r2[3];
-				matrix_diff(3, 1, 3, 1, pos, cameras[v2].t, r2);
-				double norm(matrix_norm(3, 1, r2));
-				matrix_scale(3, 1, r2, 1.0 / norm, r2);
+				Eigen::Map<Vec3> t2(cameras[v2].t);
+				Vec3 re2 = pos - t2;
+				re1 *= 1.0 / re2.norm();
 
-				double dot;
-				matrix_product(1, 3, 3, 1, r1, r2, &dot);
-
-				double angle = acos(util::clamp(dot, (-1.0 + 1.0e-8), (1.0 - 1.0e-8)));
+				double angle = acos(util::clamp(re1.dot(re2), (-1.0 + 1.0e-8), (1.0 - 1.0e-8)));
 
 				if (angle > max_angle) max_angle = angle;
 			}
