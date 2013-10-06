@@ -184,6 +184,7 @@
     <ClCompile Include="..\..\src\BundleAdjust.cpp" />
     <ClCompile Include="..\..\src\CameraData.cpp" />
     <ClCompile Include="..\..\src\Distortion.cpp" />
+    <ClCompile Include="..\..\src\EigenTools.cpp" />
     <ClCompile Include="..\..\src\ExifReader.cpp" />
     <ClCompile Include="..\..\src\FivePoint.cpp">
       <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4996;4351;4244</DisableSpecificWarnings>
