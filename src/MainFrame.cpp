@@ -11,8 +11,6 @@
 #include "Eigen/Core"
 #include "Eigen/Dense"
 
-#include "matrix.h"
-
 #ifdef _DEBUG
 	#define _CRTDBG_MAP_ALLOC
 	#include <stdlib.h>

@@ -5,6 +5,9 @@
 #include "wx/glcanvas.h"
 #include "wx/timer.h"
 
+#include "matrix.h"
+#include "vector.h"
+
 #include "Sfm.hpp"
 #include "ImageData.hpp"
 #include "MatchData.hpp"

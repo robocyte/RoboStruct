@@ -54,3 +54,7 @@ struct LMFunctor
 	// You should define that in the subclass:
 	// int operator() (const InputType& x, ValueType* v, JacobianType* _j=0) const;
 };
+
+Mat3 AngleAxisToRotationMatrix(const Vec3 &w);
+
+//Vec3 RotationMatrixToAngleAxis(const Mat3 &R);

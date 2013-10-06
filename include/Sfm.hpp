@@ -45,8 +45,5 @@ Vec6 InvertDistortion(double r0, double r1, const Vec6 &k_in);
 
 Vec2 UndistortNormalizedPoint(const Vec2 &p, const Vec6 & k_inverse);
 
-#include "vector.h"
-#include "matrix.h"
-
 // Refine the position of a single camera
-void RefineCamera(int num_points, v3_t *points, v2_t *projs, camera_params_t *camera, bool adjust_focal);
+void RefineCamera(ECamera *camera, const Vec3Vec &points, const Vec2Vec &projections, bool adjust_focal);

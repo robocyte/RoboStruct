@@ -1313,64 +1313,58 @@ void MainFrame::GetIntrinsics(const camera_params_t &camera, double *K)
 
 void MainFrame::RefineCameraParameters(std::vector<v3_t> &points, std::vector<v2_t> &projs, int *pt_idxs, camera_params_t &camera, std::vector<int> &inliers)
 {
-	int num_points_curr(points.size()), num_points(points.size());
+	Vec3Vec points_curr;
+	Vec2Vec projs_curr;
 
-	std::vector<v3_t> points_curr(points);
-	std::vector<v2_t> projs_curr(projs);
+	for (int i = 0; i < points.size(); ++i)
+	{
+		points_curr.push_back(Vec3(points[i].p[0], points[i].p[1], points[i].p[2]));
+		projs_curr.push_back(Vec2(projs[i].p[0], projs[i].p[1]));
+	}
 
-	inliers.resize(num_points);
+	inliers.resize(points.size());
 	std::iota(inliers.begin(), inliers.end(), 0);
 
+	ECamera cam;
+	cam.m_focal_length = camera.f;
+	cam.m_R = Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>>(camera.R);
+	cam.m_t = Eigen::Map<Vec3>(camera.t);
+	cam.m_k << camera.k[0], camera.k[1];
+
 	// First refine with the focal length fixed
-	RefineCamera(num_points_curr, points_curr.data(), projs_curr.data(), &camera, false);
+	RefineCamera(&cam, points_curr, projs_curr, false);
 
 	int round = 0;
 	while (true)
 	{
-		wxLogMessage("[RefineCameraParameters] Calling with %d points", num_points_curr);
-		RefineCamera(num_points_curr, points_curr.data(), projs_curr.data(), &camera, true);
+		wxLogMessage("[RefineCameraParameters] Calling with %d points", points_curr.size());
+		RefineCamera(&cam, points_curr, projs_curr, true);
 
-		std::vector<v3_t> points_next(num_points);
-		std::vector<v2_t> projs_next(num_points);
-
-		double error(0.0);
-		std::vector<int> inliers_next;
-		std::vector<double> errors(num_points_curr);
-
-		ECamera cam;
-		cam.m_focal_length = camera.f;
-		cam.m_R = Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>>(camera.R);
-		cam.m_t = Eigen::Map<Vec3>(camera.t);
-		cam.m_k << camera.k[0], camera.k[1];
-		
-		for (int i = 0; i < num_points_curr; i++)
+		std::vector<double> errors;
+		for (int i = 0; i < points_curr.size(); i++)
 		{
-			Vec2 pr = SfmProjectFinal(Vec3(points_curr[i].p[0], points_curr[i].p[1], points_curr[i].p[2]), cam);
-
-			double diff = (pr - Vec2(Vx(projs_curr[i]), Vy(projs_curr[i]))).norm();
-
-			errors[i] = diff;
-			error += diff;
+			Vec2 projection = SfmProjectFinal(points_curr[i], cam);
+			errors.push_back((projection - projs_curr[i]).norm());
 		}
 
-		wxLogMessage("[RefineCameraParameters] Error: %0.3f", error / num_points_curr);
-
 		// Sort and histogram errors
-		double median		= util::GetNthElement(util::iround(0.95 * num_points_curr), errors);
+		double median		= util::GetNthElement(util::iround(0.95 * points_curr.size()), errors);
 		double threshold	= util::clamp(2.4 * median, m_options.min_reprojection_error_threshold, m_options.max_reprojection_error_threshold);
-		wxLogMessage("[RefineCameraParameters] Threshold = %0.3f", threshold);
+		double avg			= std::accumulate(errors.begin(), errors.end(), 0.0) / errors.size();
+		wxLogMessage("[RefineCameraParameters] Mean error [%d pts]: %.3f [med: %.3f, outlier threshold: = %.3f]", points_curr.size(), avg, median, threshold);
 
-		int count(0);
-		for (int i = 0; i < num_points_curr; i++)
+		Vec3Vec points_next;
+		Vec2Vec projs_next;
+		std::vector<int> inliers_next;
+
+		for (int i = 0; i < points_curr.size(); i++)
 		{
 			if (errors[i] < threshold)
 			{
 				inliers_next.push_back(inliers[i]);
 
-				points_next[count] = points_curr[i];
-				projs_next[count] = projs_curr[i];
-
-				count++;
+				points_next.push_back(points_curr[i]);
+				projs_next.push_back(projs_curr[i]);
 			} else
 			{
 				if (pt_idxs != nullptr)
@@ -1383,21 +1377,18 @@ void MainFrame::RefineCameraParameters(std::vector<v3_t> &points, std::vector<v2
 			}
 		}
 
-		points_curr = points_next;
-		projs_curr = projs_next;
+		if (points_next.size() == points_curr.size()) break;	// We're done
 
-		if (count == num_points_curr) break;	// We're done
+		points_curr	= points_next;
+		projs_curr	= projs_next;
+		inliers		= inliers_next;
 
-		num_points_curr = count;
-
-		inliers = inliers_next;
-
-		if (count == 0)	break;	// Out of measurements
+		if (points_curr.size() == 0) break;	// Out of measurements
 
 		round++;
 	}
 
-	wxLogMessage("[RefineCameraParameters] Exiting after %d rounds with %d/%d points", round + 1, num_points_curr, num_points);
+	wxLogMessage("[RefineCameraParameters] Exiting after %d rounds with %d/%d points", round + 1, points_curr.size(), points.size());
 }
 
 int MainFrame::BundleAdjustAddAllNewPoints(int num_points, int num_cameras, std::vector<int> &added_order, camera_params_t *cameras,

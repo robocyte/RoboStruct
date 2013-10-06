@@ -1,33 +1,7 @@
 #include "Sfm.hpp"
 
-#include <iostream>
-
 namespace
 {
-	Mat3 AngleAxisToRotationMatrix(const Vec3 &w)
-	{
-		Mat3 dR;
-		double theta = w.squaredNorm();
-
-		if (theta > 0.0)
-		{
-			theta = sqrt(theta);
-			double wx = w.x() / theta, wy = w.y() / theta, wz = w.z() / theta;
-			double costh = cos(theta), sinth = sin(theta);
-
-			dR <<		  costh + wx * wx * (1.0 - costh),	wx * wy * (1.0 - costh) - wz * sinth,	 wy * sinth + wx * wz * (1.0 - costh),
-					 wz * sinth + wx * wy * (1.0 - costh),		 costh + wy * wy * (1.0 - costh),	-wx * sinth + wy * wz * (1.0 - costh),
-					-wy * sinth + wx * wz * (1.0 - costh),  wx * sinth + wy * wz * (1.0 - costh),		  costh + wz * wz * (1.0 - costh);
-		} else
-		{
-			dR <<    1.0,  w.z(), -w.y(),
-				  -w.z(),    1.0,  w.x(),
-				   w.y(), -w.x(),    1.0;
-		}
-
-		return dR;
-	}
-
 	struct CameraResidual : LMFunctor<double>
 	{
 		CameraResidual(const ECamera &camera, const Vec3Vec &points, const Vec2Vec &projections, bool adjust_focal)
@@ -133,42 +107,24 @@ Vec2 SfmProjectRD(const Vec3 &p, const ECamera &cam)
     return projected * factor;
 }
 
-//void RefineCamera(ECamera *camera, const Vec3Vec &points, const Vec2Vec &projections, bool adjust_focal)
-void RefineCamera(int num_points, v3_t *points, v2_t *projs, camera_params_t *camera, bool adjust_focal)
+void RefineCamera(ECamera *camera, const Vec3Vec &points, const Vec2Vec &projections, bool adjust_focal)
 {
-	ECamera cam;
-	cam.m_focal_length = camera->f;
-	cam.m_k << camera->k[0], camera->k[1];
-	cam.m_R = Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>>(camera->R);
-	cam.m_t = Eigen::Map<Vec3>(camera->t);
-
-	Vec3Vec epoints;		epoints.reserve(num_points);
-	Vec2Vec eprojections;	eprojections.reserve(num_points);
-	for (int i = 0; i < num_points; ++i)
-	{
-		epoints.push_back(Vec3(points[i].p[0], points[i].p[1], points[i].p[2]));
-		eprojections.push_back(Vec2(projs[i].p[0], projs[i].p[1]));
-	}
-
 	Vec x(adjust_focal ? 9 : 6);
-	if (adjust_focal)	x << camera->t[0], camera->t[1], camera->t[2], 0.0, 0.0, 0.0, camera->f, camera->k[0], camera->k[1];
-	else				x << camera->t[0], camera->t[1], camera->t[2], 0.0, 0.0, 0.0;
+	if (adjust_focal)	x << camera->m_t.x(), camera->m_t.y(), camera->m_t.z(), 0.0, 0.0, 0.0, camera->m_focal_length, camera->m_k(0), camera->m_k(1);
+	else				x << camera->m_t.x(), camera->m_t.y(), camera->m_t.z(), 0.0, 0.0, 0.0;
 
-	CameraResidual functor(cam, epoints, eprojections, adjust_focal);
+	CameraResidual functor(*camera, points, projections, adjust_focal);
 	Eigen::DenseIndex nfev;
 	Eigen::LevenbergMarquardt<CameraResidual>::lmdif1(functor, x, &nfev, 1.0e-12);
 
 	// Copy out the parameters
-	double xb[6];
-	for (int i = 0; i < 6; ++i) xb[i] = x(i);
-	memcpy(camera->t, xb + 0, 3 * sizeof(double));
-	Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> Rne(camera->R);
-	Rne = AngleAxisToRotationMatrix(x.segment(3, 3)) * cam.m_R;;
+	camera->m_t = x.segment(0, 3);
+	camera->m_R = AngleAxisToRotationMatrix(x.segment(3, 3)) * camera->m_R;
 
 	if (adjust_focal)
 	{
-		camera->f		= x(6);
-		camera->k[0]	= x(7);
-		camera->k[1]	= x(8);
+		camera->m_focal_length	= x(6);
+		camera->m_k(0)			= x(7);
+		camera->m_k(1)			= x(8);
 	}
 }
