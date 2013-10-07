@@ -1006,7 +1006,7 @@ double MainFrame::RunSFM(int num_pts, int num_cameras, camera_params_t *init_cam
 		options.linear_solver_type = ceres::DENSE_SCHUR;
 		ceres::Solve(options, &problem, &summary);
 		
-		wxLogMessage("%s", summary.FullReport().c_str());
+		wxLogMessage("%s", summary.BriefReport().c_str());
 
 		double *final_x	= init_x;
 		ptr				= final_x;

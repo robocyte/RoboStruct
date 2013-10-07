@@ -57,4 +57,4 @@ struct LMFunctor
 
 Mat3 AngleAxisToRotationMatrix(const Vec3 &w);
 
-//Vec3 RotationMatrixToAngleAxis(const Mat3 &R);
+Vec3 RotationMatrixToAngleAxis(const Mat3 &R);
