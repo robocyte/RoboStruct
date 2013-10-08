@@ -163,9 +163,6 @@ wxThread::ExitCode MainFrame::Entry()
 
 void MainFrame::BundleAdjust()
 {
- 	wxStreamToTextRedirector redirect_cerr(m_tc_log, &std::cerr);	//TODO: remove this!!
- 	wxStreamToTextRedirector redirect_cout(m_tc_log, &std::cout);	//TODO: remove this!!
-
 	wxLogMessage("[BundleAdjust] Computing structure from motion...");
 	clock_t start = clock();
 
@@ -287,43 +284,6 @@ void MainFrame::BundleAdjust()
 
 	clock_t end = clock();
 	wxLogMessage("[BundleAdjust] Computing structure from motion took %0.3f s", (double) (end - start) / (double) CLOCKS_PER_SEC);
-
-	// Save the camera parameters TODO: draft!!! -> glm
-	for (int i = 0; i < curr_num_cameras; i++)
-	{
-		int img = added_order[i];
-		if (!m_images[img].m_camera.m_adjusted) continue;
-
-		memcpy(m_images[img].m_camera.m_R, cameras[i].R, 9 * sizeof(double));
-		memcpy(m_images[img].m_camera.m_t, cameras[i].t, 3 * sizeof(double));
-
-		m_images[img].m_camera.m_gl_rot_mat[0][0] = cameras[i].R[0];
-		m_images[img].m_camera.m_gl_rot_mat[0][1] = cameras[i].R[1];
-		m_images[img].m_camera.m_gl_rot_mat[0][2] = cameras[i].R[2];
-		m_images[img].m_camera.m_gl_rot_mat[0][3] = 0.0f;
-
-		m_images[img].m_camera.m_gl_rot_mat[1][0] = cameras[i].R[3];
-		m_images[img].m_camera.m_gl_rot_mat[1][1] = cameras[i].R[4];
-		m_images[img].m_camera.m_gl_rot_mat[1][2] = cameras[i].R[5];
-		m_images[img].m_camera.m_gl_rot_mat[1][3] = 0.0f;
-
-		m_images[img].m_camera.m_gl_rot_mat[2][0] = cameras[i].R[6];
-		m_images[img].m_camera.m_gl_rot_mat[2][1] = cameras[i].R[7];
-		m_images[img].m_camera.m_gl_rot_mat[2][2] = cameras[i].R[8];
-		m_images[img].m_camera.m_gl_rot_mat[2][3] = 0.0f;
-
-		m_images[img].m_camera.m_gl_rot_mat[3][0] = 0.0f;
-		m_images[img].m_camera.m_gl_rot_mat[3][1] = 0.0f;
-		m_images[img].m_camera.m_gl_rot_mat[3][2] = 0.0f;
-		m_images[img].m_camera.m_gl_rot_mat[3][3] = 1.0f;
-
-		m_images[img].m_camera.m_focal = cameras[i].f;
-		m_images[img].m_camera.m_width = m_images[img].GetWidth();
-		m_images[img].m_camera.m_height = m_images[img].GetHeight();
-		m_images[img].m_camera.m_k[0] = cameras[i].k[0];
-		m_images[img].m_camera.m_k[1] = cameras[i].k[1];
-		m_images[img].m_camera.Finalize();
-	}
 
 	this->SavePlyFile();
 	this->SetMatchesFromPoints();
@@ -831,14 +791,14 @@ bool MainFrame::EstimateRelativePose(int i1, int i2, camera_params_t &camera1, c
 double MainFrame::RunSFM(int num_pts, int num_cameras, camera_params_t *init_camera_params, v3_t *init_pts, const std::vector<int> &added_order,
 							v3_t *colors, std::vector<ImageKeyVector> &pt_views)
 {
-	const int		min_outliers	= 40;
-	const int		min_points		= 20;
-	int				round			= 0;
-	int				num_outliers	= 0;
-	int				total_outliers	= 0;
-	int				num_dists		= 0;
-	double			dist_total		= 0.0;
-	const double	huber_parameter = 25.0;
+	const int		outliers_threshold	= 0;
+	const int		min_points			= 20;
+	int				round				= 0;
+	int				num_outliers		= 0;
+	int				total_outliers		= 0;
+	int				num_dists			= 0;
+	double			dist_total			= 0.0;
+	const double	huber_parameter		= 25.0;
 
 	std::vector<int>	remap(num_pts);
 	std::vector<v3_t>	nz_pts(num_pts);
@@ -857,7 +817,7 @@ double MainFrame::RunSFM(int num_pts, int num_cameras, camera_params_t *init_cam
 		{
 			wxLogMessage("[RunSFM] Too few points remaining, exiting!");
 
-			dist_total = DBL_MAX;
+			dist_total = std::numeric_limits<double>::max();
 			break;
 		}
 
@@ -965,7 +925,7 @@ double MainFrame::RunSFM(int num_pts, int num_cameras, camera_params_t *init_cam
 			// If enabled use Huber's loss function.
 			ceres::LossFunction *loss_function = nullptr;
 
-			loss_function = new ceres::HuberLoss(huber_parameter);
+			//loss_function = new ceres::HuberLoss(huber_parameter);
 
 			// Each observation correponds to a pair of a camera and a point which are identified by camera_index()[i] and point_index()[i] respectively.
 			double *camera	= cameras	+ cnp * cidx[i];
@@ -1175,8 +1135,6 @@ double MainFrame::RunSFM(int num_pts, int num_cameras, camera_params_t *init_cam
 		end = clock();
 		wxLogMessage("[RunSFM] Removed %d outliers in %0.3f s", num_outliers, (double) (end - start) / (double) CLOCKS_PER_SEC);
 
-		RemoveBadPointsAndCameras(num_pts, num_cameras, added_order, init_camera_params, init_pts, colors, pt_views);
-
 		for (int i = 0; i < num_pts; i++) if (remap[i] != -1) init_pts[i] = nz_pts[remap[i]];
 
 		round_stop = clock();
@@ -1217,10 +1175,10 @@ double MainFrame::RunSFM(int num_pts, int num_cameras, camera_params_t *init_cam
 
 		round++;
 
-	} while (num_outliers > min_outliers);
+	} while (num_outliers > outliers_threshold);
 
 	stop_all = clock();
-	wxLogMessage("[RunSFM] Structure from motion with outlier removal took %0.3f s (%d rounds)", (double) (stop_all - start_all) / (double) CLOCKS_PER_SEC, round + 1);
+	wxLogMessage("[RunSFM] Structure from motion with outlier removal took %0.3f s (%d rounds)", (double) (stop_all - start_all) / (double) CLOCKS_PER_SEC, round);
 
 	return dist_total / num_dists;
 }
