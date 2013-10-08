@@ -1635,7 +1635,7 @@ int MainFrame::RemoveBadPointsAndCameras(int num_points, int num_cameras, const 
 
 				Eigen::Map<Vec3> t2(cameras[v2].t);
 				Vec3 re2 = pos - t2;
-				re1 *= 1.0 / re2.norm();
+				re2 *= 1.0 / re2.norm();
 
 				double angle = acos(util::clamp(re1.dot(re2), (-1.0 + 1.0e-8), (1.0 - 1.0e-8)));
 
