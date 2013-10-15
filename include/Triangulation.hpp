@@ -23,7 +23,7 @@ struct Observation
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 };
 
-typedef std::vector<Observation>	Observations;
+typedef std::vector<Observation> Observations;
 
 // Compute the angle in radians between two rays
 double ComputeRayAngle(Vec2 p, Vec2 q, const Camera &cam1, const Camera &cam2);

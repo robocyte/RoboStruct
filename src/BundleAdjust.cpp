@@ -668,8 +668,7 @@ bool MainFrame::EstimateRelativePose(int i1, int i2, Camera &camera1, Camera &ca
 	return true;
 }
 
-double MainFrame::RunSFM(int num_pts, int num_cameras, CamVec &init_camera_params, Vec3Vec &init_pts, const IntVec &added_order,
-							Vec3Vec &colors, std::vector<ImageKeyVector> &pt_views)
+double MainFrame::RunSFM(int num_pts, int num_cameras, CamVec &init_camera_params, Vec3Vec &init_pts, const IntVec &added_order, Vec3Vec &colors, std::vector<ImageKeyVector> &pt_views)
 {
 	const int		min_points			= 20;
 	int				round				= 0;
@@ -1015,8 +1014,7 @@ double MainFrame::RunSFM(int num_pts, int num_cameras, CamVec &init_camera_param
 	return dist_total / num_dists;
 }
 
-bool MainFrame::FindAndVerifyCamera(const Vec3Vec &points, const Vec2Vec &projections, int *idxs_solve, Mat3 *K, Mat3 *R, Vec3 *t,
-									 IntVec &inliers, IntVec &inliers_weak, IntVec &outliers)
+bool MainFrame::FindAndVerifyCamera(const Vec3Vec &points, const Vec2Vec &projections, int *idxs_solve, Mat3 *K, Mat3 *R, Vec3 *t, IntVec &inliers, IntVec &inliers_weak, IntVec &outliers)
 {
 	// First, find the projection matrix
 	int r = -1;
@@ -1143,8 +1141,7 @@ void MainFrame::RefineCameraParameters(Camera *camera, const Vec3Vec &points, co
 	wxLogMessage("[RefineCameraParameters] Exiting after %d rounds with %d/%d points", round + 1, points_curr.size(), points.size());
 }
 
-int MainFrame::BundleAdjustAddAllNewPoints(int num_points, int num_cameras, IntVec &added_order, CamVec &cameras,
-											Vec3Vec &points, Vec3Vec &colors, std::vector<ImageKeyVector> &pt_views)
+int MainFrame::BundleAdjustAddAllNewPoints(int num_points, int num_cameras, IntVec &added_order, CamVec &cameras, Vec3Vec &points, Vec3Vec &colors, std::vector<ImageKeyVector> &pt_views)
 {
 	std::vector<ImageKeyVector>	new_tracks;
 	std::vector<int>			track_idxs;
@@ -1329,8 +1326,7 @@ int MainFrame::BundleAdjustAddAllNewPoints(int num_points, int num_cameras, IntV
 	return pt_count;
 }
 
-int MainFrame::RemoveBadPointsAndCameras(int num_points, int num_cameras, const IntVec &added_order,
-									CamVec &cameras, Vec3Vec &points, Vec3Vec &colors, std::vector<ImageKeyVector> &pt_views)
+int MainFrame::RemoveBadPointsAndCameras(int num_points, int num_cameras, const IntVec &added_order, CamVec &cameras, Vec3Vec &points, Vec3Vec &colors, std::vector<ImageKeyVector> &pt_views)
 {
 	int num_pruned = 0;
 
