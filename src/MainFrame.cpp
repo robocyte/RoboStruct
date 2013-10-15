@@ -167,10 +167,6 @@ bool MainFrame::FindCameraInDatabase(ImageData &img)
 	{
 		img.ConvertFocalPx(found->second);
 		return true;
-	} else
-	{
-		img.ConvertFocalPx(8.333);		// TODO: dirty hack for jpg images without EXIF tags
-		return true;
 	}
 
 	return false;

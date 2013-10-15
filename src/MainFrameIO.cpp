@@ -45,7 +45,7 @@ void MainFrame::AddCamDBFileEntry()
 	{
 		std::sort(m_camDB.begin(), m_camDB.end());
 
-		for (const auto entry : m_camDB) cam_db_file << entry.first << ":" << entry.second << std::endl;
+		for (const auto &entry : m_camDB) cam_db_file << entry.first << ":" << entry.second << std::endl;
 
 		cam_db_file.close();
 	}
@@ -86,7 +86,7 @@ void MainFrame::SaveTrackFile()
 		for (auto track : m_tracks)
 		{
 			track_file << track.m_views.size();
-			for (auto img_key : track.m_views) track_file << " " << img_key.first << " " << img_key.second;
+			for (const auto &view : track.m_views) track_file << " " << view.first << " " << view.second;
 			track_file << std::endl;
 		}
 

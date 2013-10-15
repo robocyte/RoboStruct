@@ -40,12 +40,6 @@ public:
 	void	ClearDescriptors();
 	void	SaveDescriptors(bool clear = true);
 	void	LoadDescriptors();
-
-	//void	DrawCamera(GLuint listname, const Options& opts);
-	//void	DrawFrustrum(const Options& opts);
-
-	cv::Mat	F;
-
 	void	SetTracks();
 
 private:
