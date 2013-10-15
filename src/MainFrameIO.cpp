@@ -54,7 +54,6 @@ void MainFrame::AddCamDBFileEntry()
 void MainFrame::SaveMatchFile()
 {
 	std::string filename = m_path + "\\Matches.txt";
-	wxLogMessage("Writing matches to file %s...", filename.c_str());
 	std::ofstream match_file(filename.c_str());
 
 	if (!match_file)
@@ -71,7 +70,6 @@ void MainFrame::SaveMatchFile()
 void MainFrame::SaveTrackFile()
 {
 	std::string filename = m_path + "\\Tracks.txt";
-	wxLogMessage("Writing tracks to file %s...", filename.c_str());
 	std::ofstream track_file(filename.c_str());
 
 	if (!track_file)
@@ -252,7 +250,7 @@ void MainFrame::ExportToCMVS()
 void MainFrame::SaveBundleFile(std::string path)
 {
 	// TODO: Check if we have results to save!!
-	std::string filename = path + "\\bundle.rd.out";
+	std::string filename = path + "\\Result.rd.out";
 	std::ofstream txt_file(filename.c_str());
 
 	txt_file << "# Bundle file v0.3" << std::endl;
@@ -388,7 +386,7 @@ void MainFrame::SaveMayaFile()
 	// Export to CMVS first in order to get undistorted images
 	this->ExportToCMVS();
 
-	std::string filename = m_path + "\\Bundler.ma";
+	std::string filename = m_path + "\\Result.ma";
 	std::ofstream maya_file(filename.c_str());
 
 	if (!maya_file)
