@@ -537,6 +537,7 @@ void MainFrame::ComputeTracks()
 
 	// Save the tracks
 	m_tracks = tracks;
+    delete[] img_marked;
 
 	time = (double)cv::getTickCount() - time;
 
