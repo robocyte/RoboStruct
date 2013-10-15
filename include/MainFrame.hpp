@@ -5,9 +5,6 @@
 #include "wx/glcanvas.h"
 #include "wx/timer.h"
 
-#include "matrix.h"
-#include "vector.h"
-
 #include "Sfm.hpp"
 #include "ImageData.hpp"
 #include "MatchData.hpp"
@@ -121,16 +118,16 @@ private:
 	wxThread::ExitCode	Entry();
 	void				BundleAdjust();
 	void				BundlePickInitialPair(int &i_best, int &j_best);
-	int					SetupInitialCameraPair(int i_best, int j_best, CamVec &cameras, std::vector<v3_t> &points, std::vector<v3_t> &colors, std::vector<ImageKeyVector> &pt_views);
+	int					SetupInitialCameraPair(int i_best, int j_best, CamVec &cameras, Vec3Vec &points, Vec3Vec &colors, std::vector<ImageKeyVector> &pt_views);
 	bool				EstimateRelativePose(int i1, int i2, Camera &camera1, Camera &camera2);
 	int					FindCameraWithMostMatches(int num_cameras, const IntVec &added_order, int &max_matches, const std::vector<ImageKeyVector> &pt_views);
 	IntVec          	FindCamerasWithNMatches(int n, int num_cameras, const IntVec &added_order, const std::vector<ImageKeyVector> &pt_views);
-	bool				FindAndVerifyCamera(const Vec3Vec &points, const Vec2Vec &projections, int *idxs_solve, Mat3 *K, Mat3 *R, Vec3 *t, std::vector<int> &inliers, std::vector<int> &inliers_weak, std::vector<int> &outliers);
-	Camera	        	BundleInitializeImage(int image_idx, int camera_idx, v3_t *points, std::vector<ImageKeyVector> &pt_views, bool &success_out);
-	double				RunSFM(int num_pts, int num_cameras, CamVec &init_camera_params, v3_t *init_pts, const std::vector<int> &added_order, v3_t *colors, std::vector<ImageKeyVector> &pt_views);
-	void				RefineCameraParameters(Camera *camera, const Vec3Vec &points, const Vec2Vec &projections, int *pt_idxs, std::vector<int> &inliers);
-	int					BundleAdjustAddAllNewPoints(int num_points, int num_cameras, IntVec &added_order, CamVec &cameras, v3_t *points, v3_t *colors, std::vector<ImageKeyVector> &pt_views);
-	int					RemoveBadPointsAndCameras(int num_points, int num_cameras, const IntVec &added_order, CamVec &cameras, v3_t *points, v3_t *colors, std::vector<ImageKeyVector> &pt_views);
+	bool				FindAndVerifyCamera(const Vec3Vec &points, const Vec2Vec &projections, int *idxs_solve, Mat3 *K, Mat3 *R, Vec3 *t, IntVec &inliers, IntVec &inliers_weak, IntVec &outliers);
+	Camera	        	BundleInitializeImage(int image_idx, int camera_idx, Vec3Vec &points, std::vector<ImageKeyVector> &pt_views, bool &success_out);
+	double				RunSFM(int num_pts, int num_cameras, CamVec &init_camera_params, Vec3Vec &init_pts, const IntVec &added_order, Vec3Vec &colors, std::vector<ImageKeyVector> &pt_views);
+	void				RefineCameraParameters(Camera *camera, const Vec3Vec &points, const Vec2Vec &projections, int *pt_idxs, IntVec &inliers);
+	int					BundleAdjustAddAllNewPoints(int num_points, int num_cameras, IntVec &added_order, CamVec &cameras, Vec3Vec &points, Vec3Vec &colors, std::vector<ImageKeyVector> &pt_views);
+	int					RemoveBadPointsAndCameras(int num_points, int num_cameras, const IntVec &added_order, CamVec &cameras, Vec3Vec &points, Vec3Vec &colors, std::vector<ImageKeyVector> &pt_views);
 
 protected:
 	// Handlers for MainFrame events

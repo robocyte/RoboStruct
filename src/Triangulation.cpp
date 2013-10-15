@@ -34,8 +34,8 @@ namespace
 
 double ComputeRayAngle(Vec2 p, Vec2 q, const Camera &cam1, const Camera &cam2)
 {
-	Mat3 K1_inv = cam1.GetIntrinsics().inverse();
-	Mat3 K2_inv = cam2.GetIntrinsics().inverse();
+	Mat3 K1_inv = cam1.GetIntrinsicMatrix().inverse();
+	Mat3 K2_inv = cam2.GetIntrinsicMatrix().inverse();
 
 	Vec3 p3n = K1_inv * Vec3(p.x(), p.y(), 1.0);
 	Vec3 q3n = K2_inv * Vec3(q.x(), q.y(), 1.0);

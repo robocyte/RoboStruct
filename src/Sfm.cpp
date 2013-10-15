@@ -72,13 +72,22 @@ namespace
 	};
 }
 
-Mat3 Camera::GetIntrinsics() const
+Mat3 Camera::GetIntrinsicMatrix() const
 {
 	Mat3 K;
 	K.setIdentity();
 	K(0, 0) = K(1, 1) = m_focal_length;
 
 	return K;
+}
+
+Mat34 Camera::GetProjectionMatrix() const
+{
+    Mat34 P;
+    P << m_R;
+    P.col(3) = m_t;
+
+    return GetIntrinsicMatrix() * P;
 }
 
 Vec2 SfmProjectFinal(const Vec3 &p, const Camera &cam)

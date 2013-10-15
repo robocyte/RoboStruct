@@ -22,7 +22,8 @@ struct Camera
 	Vec2	m_k;					// Undistortion parameters
 	Vec6	m_k_inv;				// Inverse undistortion parameters
 
-	Mat3 GetIntrinsics() const;
+	Mat3    GetIntrinsicMatrix() const;
+    Mat34   GetProjectionMatrix() const;
 
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 };

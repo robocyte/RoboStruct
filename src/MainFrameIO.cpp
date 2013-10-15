@@ -160,35 +160,35 @@ void MainFrame::SaveProjectionMatrix(std::string path, int img_idx)
 		wxLogMessage("Error: couldn't open file %s for writing", filename.c_str());
 	} else
 	{
-		double focal = m_images[img_idx].m_camera.m_focal;
-		double t[3], ttmp[3];
-		double R[9];
-		memcpy(ttmp, m_images[img_idx].m_camera.m_t, 3 * sizeof(double));
-		memcpy(R, m_images[img_idx].m_camera.m_R, 9 * sizeof(double));
+		//double focal = m_images[img_idx].m_camera.m_focal;
+		//double t[3], ttmp[3];
+		//double R[9];
+		//memcpy(ttmp, m_images[img_idx].m_camera.m_t, 3 * sizeof(double));
+		//memcpy(R, m_images[img_idx].m_camera.m_R, 9 * sizeof(double));
 
-		matrix_product(3, 3, 3, 1, R, ttmp, t);
-		matrix_scale(3, 1, t, -1.0, t);
+		//matrix_product(3, 3, 3, 1, R, ttmp, t);
+		//matrix_scale(3, 1, t, -1.0, t);
 
-		double K[9] = 
-		{	-focal,	0.0,	0.5 * this->GetImageWidth(img_idx) - 0.5,
-			0.0,	focal,	0.5 * this->GetImageHeight(img_idx) - 0.5,
-			0.0,	0.0,	1.0	};
+		//double K[9] = 
+		//{	-focal,	0.0,	0.5 * this->GetImageWidth(img_idx) - 0.5,
+		//	0.0,	focal,	0.5 * this->GetImageHeight(img_idx) - 0.5,
+		//	0.0,	0.0,	1.0	};
 
-		double Ptmp[12] =
-		{	R[0], R[1], R[2], t[0],
-			R[3], R[4], R[5], t[1],
-			R[6], R[7], R[8], t[2]};
+		//double Ptmp[12] =
+		//{	R[0], R[1], R[2], t[0],
+		//	R[3], R[4], R[5], t[1],
+		//	R[6], R[7], R[8], t[2]};
 
-		double P[12];
-		matrix_product(3, 3, 3, 4, K, Ptmp, P);
-		matrix_scale(3, 4, P, -1.0, P);
+		//double P[12];
+		//matrix_product(3, 3, 3, 4, K, Ptmp, P);
+		//matrix_scale(3, 4, P, -1.0, P);
 
-		txt_file << "CONTOUR" << std::endl;
-		txt_file << P[0] << " " << P[1] << " " << P[2] << " " << P[3] << std::endl;
-		txt_file << P[4] << " " << P[5] << " " << P[6] << " " << P[7] << std::endl;
-		txt_file << P[8] << " " << P[9] << " " << P[10] << " " << P[11] << std::endl;
+		//txt_file << "CONTOUR" << std::endl;
+		//txt_file << P[0] << " " << P[1] << " " << P[2] << " " << P[3] << std::endl;
+		//txt_file << P[4] << " " << P[5] << " " << P[6] << " " << P[7] << std::endl;
+		//txt_file << P[8] << " " << P[9] << " " << P[10] << " " << P[11] << std::endl;
 
-		txt_file.close();
+		//txt_file.close();
 	}
 }
 
