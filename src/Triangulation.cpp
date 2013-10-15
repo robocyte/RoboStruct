@@ -32,7 +32,7 @@ namespace
 	};
 }
 
-double ComputeRayAngle(Vec2 p, Vec2 q, const ECamera &cam1, const ECamera &cam2)
+double ComputeRayAngle(Vec2 p, Vec2 q, const Camera &cam1, const Camera &cam2)
 {
 	Mat3 K1_inv = cam1.GetIntrinsics().inverse();
 	Mat3 K2_inv = cam2.GetIntrinsics().inverse();
@@ -53,7 +53,7 @@ double ComputeRayAngle(Vec2 p, Vec2 q, const ECamera &cam1, const ECamera &cam2)
 	return acos(util::clamp((dot / mag), (-1.0 + 1.0e-8), (1.0 - 1.0e-8)));
 }
 
-bool CheckCheirality(const Vec3 p, const ECamera &cam)
+bool CheckCheirality(const Vec3 p, const Camera &cam)
 {
 	Vec3 pt = cam.m_R * (p - cam.m_t);
 	return (pt.z() < 0.0);

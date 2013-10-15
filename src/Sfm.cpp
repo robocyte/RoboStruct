@@ -4,7 +4,7 @@ namespace
 {
 	struct CameraResidual : LMFunctor<double>
 	{
-		CameraResidual(const ECamera &camera, const Vec3Vec &points, const Vec2Vec &projections, bool adjust_focal)
+		CameraResidual(const Camera &camera, const Vec3Vec &points, const Vec2Vec &projections, bool adjust_focal)
 			: LMFunctor<double>(adjust_focal ? 9 : 6, adjust_focal ? 2 * points.size() + 3 : 2 * points.size())
 			, m_camera(camera)
 			, m_points(points)
@@ -61,7 +61,7 @@ namespace
 			return projection * focal_length;
 		}
 
-		ECamera m_camera;
+		Camera m_camera;
 		Vec3Vec	m_points;
 		Vec2Vec	m_projections;
 
@@ -72,7 +72,7 @@ namespace
 	};
 }
 
-Mat3 ECamera::GetIntrinsics() const
+Mat3 Camera::GetIntrinsics() const
 {
 	Mat3 K;
 	K.setIdentity();
@@ -81,7 +81,7 @@ Mat3 ECamera::GetIntrinsics() const
 	return K;
 }
 
-Vec2 SfmProjectFinal(const Vec3 &p, const ECamera &cam)
+Vec2 SfmProjectFinal(const Vec3 &p, const Camera &cam)
 {
 	// HZ p. 153f
 	Vec3 tmp = cam.m_R * (p - cam.m_t);
@@ -94,7 +94,7 @@ Vec2 SfmProjectFinal(const Vec3 &p, const ECamera &cam)
     return projected * factor * cam.m_focal_length;
 }
 
-Vec2 SfmProjectRD(const Vec3 &p, const ECamera &cam)
+Vec2 SfmProjectRD(const Vec3 &p, const Camera &cam)
 {
 	// HZ p. 153f
 	Vec3 tmp = cam.m_R * (p - cam.m_t);
@@ -107,7 +107,7 @@ Vec2 SfmProjectRD(const Vec3 &p, const ECamera &cam)
     return projected * factor;
 }
 
-void RefineCamera(ECamera *camera, const Vec3Vec &points, const Vec2Vec &projections, bool adjust_focal)
+void RefineCamera(Camera *camera, const Vec3Vec &points, const Vec2Vec &projections, bool adjust_focal)
 {
 	Vec x(adjust_focal ? 9 : 6);
 	if (adjust_focal)	x << camera->m_t.x(), camera->m_t.y(), camera->m_t.z(), 0.0, 0.0, 0.0, camera->m_focal_length, camera->m_k(0), camera->m_k(1);

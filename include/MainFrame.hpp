@@ -18,9 +18,11 @@
 
 #include "RoboStruct_GUI.h"
 
+typedef std::vector<int>                    IntVec;
 typedef std::pair<int, int>					IntPair;
+typedef std::vector<Camera>                 CamVec;
 typedef std::pair<std::string, double>		CamDBEntry;
-typedef std::vector<std::pair<int, int>>	IntPairVector;
+typedef std::vector<std::pair<int, int>>	IntPairVec;
 
 enum TimerIDs
 {
@@ -90,9 +92,9 @@ private:
 	void		MatchAll();
 	KeyPoint&	GetKey(int img, int key) { return m_images[img].m_keys[key]; };
 	void		SetMatch(int i1, int i2) { m_matches.SetMatch(GetMatchIndex(i1, i2)); };
-	int			PruneDoubleMatches(IntPairVector &matches);
-	int			ComputeEpipolarGeometry(int idx1, int idx2, IntPairVector &matches);	// Computes the fundamental matrix F and removes outliers
-	double		ComputeHomography(int idx1, int idx2, const IntPairVector &matches);	// Computes the homography H and returns the inlier ratio
+	int			PruneDoubleMatches(IntPairVec &matches);
+	int			ComputeEpipolarGeometry(int idx1, int idx2, IntPairVec &matches);	// Computes the fundamental matrix F and removes outliers
+	double		ComputeHomography(int idx1, int idx2, const IntPairVec &matches);	// Computes the homography H and returns the inlier ratio
 	void		MakeMatchListsSymmetric();
 	void		ComputeTracks();														// Organize the matches into tracks, where a track is a connected set of matching keypoints across multiple images
 	void		SetMatchesFromTracks(int img1, int img2);
@@ -119,18 +121,16 @@ private:
 	wxThread::ExitCode	Entry();
 	void				BundleAdjust();
 	void				BundlePickInitialPair(int &i_best, int &j_best);
-	int					SetupInitialCameraPair(int i_best, int j_best, std::vector<camera_params_t> &cameras, std::vector<v3_t> &points, std::vector<v3_t> &colors, std::vector<ImageKeyVector> &pt_views);
-	bool				EstimateRelativePose(int i1, int i2, camera_params_t &camera1, camera_params_t &camera2);
-	int					FindCameraWithMostMatches(int num_cameras, const std::vector<int> &added_order, int &max_matches, const std::vector<ImageKeyVector> &pt_views);
-	std::vector<int>	FindCamerasWithNMatches(int n, int num_cameras, const std::vector<int> &added_order, const std::vector<ImageKeyVector> &pt_views);
-	bool				FindAndVerifyCamera(const Vec3Vec &points, const Vec2Vec &projections, int *idxs_solve, double *K, double *R, double *t, std::vector<int> &inliers, std::vector<int> &inliers_weak, std::vector<int> &outliers);
-	camera_params_t		BundleInitializeImage(int image_idx, int camera_idx, v3_t *points, camera_params_t *cameras, std::vector<ImageKeyVector> &pt_views, bool &success_out);
-	void				InitializeCameraParams(camera_params_t &camera);
-	void				GetIntrinsics(const camera_params_t &camera, double *K);
-	double				RunSFM(int num_pts, int num_cameras, camera_params_t *init_camera_params, v3_t *init_pts, const std::vector<int> &added_order, v3_t *colors, std::vector<ImageKeyVector> &pt_views);
-	void				RefineCameraParameters(ECamera *camera, const Vec3Vec &points, const Vec2Vec &projections, int *pt_idxs, std::vector<int> &inliers);
-	int					BundleAdjustAddAllNewPoints(int num_points, int num_cameras, std::vector<int> &added_order, camera_params_t *cameras, v3_t *points, v3_t *colors, std::vector<ImageKeyVector> &pt_views);
-	int					RemoveBadPointsAndCameras(int num_points, int num_cameras, const std::vector<int> &added_order, camera_params_t *cameras, v3_t *points, v3_t *colors, std::vector<ImageKeyVector> &pt_views);
+	int					SetupInitialCameraPair(int i_best, int j_best, CamVec &cameras, std::vector<v3_t> &points, std::vector<v3_t> &colors, std::vector<ImageKeyVector> &pt_views);
+	bool				EstimateRelativePose(int i1, int i2, Camera &camera1, Camera &camera2);
+	int					FindCameraWithMostMatches(int num_cameras, const IntVec &added_order, int &max_matches, const std::vector<ImageKeyVector> &pt_views);
+	IntVec          	FindCamerasWithNMatches(int n, int num_cameras, const IntVec &added_order, const std::vector<ImageKeyVector> &pt_views);
+	bool				FindAndVerifyCamera(const Vec3Vec &points, const Vec2Vec &projections, int *idxs_solve, Mat3 *K, Mat3 *R, Vec3 *t, std::vector<int> &inliers, std::vector<int> &inliers_weak, std::vector<int> &outliers);
+	Camera	        	BundleInitializeImage(int image_idx, int camera_idx, v3_t *points, std::vector<ImageKeyVector> &pt_views, bool &success_out);
+	double				RunSFM(int num_pts, int num_cameras, CamVec &init_camera_params, v3_t *init_pts, const std::vector<int> &added_order, v3_t *colors, std::vector<ImageKeyVector> &pt_views);
+	void				RefineCameraParameters(Camera *camera, const Vec3Vec &points, const Vec2Vec &projections, int *pt_idxs, std::vector<int> &inliers);
+	int					BundleAdjustAddAllNewPoints(int num_points, int num_cameras, IntVec &added_order, CamVec &cameras, v3_t *points, v3_t *colors, std::vector<ImageKeyVector> &pt_views);
+	int					RemoveBadPointsAndCameras(int num_points, int num_cameras, const IntVec &added_order, CamVec &cameras, v3_t *points, v3_t *colors, std::vector<ImageKeyVector> &pt_views);
 
 protected:
 	// Handlers for MainFrame events

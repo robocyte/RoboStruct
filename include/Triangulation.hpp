@@ -2,13 +2,19 @@
 
 #include "Sfm.hpp"
 
-struct Observation	// TODO: replace with ECamera!!!!!!
+struct Observation
 {
-	Observation(const Vec2 &point, const Mat3 &R, const Vec3 &t)
+	explicit Observation(const Vec2 &point, const Mat3 &R, const Vec3 &t)
 		: m_point(point)
 		, m_R(R)
 		, m_t(t)
 	{}
+
+    explicit Observation(const Vec2 &point, const Camera &camera)
+        : m_point(point)
+        , m_R(camera.m_R)
+        , m_t(-(camera.m_R * camera.m_t))
+    {}
 
 	Vec2 m_point;
 	Mat3 m_R;
@@ -20,10 +26,10 @@ struct Observation	// TODO: replace with ECamera!!!!!!
 typedef std::vector<Observation>	Observations;
 
 // Compute the angle in radians between two rays
-double ComputeRayAngle(Vec2 p, Vec2 q, const ECamera &cam1, const ECamera &cam2);
+double ComputeRayAngle(Vec2 p, Vec2 q, const Camera &cam1, const Camera &cam2);
 
 // Check if a point p lies in front of a camera
-bool CheckCheirality(const Vec3 p, const ECamera &cam);
+bool CheckCheirality(const Vec3 p, const Camera &cam);
 
 // Project a 3d point p onto an image
 Vec2 Project(const Vec3 &p, const Observation &observation);

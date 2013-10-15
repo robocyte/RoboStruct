@@ -262,7 +262,7 @@ void MainFrame::MatchAll()
 			time = (double)cv::getTickCount() - time;
 
 			// Store putative matches in ptpairs
-			IntPairVector tmp_matches;
+			IntPairVec tmp_matches;
 			int *indices_ptr = indices.ptr<int>(0);
 			float *dists_ptr = dists.ptr<float>(0);
 
@@ -324,7 +324,7 @@ void MainFrame::MatchAll()
 	m_matches_loaded = true;
 }
 
-int	MainFrame::PruneDoubleMatches(IntPairVector &matches)
+int	MainFrame::PruneDoubleMatches(IntPairVec &matches)
 {
 	int num_before = matches.size();
 
@@ -341,7 +341,7 @@ int	MainFrame::PruneDoubleMatches(IntPairVector &matches)
 	return num_before - matches.size();
 }
 
-int MainFrame::ComputeEpipolarGeometry(int idx1, int idx2, IntPairVector &matches)
+int MainFrame::ComputeEpipolarGeometry(int idx1, int idx2, IntPairVec &matches)
 {
 	auto num_putative = matches.size();
 	std::vector<cv::Point2f> points1, points2;
@@ -372,7 +372,7 @@ int MainFrame::ComputeEpipolarGeometry(int idx1, int idx2, IntPairVector &matche
 	return (int)matches.size();
 }
 
-double MainFrame::ComputeHomography(int idx1, int idx2, const IntPairVector &matches)
+double MainFrame::ComputeHomography(int idx1, int idx2, const IntPairVec &matches)
 {
 	auto num_matches = matches.size();
 	std::vector<cv::Point2f> points1, points2;
