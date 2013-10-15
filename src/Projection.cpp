@@ -218,6 +218,7 @@ int ComputeProjectionMatrixRansac(const Vec3Vec &points, const Vec2Vec &projecti
 
 void DecomposeProjectionMatrix(const Mat &P, Mat3 *K, Mat3 *R, Vec3 *t)
 {
+	// Decompose using the RQ decomposition HZ A4.1.1 pag.579.
 	Mat3 Kp = P.block(0, 0, 3, 3);
 	Mat3 Q; Q.setIdentity();
 
@@ -296,8 +297,7 @@ void DecomposeProjectionMatrix(const Mat &P, Mat3 *K, Mat3 *R, Vec3 *t)
 	}
 
 	// Compute translation.
-	Eigen::PartialPivLU<Mat3> lu(Kp);
-	Vec3 tp = lu.solve(P.col(3));
+	Vec3 tp = Kp.fullPivLu().solve(P.col(3));
 
 	if(Rp.determinant() < 0)
 	{

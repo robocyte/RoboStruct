@@ -75,7 +75,8 @@ void MainFrame::ResetOptions()
 	m_pg_options->Append( new wxFloatProperty("Min reprojection error threshold",	wxPG_LABEL,	m_options.min_reprojection_error_threshold ) );
 	m_pg_options->Append( new wxFloatProperty("Max reprojection error threshold",	wxPG_LABEL,	m_options.max_reprojection_error_threshold ) );
 	m_pg_options->Append( new wxFloatProperty("Ray angle threshold",				wxPG_LABEL,	m_options.ray_angle_threshold ) );
-	
+	m_pg_options->Append( new wxIntProperty("Outlier threshold BA",					wxPG_LABEL,	m_options.outlier_threshold_ba ) );
+
 	// Display category
 	m_pg_options->Append( new wxPropertyCategory( "Display options" ) );
 	m_pg_options->Append( new wxColourProperty("Viewport gradient top",	wxPG_LABEL,	m_options.viewport_top_color ) );
@@ -134,6 +135,7 @@ void MainFrame::OnOptionsChanged(wxPropertyGridEvent& event)
 	m_options.min_reprojection_error_threshold =	m_pg_options->GetProperty("Min reprojection error threshold")->GetValue().GetDouble();
 	m_options.max_reprojection_error_threshold =	m_pg_options->GetProperty("Max reprojection error threshold")->GetValue().GetDouble();
 	m_options.ray_angle_threshold =					m_pg_options->GetProperty("Ray angle threshold")->GetValue().GetDouble();
+	m_options.outlier_threshold_ba =				m_pg_options->GetProperty("Outlier threshold BA")->GetValue().GetInteger();
 
 	wxAny top = m_pg_options->GetProperty("Viewport gradient top")->GetValue();
 	wxAny bot = m_pg_options->GetProperty("Viewport gradient bot")->GetValue();

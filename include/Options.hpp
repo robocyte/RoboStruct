@@ -41,13 +41,14 @@ struct Options
 		, ransac_threshold_five_point(2.25)
 		, ransac_rounds_five_point(500)
 		, min_max_matches(16)
-		, ransac_rounds_projection(500)
+		, ransac_rounds_projection(1000)
 		, focal_length_constrain_weight(0.0001)
 		, distortion_constrain_weight(100.0)
 		, projection_estimation_threshold(4.0)
 		, min_reprojection_error_threshold(4.0)
 		, max_reprojection_error_threshold(8.0)
 		, ray_angle_threshold(2.0)
+		, outlier_threshold_ba(0.0)
 		
 		, viewport_top_color(77, 77, 77)
 		, viewport_bottom_color(204, 204, 204)
@@ -112,6 +113,7 @@ struct Options
 	double		min_reprojection_error_threshold;
 	double		max_reprojection_error_threshold;
 	double		ray_angle_threshold;
+	int			outlier_threshold_ba;
 
 	// Ceres options
 
