@@ -9,7 +9,7 @@ bool MainFrame::ReadCamDBFile(std::string filename)
 {
 	m_camDB.clear();
 
-	std::ifstream cam_db_file(filename.c_str());
+	std::ifstream cam_db_file(filename);
 
 	if (!cam_db_file)
 	{
@@ -54,7 +54,7 @@ void MainFrame::AddCamDBFileEntry()
 void MainFrame::SaveMatchFile()
 {
 	std::string filename = m_path + "\\Matches.txt";
-	std::ofstream match_file(filename.c_str());
+	std::ofstream match_file(filename);
 
 	if (!match_file)
 	{
@@ -70,7 +70,7 @@ void MainFrame::SaveMatchFile()
 void MainFrame::SaveTrackFile()
 {
 	std::string filename = m_path + "\\Tracks.txt";
-	std::ofstream track_file(filename.c_str());
+	std::ofstream track_file(filename);
 
 	if (!track_file)
 	{
@@ -151,7 +151,7 @@ void MainFrame::SaveProjectionMatrix(std::string path, int img_idx)
 	filename.replace(filename.find(".jpg"), 4, ".txt");
 	filename = path + "\\" + filename;
 
-	std::ofstream txt_file(filename.c_str());
+	std::ofstream txt_file(filename);
 
 	if (!txt_file)
 	{
@@ -249,9 +249,8 @@ void MainFrame::ExportToCMVS()
 
 void MainFrame::SaveBundleFile(std::string path)
 {
-	// TODO: Check if we have results to save!!
 	std::string filename = path + "\\Result.rd.out";
-	std::ofstream txt_file(filename.c_str());
+	std::ofstream txt_file(filename);
 
 	txt_file << "# Bundle file v0.3" << std::endl;
 
@@ -324,7 +323,7 @@ void MainFrame::SaveBundleFile(std::string path)
 void MainFrame::SavePlyFile()
 {
 	std::string filename = m_path + "\\Result.ply";
-	std::ofstream ply_file(filename.c_str());
+	std::ofstream ply_file(filename);
 
 	if (!ply_file)
 	{
@@ -387,7 +386,7 @@ void MainFrame::SaveMayaFile()
 	this->ExportToCMVS();
 
 	std::string filename = m_path + "\\Result.ma";
-	std::ofstream maya_file(filename.c_str());
+	std::ofstream maya_file(filename);
 
 	if (!maya_file)
 	{
