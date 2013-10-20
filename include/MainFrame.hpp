@@ -119,16 +119,16 @@ private:
 	wxThread::ExitCode	Entry();
 	void				BundleAdjust();
 	IntPair				PickInitialCameraPair();
-    int					SetupInitialCameraPair(IntPair initial_pair, CamVec &cameras, Vec3Vec &points, PointVec &pt_views);
+    void				SetupInitialCameraPair(IntPair initial_pair, CamVec &cameras, PointVec &points);
 	bool				EstimateRelativePose(int i1, int i2, Camera *camera1, Camera *camera2);
-	int					FindCameraWithMostMatches(int num_cameras, const IntVec &added_order, int &max_matches, const PointVec &pt_views);
-	IntVec          	FindCamerasWithNMatches(int n, int num_cameras, const IntVec &added_order, const PointVec &pt_views);
+	int					FindCameraWithMostMatches(int num_cameras, const IntVec &added_order, int &max_matches, const PointVec &points);
+	IntVec          	FindCamerasWithNMatches(int n, int num_cameras, const IntVec &added_order, const PointVec &points);
 	bool				FindAndVerifyCamera(const Vec3Vec &points, const Vec2Vec &projections, int *idxs_solve, Mat3 *K, Mat3 *R, Vec3 *t, IntVec &inliers, IntVec &inliers_weak, IntVec &outliers);
-	Camera	        	BundleInitializeImage(int image_idx, int camera_idx, Vec3Vec &points, PointVec &pt_views, bool &success_out);
-	double				RunSFM(int num_pts, int num_cameras, CamVec &init_camera_params, Vec3Vec &init_pts, const IntVec &added_order, PointVec &pt_views);
+	Camera	        	BundleInitializeImage(int image_idx, int camera_idx, PointVec &points, bool &success_out);
+	double				RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_order, PointVec &points);
 	void				RefineCameraParameters(Camera *camera, const Vec3Vec &points, const Vec2Vec &projections, int *pt_idxs, IntVec &inliers);
-	int					BundleAdjustAddAllNewPoints(int num_points, int num_cameras, IntVec &added_order, CamVec &cameras, Vec3Vec &points, PointVec &pt_views);
-	int					RemoveBadPointsAndCameras(int num_points, int num_cameras, const IntVec &added_order, CamVec &cameras, Vec3Vec &points, PointVec &pt_views);
+	void				BundleAdjustAddAllNewPoints(int num_cameras, IntVec &added_order, CamVec &cameras, PointVec &points);
+	int					RemoveBadPointsAndCameras(const IntVec &added_order, CamVec &cameras, PointVec &points);
 
 protected:
 	// Handlers for MainFrame events

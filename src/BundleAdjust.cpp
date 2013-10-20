@@ -127,19 +127,17 @@ void MainFrame::BundleAdjust()
 	for (auto &img : m_images) for (auto &key : img.m_keys) key.m_extra = -1;
 
 	int num_images	= this->GetNumImages();
-	int max_pts		= (int)m_tracks.size();
-	IntVec			        	added_order(num_images);
-	CamVec              	    cameras(num_images);
-	Vec3Vec		                points(max_pts);
-	PointVec                	pt_views;
+	IntVec		added_order(num_images);
+	CamVec      cameras(num_images);
+	PointVec    points;
 
 	auto initial_pair = PickInitialCameraPair();
     added_order[0] = initial_pair.first;
     added_order[1] = initial_pair.second;
 
 	wxLogMessage("[BundleAdjust] Adjusting cameras %d and %d...", initial_pair.first, initial_pair.second);
-	int curr_num_pts = SetupInitialCameraPair(initial_pair, cameras, points, pt_views);
-	RunSFM(curr_num_pts, 2, cameras, points, added_order, pt_views);
+	SetupInitialCameraPair(initial_pair, cameras, points);
+	RunSFM(2, cameras, added_order, points);
 	int curr_num_cameras = 2;
 
 	// Main loop
@@ -147,7 +145,7 @@ void MainFrame::BundleAdjust()
 	while (curr_num_cameras < num_images)
 	{
 		int max_matches = 0;
-		int max_cam = this->FindCameraWithMostMatches(curr_num_cameras, added_order, max_matches, pt_views);
+		int max_cam = FindCameraWithMostMatches(curr_num_cameras, added_order, max_matches, points);
 		wxLogMessage("[BundleAdjust] Max_matches = %d", max_matches);
 
 		if (max_matches < m_options.min_max_matches)
@@ -156,7 +154,7 @@ void MainFrame::BundleAdjust()
 			break;
 		}
 
-		auto image_set = this->FindCamerasWithNMatches(util::iround(0.75 * max_matches), curr_num_cameras, added_order, pt_views);
+		auto image_set = FindCamerasWithNMatches(util::iround(0.75 * max_matches), curr_num_cameras, added_order, points);
 		wxLogMessage("[BundleAdjust] Registering %d images", (int)image_set.size());
 
 		// Now, throw the new cameras into the mix
@@ -167,7 +165,7 @@ void MainFrame::BundleAdjust()
 			added_order[curr_num_cameras + image_count] = image_idx;
 
 			bool success = false;
-			auto camera_new = this->BundleInitializeImage(image_idx, curr_num_cameras + image_count, points, pt_views, success);
+			auto camera_new = BundleInitializeImage(image_idx, curr_num_cameras + image_count, points, success);
 			if (success)
 			{
 				cameras[curr_num_cameras + image_count] = camera_new;
@@ -181,12 +179,12 @@ void MainFrame::BundleAdjust()
 
 		wxLogMessage("[BundleAdjust] Adding new matches");
 		curr_num_cameras += image_count;
-		curr_num_pts = this->BundleAdjustAddAllNewPoints(curr_num_pts, curr_num_cameras, added_order, cameras, points, pt_views);
-		wxLogMessage("[BundleAdjust] Number of points = %d", curr_num_pts);
+		BundleAdjustAddAllNewPoints(curr_num_cameras, added_order, cameras, points);
+        wxLogMessage("[BundleAdjust] Number of points = %d", points.size());
 
-		RunSFM(curr_num_pts, curr_num_cameras, cameras, points, added_order, pt_views);
+		RunSFM(curr_num_cameras, cameras, added_order, points);
 
-		this->RemoveBadPointsAndCameras(curr_num_pts, curr_num_cameras + 1, added_order, cameras, points, pt_views);
+		RemoveBadPointsAndCameras(added_order, cameras, points);
 
 		wxLogMessage("[BundleAdjust] Focal lengths:");
 		for (int i = 0; i < curr_num_cameras; i++)
@@ -199,21 +197,15 @@ void MainFrame::BundleAdjust()
 			wxCriticalSectionLocker lock(m_points_cs);
 			m_points.clear();
 
-			for (int i = 0; i < curr_num_pts; i++)
+			for (const auto &point : points)
 			{
 				// Check if the point is visible in any view
-                if ((int) pt_views[i].m_views.size() == 0) continue;	// Invisible
+                if (point.m_views.empty()) continue;	// Invisible
 	
-				PointData pdata;
-                pdata.m_pos = points[i];
-                pdata.m_color = pt_views[i].m_color;
+                ImageKeyVector views;
+                for (const auto &view : point.m_views) views.push_back(ImageKey(added_order[view.first], view.second));
 
-                for (const auto &view : pt_views[i].m_views)
-				{
-					pdata.m_views.push_back(ImageKey(added_order[view.first], view.second));
-				}
-
-				m_points.push_back(pdata);
+                m_points.push_back(PointData(point.m_pos, point.m_color, views));
 			}
 		}
 
@@ -299,7 +291,7 @@ IntPair MainFrame::PickInitialCameraPair()
     return std::make_pair(i_best, j_best);
 }
 
-int MainFrame::SetupInitialCameraPair(IntPair initial_pair, CamVec &cameras, Vec3Vec &points, PointVec &pt_views)
+void MainFrame::SetupInitialCameraPair(IntPair initial_pair, CamVec &cameras, PointVec &points)
 {
     int i_best = initial_pair.first;
     int j_best = initial_pair.second;
@@ -320,7 +312,6 @@ int MainFrame::SetupInitialCameraPair(IntPair initial_pair, CamVec &cameras, Vec
     Mat3 K1_inv = cameras[0].GetIntrinsicMatrix().inverse();
     Mat3 K2_inv = cameras[1].GetIntrinsicMatrix().inverse();
 
-	int pt_count = 0;
 	auto &list = m_matches.GetMatchList(GetMatchIndex(i_best, j_best));
 	int num_matches = list.size();
 
@@ -340,7 +331,7 @@ int MainFrame::SetupInitialCameraPair(IntPair initial_pair, CamVec &cameras, Vec
         observations.push_back(Observation(Vec2(p_norm2.head<2>() / p_norm2.z()), cameras[1]));
 
 		double error;
-		points[pt_count] = Triangulate(observations, &error);
+		auto position = Triangulate(observations, &error);
 
         error = (cameras[0].m_focal_length + cameras[1].m_focal_length) * 0.5 * sqrt(error * 0.5);
 		
@@ -348,25 +339,18 @@ int MainFrame::SetupInitialCameraPair(IntPair initial_pair, CamVec &cameras, Vec
 
 		auto &key = GetKey(i_best, key_idx1);
 
-		GetKey(i_best, key_idx1).m_extra = pt_count;
-		GetKey(j_best, key_idx2).m_extra = pt_count;
+        GetKey(i_best, key_idx1).m_extra = points.size();
+		GetKey(j_best, key_idx2).m_extra = points.size();
 
 		int track_idx = GetKey(i_best, key_idx1).m_track;
-		m_tracks[track_idx].m_extra = pt_count;
+		m_tracks[track_idx].m_extra = points.size();
 
 		ImageKeyVector views;
 		views.push_back(ImageKey(0, key_idx1));
 		views.push_back(ImageKey(1, key_idx2));
  
-        PointData point;
-        point.m_color = key.m_color;
-        point.m_views = views;
-		pt_views.push_back(point);
-
-		pt_count++;
+        points.push_back(PointData(position, key.m_color, views));
 	}
-
-	return pt_count;
 }
 
 void MainFrame::SetMatchesFromTracks(int img1, int img2)
@@ -427,7 +411,7 @@ void MainFrame::SetMatchesFromPoints()
 	wxLogMessage("[SetMatchesFromPoints] Done!");
 }
 
-int MainFrame::FindCameraWithMostMatches(int num_cameras, const IntVec &added_order, int &max_matches, const PointVec &pt_views)
+int MainFrame::FindCameraWithMostMatches(int num_cameras, const IntVec &added_order, int &max_matches, const PointVec &points)
 {
 	int i_best = -1;
 	max_matches = 0;
@@ -452,17 +436,13 @@ int MainFrame::FindCameraWithMostMatches(int num_cameras, const IntVec &added_or
 		int num_existing_matches = 0;
 
 		// Find the tracks seen by this image
-		auto &tracks = m_images[i].m_visible_points;
-		int num_tracks = (int) tracks.size();
-
-		for (int j = 0; j < num_tracks; j++)
+		for (const auto & track : m_images[i].m_visible_points)
 		{
-			int tr(tracks[j]);
-			if (m_tracks[tr].m_extra < 0) continue;
+			if (m_tracks[track].m_extra < 0) continue;
 
 			// This tracks corresponds to a point
-			int pt = m_tracks[tr].m_extra;
-            if ((int) pt_views[pt].m_views.size() == 0) continue;
+			int pt = m_tracks[track].m_extra;
+            if (points[pt].m_views.empty()) continue;
 
 			num_existing_matches++;
 		}
@@ -478,7 +458,7 @@ int MainFrame::FindCameraWithMostMatches(int num_cameras, const IntVec &added_or
 	return i_best;
 }
 
-IntVec MainFrame::FindCamerasWithNMatches(int n, int num_cameras, const IntVec &added_order, const PointVec &pt_views)
+IntVec MainFrame::FindCamerasWithNMatches(int n, int num_cameras, const IntVec &added_order, const PointVec &points)
 {
 	std::vector<int> found_cameras;
 
@@ -503,17 +483,13 @@ IntVec MainFrame::FindCamerasWithNMatches(int n, int num_cameras, const IntVec &
 		int parent_idx_best = -1;
 
 		// Find the tracks seen by this image
-		const auto &tracks = m_images[i].m_visible_points;
-		int num_tracks = (int) tracks.size();
-
-		for (int j = 0; j < num_tracks; j++)
+		for (const auto & track : m_images[i].m_visible_points)
 		{
-			int tr = tracks[j];
-			if (m_tracks[tr].m_extra < 0) continue;
+			if (m_tracks[track].m_extra < 0) continue;
 
 			// This tracks corresponds to a point
-			int pt = m_tracks[tr].m_extra;
-            if ((int) pt_views[pt].m_views.size() == 0) continue;
+			int pt = m_tracks[track].m_extra;
+            if (points[pt].m_views.empty()) continue;
 
 			num_existing_matches++;
 		}
@@ -526,7 +502,7 @@ IntVec MainFrame::FindCamerasWithNMatches(int n, int num_cameras, const IntVec &
 	return found_cameras;
 }
 
-Camera MainFrame::BundleInitializeImage(int image_idx, int camera_idx, Vec3Vec &points, PointVec &pt_views, bool &success_out)
+Camera MainFrame::BundleInitializeImage(int image_idx, int camera_idx, PointVec &points, bool &success_out)
 {
 	clock_t start = clock();
 	Camera dummy;
@@ -554,10 +530,10 @@ Camera MainFrame::BundleInitializeImage(int image_idx, int camera_idx, Vec3Vec &
 
 		// This tracks corresponds to a point
 		int pt(m_tracks[track].m_extra);
-        if (pt_views[pt].m_views.empty()) continue;
+        if (points[pt].m_views.empty()) continue;
 
 		// Add the point to the set we'll use to solve for the camera position
-		points_solve.push_back(points[pt]);
+        points_solve.push_back(points[pt].m_pos);
 		projs_solve.push_back(image.m_keys[key].m_coords);
 		idxs_solve.push_back(pt);
 		keys_solve.push_back(key);
@@ -623,7 +599,7 @@ Camera MainFrame::BundleInitializeImage(int image_idx, int camera_idx, Vec3Vec &
 	for (const auto &i : inliers)
 	{
 		image.m_keys[keys_final[i]].m_extra = idxs_final[i];
-        pt_views[idxs_final[i]].m_views.push_back(ImageKey(camera_idx, keys_final[i]));
+        points[idxs_final[i]].m_views.push_back(ImageKey(camera_idx, keys_final[i]));
 	}
 
 	clock_t end = clock();
@@ -668,7 +644,7 @@ bool MainFrame::EstimateRelativePose(int i1, int i2, Camera *camera1, Camera *ca
 	return true;
 }
 
-double MainFrame::RunSFM(int num_pts, int num_cameras, CamVec &init_camera_params, Vec3Vec &init_pts, const IntVec &added_order, PointVec &pt_views)
+double MainFrame::RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_order, PointVec &points)
 {
 	const int		min_points			= 20;
 	int				round				= 0;
@@ -678,8 +654,9 @@ double MainFrame::RunSFM(int num_pts, int num_cameras, CamVec &init_camera_param
 	double			dist_total			= 0.0;
 	const double	huber_parameter		= 25.0;
 
-	std::vector<int>	remap(num_pts);
-	Vec3Vec         	nz_pts(num_pts);
+    int num_pts = points.size();
+    std::vector<int>	remap(num_pts);
+    Vec3Vec         	nz_pts(num_pts);
 
 	clock_t start_all, stop_all;
 	start_all = clock();
@@ -698,7 +675,7 @@ double MainFrame::RunSFM(int num_pts, int num_cameras, CamVec &init_camera_param
 
 		// Set up the projections
 		int num_projections = 0;
-        for (const auto &views : pt_views) num_projections += views.m_views.size();
+        for (const auto &point : points) num_projections += point.m_views.size();
 		std::vector<double>			projections(2 * num_projections);
 		std::vector<int>			pidx(num_projections);
 		std::vector<int>			cidx(num_projections);
@@ -708,11 +685,9 @@ double MainFrame::RunSFM(int num_pts, int num_cameras, CamVec &init_camera_param
 		int nz_count = 0;
 		for (int i = 0; i < num_pts; i++)
 		{
-            int num_views = (int)pt_views[i].m_views.size();
-
-			if (num_views > 0)
+            if (!points[i].m_views.empty())
 			{
-                for (const auto &view : pt_views[i].m_views)
+                for (const auto &view : points[i].m_views)
 				{
                     int c = view.first;
                     int k = view.second;
@@ -729,7 +704,7 @@ double MainFrame::RunSFM(int num_pts, int num_cameras, CamVec &init_camera_param
 				}
 
 				remap[i] = nz_count;
-				nz_pts[nz_count] = init_pts[i];
+                nz_pts[nz_count] = points[i].m_pos;
 				nz_count++;
 			} else
 			{
@@ -751,8 +726,8 @@ double MainFrame::RunSFM(int num_pts, int num_cameras, CamVec &init_camera_param
 		unsigned int num_parameters = pnp * num_nz_points + cnp * num_cameras;
 
 		double *init_x = new double[num_parameters];
-		double *cameras = init_x;
-		double *points = init_x + cnp * num_cameras;
+		double *pcameras = init_x;
+		double *ppoints = init_x + cnp * num_cameras;
 
 		// Insert camera parameters
 		double *ptr = init_x;
@@ -761,12 +736,12 @@ double MainFrame::RunSFM(int num_pts, int num_cameras, CamVec &init_camera_param
 		for (int i = 0; i < num_cameras; i++)
 		{
 			// Get the rotation
-            Vec3 axis = RotationMatrixToAngleAxis(init_camera_params[i].m_R);
-			Vec3 t = -(init_camera_params[i].m_R * init_camera_params[i].m_t);
+            Vec3 axis = RotationMatrixToAngleAxis(cameras[i].m_R);
+			Vec3 t = -(cameras[i].m_R * cameras[i].m_t);
 
-            double f = init_camera_params[i].m_focal_length;
-            double k1 = init_camera_params[i].m_k[0];
-			double k2 = init_camera_params[i].m_k[1];
+            double f = cameras[i].m_focal_length;
+            double k1 = cameras[i].m_k[0];
+			double k2 = cameras[i].m_k[1];
 
 			ptr[idx] = axis[0]; idx++;
 			ptr[idx] = axis[1]; idx++;
@@ -782,11 +757,11 @@ double MainFrame::RunSFM(int num_pts, int num_cameras, CamVec &init_camera_param
 		// Insert point parameters
 		for (int i = 0; i < num_pts; i++)
 		{
-            if (pt_views[i].m_views.size() > 0)
+            if (!points[i].m_views.empty())
 			{
-				ptr[idx] = init_pts[i].x(); idx++;
-				ptr[idx] = init_pts[i].y(); idx++;
-				ptr[idx] = init_pts[i].z(); idx++;
+                ptr[idx] = points[i].m_pos.x(); idx++;
+                ptr[idx] = points[i].m_pos.y(); idx++;
+                ptr[idx] = points[i].m_pos.z(); idx++;
 			}
 		}
 
@@ -801,8 +776,8 @@ double MainFrame::RunSFM(int num_pts, int num_cameras, CamVec &init_camera_param
 			//loss_function = new ceres::HuberLoss(huber_parameter);
 
 			// Each observation correponds to a pair of a camera and a point which are identified by camera_index()[i] and point_index()[i] respectively.
-			double *camera	= cameras	+ cnp * cidx[i];
-			double *point	= points	+ pnp * pidx[i];
+			double *camera	= pcameras	+ cnp * cidx[i];
+			double *point	= ppoints	+ pnp * pidx[i];
 
 			problem.AddResidualBlock(cost_function, loss_function, camera, point);
 		}
@@ -812,15 +787,15 @@ double MainFrame::RunSFM(int num_pts, int num_cameras, CamVec &init_camera_param
 		{
 			ceres::CostFunction *prior_cost_function;
 
-            prior_cost_function = new ceres::AutoDiffCostFunction<PriorError, 1, 9>(new PriorError(6, init_camera_params[i].m_init_focal_length, m_options.focal_length_constrain_weight* num_vis[i]));
-			problem.AddResidualBlock(prior_cost_function, nullptr, cameras + cnp * i);
+            prior_cost_function = new ceres::AutoDiffCostFunction<PriorError, 1, 9>(new PriorError(6, cameras[i].m_init_focal_length, m_options.focal_length_constrain_weight* num_vis[i]));
+			problem.AddResidualBlock(prior_cost_function, nullptr, pcameras + cnp * i);
 
 			// Take care of priors on distortion parameters
 			prior_cost_function = new ceres::AutoDiffCostFunction<PriorError, 1, 9>(new PriorError(7, 0.0, m_options.distortion_constrain_weight * num_vis[i]));
-			problem.AddResidualBlock(prior_cost_function, nullptr, cameras + cnp * i);
+			problem.AddResidualBlock(prior_cost_function, nullptr, pcameras + cnp * i);
 
 			prior_cost_function = new ceres::AutoDiffCostFunction<PriorError, 1, 9>(new PriorError(8, 0.0, m_options.distortion_constrain_weight * num_vis[i]));
-			problem.AddResidualBlock(prior_cost_function, nullptr, cameras + cnp * i);
+			problem.AddResidualBlock(prior_cost_function, nullptr, pcameras + cnp * i);
 		}
 
 		dist_total = 0.0;
@@ -850,11 +825,11 @@ double MainFrame::RunSFM(int num_pts, int num_cameras, CamVec &init_camera_param
 			t[1]    = *ptr; ptr++;
 			t[2]    = *ptr; ptr++;
 
-            init_camera_params[i].m_R = AngleAxisToRotationMatrix(axis);
-            init_camera_params[i].m_t = -(init_camera_params[i].m_R.transpose() * t);
-            double f = init_camera_params[i].m_focal_length = *ptr; ptr++;
-			init_camera_params[i].m_k[0] = *ptr * (f * f); ptr++;
-			init_camera_params[i].m_k[1] = *ptr * (f * f * f * f); ptr++;
+            cameras[i].m_R = AngleAxisToRotationMatrix(axis);
+            cameras[i].m_t = -(cameras[i].m_R.transpose() * t);
+            double f = cameras[i].m_focal_length = *ptr; ptr++;
+			cameras[i].m_k[0] = *ptr * (f * f); ptr++;
+			cameras[i].m_k[1] = *ptr * (f * f * f * f); ptr++;
 		}
 
 		// Insert point parameters
@@ -880,11 +855,11 @@ double MainFrame::RunSFM(int num_pts, int num_cameras, CamVec &init_camera_param
 			auto &data = m_images[added_order[i]];
 
 			// Compute inverse distortion parameters
-			Vec6 k_dist; k_dist << 0.0, 1.0, 0.0, init_camera_params[i].m_k[0], 0.0, init_camera_params[i].m_k[1];
+			Vec6 k_dist; k_dist << 0.0, 1.0, 0.0, cameras[i].m_k[0], 0.0, cameras[i].m_k[1];
 			double w_2 = 0.5 * data.GetWidth();
 			double h_2 = 0.5 * data.GetHeight();
-            double max_radius = sqrt(w_2 * w_2 + h_2 * h_2) / init_camera_params[i].m_focal_length;
-			init_camera_params[i].m_k_inv = InvertDistortion(0.0, max_radius, k_dist);
+            double max_radius = sqrt(w_2 * w_2 + h_2 * h_2) / cameras[i].m_focal_length;
+			cameras[i].m_k_inv = InvertDistortion(0.0, max_radius, k_dist);
 
 			int num_keys = GetNumKeys(added_order[i]);
 			int num_pts_proj = 0;
@@ -897,7 +872,7 @@ double MainFrame::RunSFM(int num_pts, int num_cameras, CamVec &init_camera_param
 				if (key.m_extra >= 0)
 				{
 					int pt_idx = key.m_extra;
-					Vec2 pr = SfmProjectRD(nz_pts[remap[pt_idx]], init_camera_params[i]);
+					Vec2 pr = SfmProjectRD(nz_pts[remap[pt_idx]], cameras[i]);
 
 					double dist = (pr - key.m_coords).norm();
 					dists.push_back(dist);
@@ -945,11 +920,9 @@ double MainFrame::RunSFM(int num_pts, int num_cameras, CamVec &init_camera_param
 
 			wxLogMessage("[RunSFM] Removing outlier %d (reproj error: %0.3f)", idx, reproj_errors[i]);
 
-            pt_views[idx].m_color = Vec3(0.0, 0.0, -1.0);
+            points[idx].m_color = Vec3(0.0, 0.0, -1.0);
 
-            int num_views = (int)pt_views[idx].m_views.size();
-
-            for (const auto &view : pt_views[idx].m_views)
+            for (const auto &view : points[idx].m_views)
 			{
                 int v = view.first;
                 int k = view.second;
@@ -960,7 +933,7 @@ double MainFrame::RunSFM(int num_pts, int num_cameras, CamVec &init_camera_param
 				GetKey(added_order[v], k).m_extra = -2;
 			}
 
-            pt_views[idx].m_views.clear();
+            points[idx].m_views.clear();
 		}
 
 		num_outliers = outliers.size();
@@ -969,9 +942,9 @@ double MainFrame::RunSFM(int num_pts, int num_cameras, CamVec &init_camera_param
 		end = clock();
 		wxLogMessage("[RunSFM] Removed %d outliers in %0.3f s", num_outliers, (double) (end - start) / (double) CLOCKS_PER_SEC);
 
-		RemoveBadPointsAndCameras(num_pts, num_cameras, added_order, init_camera_params, init_pts, pt_views);
+		RemoveBadPointsAndCameras(added_order, cameras, points);
 
-		for (int i = 0; i < num_pts; i++) if (remap[i] != -1) init_pts[i] = nz_pts[remap[i]];
+        for (int i = 0; i < num_pts; i++) if (remap[i] != -1) points[i].m_pos = nz_pts[remap[i]];
 
 		round_stop = clock();
 		wxLogMessage("[RunSFM] Round %d took %0.3f s", round, (double) (round_stop - round_start) / (double) CLOCKS_PER_SEC);
@@ -981,21 +954,15 @@ double MainFrame::RunSFM(int num_pts, int num_cameras, CamVec &init_camera_param
 			wxCriticalSectionLocker lock(m_points_cs);
 			m_points.clear();
 
-			for (int i = 0; i < num_pts; i++)
+			for (const auto &point : points)
 			{
 				// Check if the point is visible in any view
-                if ((int) pt_views[i].m_views.size() == 0) continue;	// Invisible
+                if (point.m_views.empty()) continue;	// Invisible
 	
-				PointData pdata;
-				pdata.m_pos = init_pts[i];
-                pdata.m_color = pt_views[i].m_color;
+                ImageKeyVector views;
+                for (const auto &view : point.m_views) views.push_back(ImageKey(added_order[view.first], view.second));
 
-                for (const auto &view : pt_views[i].m_views)
-				{
-					pdata.m_views.push_back(ImageKey(added_order[view.first], view.second));
-				}
-
-				m_points.push_back(pdata);
+                m_points.push_back(PointData(point.m_pos, point.m_color, views));
 			}
 		}
 
@@ -1138,7 +1105,7 @@ void MainFrame::RefineCameraParameters(Camera *camera, const Vec3Vec &points, co
 	wxLogMessage("[RefineCameraParameters] Exiting after %d rounds with %d/%d points", round + 1, points_curr.size(), points.size());
 }
 
-int MainFrame::BundleAdjustAddAllNewPoints(int num_points, int num_cameras, IntVec &added_order, CamVec &cameras, Vec3Vec &points, PointVec &pt_views)
+void MainFrame::BundleAdjustAddAllNewPoints(int num_cameras, IntVec &added_order, CamVec &cameras, PointVec &points)
 {
 	std::vector<ImageKeyVector>	new_tracks;
 	std::vector<int>			track_idxs;
@@ -1182,7 +1149,6 @@ int MainFrame::BundleAdjustAddAllNewPoints(int num_points, int num_cameras, IntV
 	}
 
 	// Now for each (sub) track, triangulate to see if the track is consistent
-	int pt_count = num_points;
 	int num_ill_conditioned = 0;
 	int num_high_reprojection = 0;
 	int num_cheirality_failed = 0;
@@ -1283,24 +1249,18 @@ int MainFrame::BundleAdjustAddAllNewPoints(int num_points, int num_cameras, IntV
 		}
 		
 		// All tests succeeded, so let's add the point
-		points[pt_count] = point;
-
 		int camera_idx = new_tracks[i][0].first;
 		int image_idx = added_order[camera_idx];
 		int key_idx = new_tracks[i][0].second;
 		auto &key = GetKey(image_idx, key_idx);
 
-        PointData pd;
-        pd.m_color = key.m_color;
-		pd.m_views = new_tracks[i];
-        pt_views.push_back(pd);
+        points.push_back(PointData(point, key.m_color, new_tracks[i]));
 
 		// Set the point index on the keys
-		for (const auto &track : new_tracks[i]) GetKey(added_order[track.first], track.second).m_extra = pt_count;
+        for (const auto &track : new_tracks[i]) GetKey(added_order[track.first], track.second).m_extra = points.size() - 1;
 
-		m_tracks[track_idxs[i]].m_extra = pt_count;
+		m_tracks[track_idxs[i]].m_extra = points.size() - 1;
 
-		pt_count++;
 		num_added++;
 	}
 
@@ -1308,33 +1268,29 @@ int MainFrame::BundleAdjustAddAllNewPoints(int num_points, int num_cameras, IntV
 	wxLogMessage("[AddAllNewPoints] Ill-conditioned tracks: %d",	num_ill_conditioned);
 	wxLogMessage("[AddAllNewPoints] Bad reprojections: %d",			num_high_reprojection);
 	wxLogMessage("[AddAllNewPoints] Failed cheirality checks: %d",	num_cheirality_failed);
-
-	return pt_count;
 }
 
-int MainFrame::RemoveBadPointsAndCameras(int num_points, int num_cameras, const IntVec &added_order, CamVec &cameras, Vec3Vec &points, PointVec &pt_views)
+int MainFrame::RemoveBadPointsAndCameras(const IntVec &added_order, CamVec &cameras, PointVec &points)
 {
 	int num_pruned = 0;
 
-	for (int i = 0; i < num_points; i++)
+	for (auto &point : points)
 	{
-        int num_views = (int)pt_views[i].m_views.size();
-
-		if (num_views == 0) continue;
+        if (point.m_views.empty()) continue;
 
 		double max_angle = 0.0;
-		for (int j = 0; j < num_views; j++)
+        for (int j = 0; j < point.m_views.size(); j++)
 		{
-            int v1(pt_views[i].m_views[j].first);
+            int v1(point.m_views[j].first);
 
-			Vec3 re1 = points[i] - cameras[v1].m_t;
+            Vec3 re1 = point.m_pos - cameras[v1].m_t;
 			re1 *= 1.0 / re1.norm();
 
-			for (int k = j + 1; k < num_views; k++)
+			for (int k = j + 1; k < point.m_views.size(); k++)
 			{
-                int v2(pt_views[i].m_views[k].first);
+                int v2(point.m_views[k].first);
 
-				Vec3 re2 = points[i] - cameras[v2].m_t;
+                Vec3 re2 = point.m_pos - cameras[v2].m_t;
 				re2 *= 1.0 / re2.norm();
 
 				double angle = acos(util::clamp(re1.dot(re2), (-1.0 + 1.0e-8), (1.0 - 1.0e-8)));
@@ -1345,16 +1301,16 @@ int MainFrame::RemoveBadPointsAndCameras(int num_points, int num_cameras, const 
 
 		if (util::rad2deg(max_angle) < 0.5 * m_options.ray_angle_threshold)
 		{
-			wxLogMessage("[RemoveBadPointsAndCamera] Removing point %d with angle %0.3f", i, util::rad2deg(max_angle));
+			wxLogMessage("[RemoveBadPointsAndCamera] Removing point with angle %0.3f", util::rad2deg(max_angle));
 
-			for (const auto &view : pt_views[i].m_views)
+			for (const auto &view : point.m_views)
 			{
 				// Set extra flag back to 0
                 GetKey(added_order[view.first], view.second).m_extra = -1;
 			}
 
-			pt_views[i].m_color = Vec3(0.0, 0.0, -1.0);
-            pt_views[i].m_views.clear();
+			point.m_color = Vec3(0.0, 0.0, -1.0);
+            point.m_views.clear();
 
 			num_pruned++;
 		}
