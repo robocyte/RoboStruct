@@ -117,8 +117,8 @@ private:
 	void				StartBundlerThread();
 	wxThread::ExitCode	Entry();
 	void				BundleAdjust();
-	void				BundlePickInitialPair(int &i_best, int &j_best);
-	int					SetupInitialCameraPair(int i_best, int j_best, CamVec &cameras, Vec3Vec &points, Vec3Vec &colors, std::vector<ImageKeyVector> &pt_views);
+	IntPair				BundlePickInitialPair();
+    int					SetupInitialCameraPair(IntPair initial_pair, CamVec &cameras, Vec3Vec &points, Vec3Vec &colors, std::vector<ImageKeyVector> &pt_views);
 	bool				EstimateRelativePose(int i1, int i2, Camera &camera1, Camera &camera2);
 	int					FindCameraWithMostMatches(int num_cameras, const IntVec &added_order, int &max_matches, const std::vector<ImageKeyVector> &pt_views);
 	IntVec          	FindCamerasWithNMatches(int n, int num_cameras, const IntVec &added_order, const std::vector<ImageKeyVector> &pt_views);

@@ -134,13 +134,12 @@ void MainFrame::BundleAdjust()
 	Vec3Vec         			colors(max_pts);
 	std::vector<ImageKeyVector>	pt_views;
 
-	int i_best = -1, j_best = -1;
-	this->BundlePickInitialPair(i_best, j_best);
-	added_order[0] = i_best;
-	added_order[1] = j_best;
+	auto initial_pair = BundlePickInitialPair();
+    added_order[0] = initial_pair.first;
+    added_order[1] = initial_pair.second;
 
-	wxLogMessage("[BundleAdjust] Adjusting cameras %d and %d...", i_best, j_best);
-	int curr_num_pts = this->SetupInitialCameraPair(i_best, j_best, cameras, points, colors, pt_views);
+	wxLogMessage("[BundleAdjust] Adjusting cameras %d and %d...", initial_pair.first, initial_pair.second);
+	int curr_num_pts = SetupInitialCameraPair(initial_pair, cameras, points, colors, pt_views);
 	RunSFM(curr_num_pts, 2, cameras, points, added_order, colors, pt_views);
 	int curr_num_cameras = 2;
 
@@ -235,7 +234,7 @@ void MainFrame::BundleAdjust()
 	m_sfm_done = true;
 }
 
-void MainFrame::BundlePickInitialPair(int &i_best, int &j_best)
+IntPair MainFrame::BundlePickInitialPair()
 {
 	int		num_images		= this->GetNumImages();
 	int		min_matches		= 80;
@@ -246,6 +245,7 @@ void MainFrame::BundlePickInitialPair(int &i_best, int &j_best)
 	double	score_threshold	= 2.0;
 	int		match_threshold = 32;
 
+    int     i_best = -1, j_best = -1;
 	int		i_best_2 = -1, j_best_2 = -1;
 
 	// Compute score for each image pair
@@ -298,10 +298,14 @@ void MainFrame::BundlePickInitialPair(int &i_best, int &j_best)
 			j_best = j_best_2;
 		}
 	}
+
+    return std::make_pair(i_best, j_best);
 }
 
-int MainFrame::SetupInitialCameraPair(int i_best, int j_best, CamVec &cameras, Vec3Vec &points, Vec3Vec &colors, std::vector<ImageKeyVector> &pt_views)
+int MainFrame::SetupInitialCameraPair(IntPair initial_pair, CamVec &cameras, Vec3Vec &points, Vec3Vec &colors, std::vector<ImageKeyVector> &pt_views)
 {
+    int i_best = initial_pair.first;
+    int j_best = initial_pair.second;
 	this->SetMatchesFromTracks(i_best, j_best);
 
 	m_images[i_best].SetTracks();
