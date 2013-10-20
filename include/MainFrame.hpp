@@ -18,6 +18,7 @@
 typedef std::vector<int>                    IntVec;
 typedef std::pair<int, int>					IntPair;
 typedef std::vector<Camera>                 CamVec;
+typedef std::vector<PointData>              PointVec;
 typedef std::pair<std::string, double>		CamDBEntry;
 typedef std::vector<std::pair<int, int>>	IntPairVec;
 
@@ -58,7 +59,7 @@ private:
 	std::vector<TrackData>		m_tracks;								// Information about the detected 3D tracks
 	MatchTable					m_matches;								// Holds the matches
 	TransformData				m_transforms;							// Holds transform info
-	std::vector<PointData>		m_points;								// Holds reconstructed points
+	PointVec            		m_points;								// Holds reconstructed points
 
 	bool						m_has_images;
 	bool						m_features_detected;					// Have features been detected?
@@ -117,17 +118,17 @@ private:
 	void				StartBundlerThread();
 	wxThread::ExitCode	Entry();
 	void				BundleAdjust();
-	IntPair				BundlePickInitialPair();
-    int					SetupInitialCameraPair(IntPair initial_pair, CamVec &cameras, Vec3Vec &points, Vec3Vec &colors, std::vector<ImageKeyVector> &pt_views);
-	bool				EstimateRelativePose(int i1, int i2, Camera &camera1, Camera &camera2);
-	int					FindCameraWithMostMatches(int num_cameras, const IntVec &added_order, int &max_matches, const std::vector<ImageKeyVector> &pt_views);
-	IntVec          	FindCamerasWithNMatches(int n, int num_cameras, const IntVec &added_order, const std::vector<ImageKeyVector> &pt_views);
+	IntPair				PickInitialCameraPair();
+    int					SetupInitialCameraPair(IntPair initial_pair, CamVec &cameras, Vec3Vec &points, PointVec &pt_views);
+	bool				EstimateRelativePose(int i1, int i2, Camera *camera1, Camera *camera2);
+	int					FindCameraWithMostMatches(int num_cameras, const IntVec &added_order, int &max_matches, const PointVec &pt_views);
+	IntVec          	FindCamerasWithNMatches(int n, int num_cameras, const IntVec &added_order, const PointVec &pt_views);
 	bool				FindAndVerifyCamera(const Vec3Vec &points, const Vec2Vec &projections, int *idxs_solve, Mat3 *K, Mat3 *R, Vec3 *t, IntVec &inliers, IntVec &inliers_weak, IntVec &outliers);
-	Camera	        	BundleInitializeImage(int image_idx, int camera_idx, Vec3Vec &points, std::vector<ImageKeyVector> &pt_views, bool &success_out);
-	double				RunSFM(int num_pts, int num_cameras, CamVec &init_camera_params, Vec3Vec &init_pts, const IntVec &added_order, Vec3Vec &colors, std::vector<ImageKeyVector> &pt_views);
+	Camera	        	BundleInitializeImage(int image_idx, int camera_idx, Vec3Vec &points, PointVec &pt_views, bool &success_out);
+	double				RunSFM(int num_pts, int num_cameras, CamVec &init_camera_params, Vec3Vec &init_pts, const IntVec &added_order, PointVec &pt_views);
 	void				RefineCameraParameters(Camera *camera, const Vec3Vec &points, const Vec2Vec &projections, int *pt_idxs, IntVec &inliers);
-	int					BundleAdjustAddAllNewPoints(int num_points, int num_cameras, IntVec &added_order, CamVec &cameras, Vec3Vec &points, Vec3Vec &colors, std::vector<ImageKeyVector> &pt_views);
-	int					RemoveBadPointsAndCameras(int num_points, int num_cameras, const IntVec &added_order, CamVec &cameras, Vec3Vec &points, Vec3Vec &colors, std::vector<ImageKeyVector> &pt_views);
+	int					BundleAdjustAddAllNewPoints(int num_points, int num_cameras, IntVec &added_order, CamVec &cameras, Vec3Vec &points, PointVec &pt_views);
+	int					RemoveBadPointsAndCameras(int num_points, int num_cameras, const IntVec &added_order, CamVec &cameras, Vec3Vec &points, PointVec &pt_views);
 
 protected:
 	// Handlers for MainFrame events
