@@ -47,5 +47,5 @@ private:
 	int		m_height;								// Height from exif tags
 	double	m_init_focal_mm;						// Focal length in mm from exif tag
 
-	void	ConvertOpenCVKeys(const std::vector<cv::KeyPoint>& kpts, const cv::Mat& image);
+	void	ConvertOpenCVKeys(const std::vector<cv::KeyPoint>& keys, const cv::Mat& image);
 };

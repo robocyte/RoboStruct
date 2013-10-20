@@ -53,7 +53,7 @@ void ImageData::DetectFeatures(const Options& opts)
 	this->ClearDescriptors();
 	m_keys.clear();
 
-	std::vector<cv::KeyPoint> kpts;
+	std::vector<cv::KeyPoint> keys;
 	const auto img = cv::imread(m_filename);
 	cv::Mat grey_img;
 	cv::cvtColor(img, grey_img, CV_BGR2GRAY);
@@ -68,7 +68,7 @@ void ImageData::DetectFeatures(const Options& opts)
 								opts.yape_views,
 								opts.yape_base_feature_size,
 								opts.yape_clustering_distance);
-			YapeDet(grey_img, kpts);
+			YapeDet(grey_img, keys);
 
 			daisy DaisyDesc = daisy();
 			DaisyDesc.set_image(grey_img.data, m_height, m_width);
@@ -83,10 +83,10 @@ void ImageData::DetectFeatures(const Options& opts)
 			m_descriptors.reserve(m_keys.size() * m_desc_size);
 
 			// Compute Daisy descriptors at provided locations
-			for (const auto &keypoint : kpts)
+			for (const auto &key : keys)
 			{
 				std::vector<float> descriptor(m_desc_size);
-				DaisyDesc.get_descriptor(keypoint.pt.y, keypoint.pt.x, 35, descriptor.data());
+				DaisyDesc.get_descriptor(key.pt.y, key.pt.x, 35, descriptor.data());
 				m_descriptors.insert(m_descriptors.end(), descriptor.begin(), descriptor.end());
 			}
 			break;
@@ -94,32 +94,32 @@ void ImageData::DetectFeatures(const Options& opts)
 	case 1: // Detect SIFT features
 		{
 			m_desc_size = 128;
-			m_descriptors.reserve(kpts.size() * m_desc_size);
+			m_descriptors.reserve(keys.size() * m_desc_size);
 
 			cv::SIFT Sift(	opts.sift_det_threshold,
 							opts.sift_det_edge_threshold,
 							opts.surf_common_octaves,
 							opts.sift_common_octave_layers);
-			Sift(grey_img, cv::Mat(), kpts, m_descriptors);
+			Sift(grey_img, cv::Mat(), keys, m_descriptors);
 			break;
 		}
 	case 2: // Detect SURF features
 		{
 			if (opts.surf_desc_extended)	m_desc_size = 128;
 			else							m_desc_size = 64;
-			m_descriptors.reserve(kpts.size() * m_desc_size);
+			m_descriptors.reserve(keys.size() * m_desc_size);
 
 			cv::SURF Surf(	opts.surf_det_hessian_threshold,
 							opts.surf_common_octaves,
 							opts.surf_common_octave_layers,
 							opts.surf_desc_extended,
 							opts.surf_desc_upright);
-			Surf(grey_img, cv::Mat(), kpts, m_descriptors);
+			Surf(grey_img, cv::Mat(), keys, m_descriptors);
 			break;
 		}
 	}
 
-	this->ConvertOpenCVKeys(kpts, img);
+	this->ConvertOpenCVKeys(keys, img);
 	this->SaveDescriptors(true);
 }
 
@@ -151,14 +151,14 @@ void ImageData::LoadDescriptors()
 	file.close();
 }
 
-void ImageData::ConvertOpenCVKeys(const std::vector<cv::KeyPoint>& kpts, const cv::Mat& image)
+void ImageData::ConvertOpenCVKeys(const std::vector<cv::KeyPoint>& keys, const cv::Mat& image)
 {
-	m_keys.reserve(kpts.size());
+	m_keys.reserve(keys.size());
 
 	float x_correction_factor = 0.5 * m_width;
 	float y_correction_factor = 0.5 * m_height - 1.0;
 
-	for (auto &key : kpts)
+	for (auto &key : keys)
 	{
 		float x = key.pt.x - x_correction_factor;
 		float y = y_correction_factor - key.pt.y;
@@ -202,10 +202,10 @@ void ImageData::SetTracks()
 {
 	for (unsigned int i = 0; i < m_visible_points.size(); i++)
 	{
-		int tr(m_visible_points[i]);
+		int track(m_visible_points[i]);
 		int key(m_visible_keys[i]);
 
-		m_keys[key].m_track = tr;
+		m_keys[key].m_track = track;
 	}
 
 	wxLogMessage("[SetTracks] %i tracks set for image %s", m_visible_points.size(), m_filename_short.c_str());

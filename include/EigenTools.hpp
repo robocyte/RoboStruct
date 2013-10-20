@@ -58,3 +58,9 @@ struct LMFunctor
 Mat3 AngleAxisToRotationMatrix(const Vec3 &w);
 
 Vec3 RotationMatrixToAngleAxis(const Mat3 &R);
+
+Vec3 EuclideanToHomogenous(const Vec2 &x);
+
+Vec4 EuclideanToHomogenous(const Vec3 &x);
+
+Vec2 HomogenousToEuclidean(const Vec3 &x);

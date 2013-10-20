@@ -207,7 +207,7 @@ void MainFrame::BundleAdjust()
 	
 				PointData pdata;
                 pdata.m_pos = points[i];
-				pdata.m_color = colors[i] / 255.0;
+				pdata.m_color = colors[i];
 
 				for (int j = 0; j < (int) pt_views[i].size(); j++)
 				{
@@ -334,8 +334,8 @@ int MainFrame::SetupInitialCameraPair(IntPair initial_pair, CamVec &cameras, Vec
 		int key_idx2(list[i].m_idx2);
 
 		// Normalize the point
-		Vec3 p_norm1 = K1_inv * Vec3(m_images[i_best].m_keys[key_idx1].m_x, m_images[i_best].m_keys[key_idx1].m_y, -1.0);
-		Vec3 p_norm2 = K2_inv * Vec3(m_images[j_best].m_keys[key_idx2].m_x, m_images[j_best].m_keys[key_idx2].m_y, -1.0);
+		Vec3 p_norm1 = K1_inv * Vec3(m_images[i_best].m_keys[key_idx1].m_coords.x(), m_images[i_best].m_keys[key_idx1].m_coords.y(), -1.0);
+		Vec3 p_norm2 = K2_inv * Vec3(m_images[j_best].m_keys[key_idx2].m_coords.x(), m_images[j_best].m_keys[key_idx2].m_coords.y(), -1.0);
 
 		// Put the translation in standard form
 		Observations observations;
@@ -351,7 +351,7 @@ int MainFrame::SetupInitialCameraPair(IntPair initial_pair, CamVec &cameras, Vec
 
 		// Get the color of the point
 		auto &key = GetKey(i_best, key_idx1);
-		colors[pt_count] = Vec3((double) key.m_r, (double)key.m_g, (double) key.m_b);
+		colors[pt_count] = key.m_color;
 
 		GetKey(i_best, key_idx1).m_extra = pt_count;
 		GetKey(j_best, key_idx2).m_extra = pt_count;
@@ -559,7 +559,7 @@ Camera MainFrame::BundleInitializeImage(int image_idx, int camera_idx, Vec3Vec &
 
 		// Add the point to the set we'll use to solve for the camera position
 		points_solve.push_back(points[pt]);
-		projs_solve.push_back(Vec2(image.m_keys[key].m_x, image.m_keys[key].m_y));
+		projs_solve.push_back(image.m_keys[key].m_coords);
 		idxs_solve.push_back(pt);
 		keys_solve.push_back(key);
 	}
@@ -649,8 +649,8 @@ bool MainFrame::EstimateRelativePose(int i1, int i2, Camera &camera1, Camera &ca
 
 	for (const auto &match : matches)
 	{
-		k1_pts.push_back(Vec2(keys1[match.m_idx1].m_x, keys1[match.m_idx1].m_y));
-		k2_pts.push_back(Vec2(keys2[match.m_idx2].m_x, keys2[match.m_idx2].m_y));
+		k1_pts.push_back(keys1[match.m_idx1].m_coords);
+		k2_pts.push_back(keys2[match.m_idx2].m_coords);
 	}
 
 	wxLogMessage("[EstimateRelativePose] EstimateRelativePose starting...");
@@ -722,8 +722,8 @@ double MainFrame::RunSFM(int num_pts, int num_cameras, CamVec &init_camera_param
 					int v = added_order[c];
 					int k = pt_views[i][j].second;
 
-					projections[2 * arr_idx + 0] = GetKey(v, k).m_x;
-					projections[2 * arr_idx + 1] = GetKey(v, k).m_y;
+					projections[2 * arr_idx + 0] = GetKey(v, k).m_coords.x();
+					projections[2 * arr_idx + 1] = GetKey(v, k).m_coords.y();
 
 					pidx[arr_idx] = nz_count;
 					cidx[arr_idx] = c;
@@ -904,7 +904,7 @@ double MainFrame::RunSFM(int num_pts, int num_cameras, CamVec &init_camera_param
 					int pt_idx = key.m_extra;
 					Vec2 pr = SfmProjectRD(nz_pts[remap[pt_idx]], init_camera_params[i]);
 
-					double dist = (pr - Vec2(key.m_x, key.m_y)).norm();
+					double dist = (pr - key.m_coords).norm();
 					dists.push_back(dist);
 					dist_total += dist;
 					num_dists++;
@@ -993,7 +993,7 @@ double MainFrame::RunSFM(int num_pts, int num_cameras, CamVec &init_camera_param
 	
 				PointData pdata;
 				pdata.m_pos = init_pts[i];
-				pdata.m_color = colors[i] / 255.0;
+				pdata.m_color = colors[i];
 
 
 				for (int j = 0; j < (int) pt_views[i].size(); j++)
@@ -1051,7 +1051,7 @@ bool MainFrame::FindAndVerifyCamera(const Vec3Vec &points, const Vec2Vec &projec
 	int num_behind = 0;
 	for (int j = 0; j < points.size(); j++)
 	{
-		Vec3 q = *K * (Rigid * Vec4(points[j].x(), points[j].y(), points[j].z(), 1.0));
+		Vec3 q = *K * (Rigid * EuclideanToHomogenous(points[j]));
 		Vec2 pimg = -q.head<2>() / q.z();
 		double diff = (pimg - projections[j]).norm();
 
@@ -1220,10 +1220,7 @@ int MainFrame::BundleAdjustAddAllNewPoints(int num_points, int num_cameras, IntV
 				KeyPoint &key1 = GetKey(image_idx1, key_idx1);
 				KeyPoint &key2 = GetKey(image_idx2, key_idx2);
 
-				Vec2 p(key1.m_x, key1.m_y);
-				Vec2 q(key2.m_x, key2.m_y);
-
-				double angle = ComputeRayAngle(p, q, cameras[camera_idx1], cameras[camera_idx2]);
+                double angle = ComputeRayAngle(key1.m_coords, key2.m_coords, cameras[camera_idx1], cameras[camera_idx2]);
 
 				if (angle > max_angle) max_angle = angle;
 
@@ -1248,7 +1245,7 @@ int MainFrame::BundleAdjustAddAllNewPoints(int num_points, int num_cameras, IntV
 
             Mat3 K = cam.GetIntrinsicMatrix();
 
-			Vec3 pn = K.inverse() * Vec3(key.m_x, key.m_y, 1.0);
+			Vec3 pn = K.inverse() * EuclideanToHomogenous(key.m_coords);
             Vec2 pu = UndistortNormalizedPoint(Vec2(-pn.x(), -pn.y()), cam.m_k_inv);
 
 			observations.push_back(Observation(pu, cam));
@@ -1264,7 +1261,7 @@ int MainFrame::BundleAdjustAddAllNewPoints(int num_points, int num_cameras, IntV
 
 			Vec2 pr = SfmProjectFinal(point, cameras[track.first]);
 
-			error += (pr - Vec2(key.m_x, key.m_y)).squaredNorm();
+			error += (pr - key.m_coords).squaredNorm();
 		}
 		error = sqrt(error / new_tracks[i].size());
 
@@ -1302,7 +1299,7 @@ int MainFrame::BundleAdjustAddAllNewPoints(int num_points, int num_cameras, IntV
 		int key_idx = new_tracks[i][0].second;
 		auto &key = GetKey(image_idx, key_idx);
 
-		colors[pt_count] = Vec3((double)key.m_r, (double)key.m_g, (double)key.m_b);
+		colors[pt_count] = key.m_color;
 
 		pt_views.push_back(new_tracks[i]);
 

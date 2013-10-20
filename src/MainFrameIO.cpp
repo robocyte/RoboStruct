@@ -308,8 +308,8 @@ void MainFrame::SaveBundleFile(std::string path)
 					int img = view.first;
 					int key = view.second;
 
-					double x = m_images[img].m_keys[key].m_x;
-					double y = m_images[img].m_keys[key].m_y;
+					double x = m_images[img].m_keys[key].m_coords.x();
+					double y = m_images[img].m_keys[key].m_coords.y();
 
 					txt_file << " " << img << " " << key << " " << x << " " << y;
 				}

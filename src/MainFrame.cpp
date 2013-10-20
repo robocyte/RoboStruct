@@ -351,8 +351,8 @@ int MainFrame::ComputeEpipolarGeometry(int idx1, int idx2, IntPairVec &matches)
 
 	for (const auto &match : matches)
 	{
-		points1.push_back(cv::Point2f(keys1[match.first].m_x, keys1[match.first].m_y));
-		points2.push_back(cv::Point2f(keys2[match.second].m_x, keys2[match.second].m_y));
+		points1.push_back(cv::Point2f(keys1[match.first].m_coords.x(), keys1[match.first].m_coords.y()));
+		points2.push_back(cv::Point2f(keys2[match.second].m_coords.x(), keys2[match.second].m_coords.y()));
 	}
 
 	// Find the fundamental matrix
@@ -382,8 +382,8 @@ double MainFrame::ComputeHomography(int idx1, int idx2, const IntPairVec &matche
 
 	for (const auto &match : matches)
 	{
-		points1.push_back(cv::Point2f(keys1[match.first].m_x, keys1[match.first].m_y));
-		points2.push_back(cv::Point2f(keys2[match.second].m_x, keys2[match.second].m_y));
+		points1.push_back(cv::Point2f(keys1[match.first].m_coords.x(), keys1[match.first].m_coords.y()));
+		points2.push_back(cv::Point2f(keys2[match.second].m_coords.x(), keys2[match.second].m_coords.y()));
 	}
 
 	// Find the homography matrix
