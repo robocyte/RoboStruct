@@ -20,17 +20,6 @@ double CameraData::GetCCDWidth()
 
 void CameraData::Finalize()
 {
-	//// Compute projection matrix
-	//double K[9];
-	//double Ptmp[12] = 
-	//{	m_R[0], m_R[1], m_R[2], m_t[0],
-	//	m_R[3], m_R[4], m_R[5], m_t[1],
-	//	m_R[6], m_R[7], m_R[8], m_t[2]};
-
-	//this->GetIntrinsics(K);
-
-	//matrix_product(3, 3, 3, 4, K, Ptmp, m_Pmatrix);
-
 	//// Find the 3d positions of the image corners
 	//m_img_upper_left[0] = -0.5 * m_width;
 	//m_img_upper_left[1] = 0.5 * m_height;

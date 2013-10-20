@@ -126,7 +126,7 @@ void MainFrame::BundleAdjust()
 	for (auto &track : m_tracks) track.m_extra = -1;
 	for (auto &img : m_images) for (auto &key : img.m_keys) key.m_extra = -1;
 
-	int num_images	= this->GetNumImages();
+	int num_images	= GetNumImages();
 	IntVec		added_order(num_images);
 	CamVec      cameras(num_images);
 	PointVec    points;
@@ -200,7 +200,7 @@ void MainFrame::BundleAdjust()
 			for (const auto &point : points)
 			{
 				// Check if the point is visible in any view
-                if (point.m_views.empty()) continue;	// Invisible
+                if (point.m_views.empty()) continue; // Invisible
 	
                 ImageKeyVector views;
                 for (const auto &view : point.m_views) views.push_back(ImageKey(added_order[view.first], view.second));
@@ -216,8 +216,8 @@ void MainFrame::BundleAdjust()
 	clock_t end = clock();
 	wxLogMessage("[BundleAdjust] Computing structure from motion took %0.3f s", (double) (end - start) / (double) CLOCKS_PER_SEC);
 
-	this->SavePlyFile();
-	this->SetMatchesFromPoints();
+	SavePlyFile();
+	SetMatchesFromPoints();
 
 	// Update program state
 	m_sfm_done = true;
@@ -225,7 +225,7 @@ void MainFrame::BundleAdjust()
 
 IntPair MainFrame::PickInitialCameraPair()
 {
-	int		num_images		= this->GetNumImages();
+	int		num_images		= GetNumImages();
 	int		min_matches		= 80;
 	int		max_matches		= 0;
 	double	min_score		= 0.1;
@@ -243,13 +243,13 @@ IntPair MainFrame::PickInitialCameraPair()
 	{
 		for (int j = i + 1; j < num_images; j++)
 		{
-			int num_matches = this->GetNumTrackMatches(i, j);
+			int num_matches = GetNumTrackMatches(i, j);
 			max_pts += num_matches;
 
 			if (num_matches <= match_threshold) continue;
 
 			double score = 0.0;
-			double ratio = this->GetInlierRatio(i, j);
+			double ratio = GetInlierRatio(i, j);
 			
 			if (ratio == 0.0)	score = min_score;
 			else				score = 1.0 / ratio;
@@ -295,7 +295,7 @@ void MainFrame::SetupInitialCameraPair(IntPair initial_pair, CamVec &cameras, Po
 {
     int i_best = initial_pair.first;
     int j_best = initial_pair.second;
-	this->SetMatchesFromTracks(i_best, j_best);
+	SetMatchesFromTracks(i_best, j_best);
 
 	m_images[i_best].SetTracks();
 	m_images[j_best].SetTracks();
@@ -360,7 +360,7 @@ void MainFrame::SetMatchesFromTracks(int img1, int img2)
 	auto &tracks2 = m_images[img2].m_visible_points;
 
 	// Find tracks visible from both cameras
-	std::vector<int> intersection;
+    IntVec intersection;
 	std::set_intersection(tracks1.begin(), tracks1.end(), tracks2.begin(), tracks2.end(), std::inserter(intersection, intersection.begin()));
 
 	if (intersection.empty()) return;
@@ -368,7 +368,7 @@ void MainFrame::SetMatchesFromTracks(int img1, int img2)
 	matches.clear();
 	matches.reserve(intersection.size());
 
-	for (const int track : intersection)
+	for (const int &track : intersection)
 	{
 		auto p = std::lower_bound(tracks1.begin(), tracks1.end(), track);
 		auto offset = std::distance(tracks1.begin(), p);
@@ -389,21 +389,21 @@ void MainFrame::SetMatchesFromPoints()
 	// Clear all matches
 	m_matches.RemoveAll();
 
-	wxCriticalSectionLocker lock(m_points_cs);
-	int num_points = (int) m_points.size();
-	for (int i = 0; i < num_points; i++) {
-		int num_views = (int) m_points[i].m_views.size();
+	for (const auto &point : m_points)
+    {
+		int num_views = point.m_views.size();
 
-		for (int j = 0; j < num_views; j++) {
-			for (int k = 0; k < num_views; k++) {
+		for (int j = 0; j < num_views; j++)
+        {
+			for (int k = 0; k < num_views; k++)
+            {
 				if (j == k) continue;
 
-				ImageKey view1 = m_points[i].m_views[j];
-				ImageKey view2 = m_points[i].m_views[k];
+				ImageKey view1 = point.m_views[j];
+				ImageKey view2 = point.m_views[k];
 
 				SetMatch(view1.first, view2.first);
-				MatchIndex idx = GetMatchIndex(view1.first, view2.first);
-				m_matches.AddMatch(idx, KeypointMatch(view1.second, view2.second));
+				m_matches.AddMatch(MatchIndex(view1.first, view2.first), KeypointMatch(view1.second, view2.second));
 			}
 		}
 	}
@@ -552,7 +552,7 @@ Camera MainFrame::BundleInitializeImage(int image_idx, int camera_idx, PointVec 
     Vec3 tinit;
 	Camera camera_new;
 	IntVec inliers, inliers_weak, outliers;
-	bool found = this->FindAndVerifyCamera(points_solve, projs_solve, idxs_solve.data(), &Kinit, &Rinit, &tinit, inliers, inliers_weak, outliers);
+	bool found = FindAndVerifyCamera(points_solve, projs_solve, idxs_solve.data(), &Kinit, &Rinit, &tinit, inliers, inliers_weak, outliers);
 
 	if (!found)
 	{
@@ -587,7 +587,7 @@ Camera MainFrame::BundleInitializeImage(int image_idx, int camera_idx, PointVec 
 		keys_final.push_back(keys_solve[idx]);
 	}
 
-	this->RefineCameraParameters(&camera_new, points_final, projs_final, idxs_final.data(), inliers);
+	RefineCameraParameters(&camera_new, points_final, projs_final, idxs_final.data(), inliers);
 
     if ((inliers.size() < 8) || (camera_new.m_focal_length < 0.1 * image.GetWidth()))
 	{
@@ -957,7 +957,7 @@ double MainFrame::RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_o
 			for (const auto &point : points)
 			{
 				// Check if the point is visible in any view
-                if (point.m_views.empty()) continue;	// Invisible
+                if (point.m_views.empty()) continue; // Invisible
 	
                 ImageKeyVector views;
                 for (const auto &view : point.m_views) views.push_back(ImageKey(added_order[view.first], view.second));
@@ -1249,10 +1249,7 @@ void MainFrame::BundleAdjustAddAllNewPoints(int num_cameras, IntVec &added_order
 		}
 		
 		// All tests succeeded, so let's add the point
-		int camera_idx = new_tracks[i][0].first;
-		int image_idx = added_order[camera_idx];
-		int key_idx = new_tracks[i][0].second;
-		auto &key = GetKey(image_idx, key_idx);
+		auto &key = GetKey(added_order[new_tracks[i][0].first], new_tracks[i][0].second);
 
         points.push_back(PointData(point, key.m_color, new_tracks[i]));
 
