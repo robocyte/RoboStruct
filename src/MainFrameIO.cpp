@@ -400,7 +400,7 @@ void MainFrame::SaveMayaFile()
 
 		// Write header and default cameras
 		maya_file << "//Maya ASCII 2008 scene\n";
-		maya_file << "//Name: Bundler.ma\n";
+		maya_file << "//Name: Result.ma\n";
 		maya_file << "//Codeset: 1252\n";
 		maya_file << "requires maya \"2008\";\n";
 		maya_file << "currentUnit -l centimeter -a degree -t film;\n";
@@ -579,7 +579,7 @@ void MainFrame::SaveMayaFile()
 		maya_file << "\tsetAttr -k on \".pointSize\" 3;\n";
 		maya_file << "\tsetAttr -k on \".normalDir\";\n";
 
-		maya_file << "// End of Bundler.ma\n";
+		maya_file << "// End of Result.ma\n";
 		maya_file.close();
 	}
 }

@@ -46,8 +46,8 @@ namespace
 			Mat3 Rnew = AngleAxisToRotationMatrix(x.segment(3, 3)) * m_camera.m_R;
 
 			// Project
-			Vec3 tmp = Rnew * (point - x.head(3));
-			Vec2 projection(tmp.x() / -tmp.z(), tmp.y() / -tmp.z());
+			Vec3 tmp = Rnew * (point - x.head<3>());
+			Vec2 projection = tmp.head<2>() / -tmp.z();
 
 			if (m_adjust_focal)
 			{
@@ -94,7 +94,7 @@ Vec2 SfmProjectFinal(const Vec3 &p, const Camera &cam)
 {
 	// HZ p. 153f
 	Vec3 tmp = cam.m_R * (p - cam.m_t);
-	Vec2 projected(tmp.x() / -tmp.z(), tmp.y() / -tmp.z());
+	Vec2 projected = tmp.head<2>() / -tmp.z();
 
 	// Compute radial distortion
 	double r2 = projected.squaredNorm() / (cam.m_focal_length * cam.m_focal_length);
@@ -107,7 +107,7 @@ Vec2 SfmProjectRD(const Vec3 &p, const Camera &cam)
 {
 	// HZ p. 153f
 	Vec3 tmp = cam.m_R * (p - cam.m_t);
-	Vec2 projected(-tmp.x() * cam.m_focal_length / tmp.z(), -tmp.y() * cam.m_focal_length / tmp.z());
+	Vec2 projected = tmp.head<2>() * cam.m_focal_length / -tmp.z();
 
 	// Compute radial distortion
 	double r2 = projected.squaredNorm() / (cam.m_focal_length * cam.m_focal_length);
@@ -127,7 +127,7 @@ void RefineCamera(Camera *camera, const Vec3Vec &points, const Vec2Vec &projecti
 	Eigen::LevenbergMarquardt<CameraResidual>::lmdif1(functor, x, &nfev, 1.0e-12);
 
 	// Copy out the parameters
-	camera->m_t = x.segment(0, 3);
+	camera->m_t = x.head<3>();
 	camera->m_R = AngleAxisToRotationMatrix(x.segment(3, 3)) * camera->m_R;
 
 	if (adjust_focal)
