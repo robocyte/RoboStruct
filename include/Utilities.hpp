@@ -10,18 +10,6 @@ const double PI = 3.1415926535897932384626433832795;
 namespace util
 {
 
-	template <typename T> inline const
-		T& min(const T &a, const T &b)
-	{
-		return (a < b) ? a : b;
-	}
-
-	template <typename T> inline const
-		T& max(const T &a, const T &b)
-	{
-		return (a > b) ? a : b;
-	}
-
 	// Clamps the value x to lie within min and max
 	template <typename T> inline
 		T clamp(T x, T min, T max)

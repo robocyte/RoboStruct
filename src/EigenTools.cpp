@@ -1,5 +1,4 @@
 #include "EigenTools.hpp"
-#include "Utilities.hpp"
 
 Mat3 AngleAxisToRotationMatrix(const Vec3 &w)
 {

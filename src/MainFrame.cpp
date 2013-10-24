@@ -166,7 +166,8 @@ bool MainFrame::FindCameraInDatabase(ImageData &img)
 	if (found != m_camDB.end())
 	{
 		img.m_ccd_width = found->second;
-		img.ConvertFocalPx();
+		if (img.GetWidth() > img.GetHeight())	img.m_init_focal = img.GetWidth() * (img.m_init_focal_mm / img.m_ccd_width);
+		else									img.m_init_focal = img.GetHeight() * (img.m_init_focal_mm / img.m_ccd_width);
 		return true;
 	}
 
