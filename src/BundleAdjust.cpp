@@ -192,7 +192,7 @@ void MainFrame::BundleAdjust()
             wxLogMessage("  [%03d] %.3f %s %d; %.3f %.3f", i, cameras[i].m_focal_length, m_images[added_order[i]].m_filename_short.c_str(), added_order[i], cameras[i].m_k[0], cameras[i].m_k[1]);
 		}
 
-		// Update points for display
+		// Update points and cameras for display
 		{
 			wxCriticalSectionLocker lock(m_points_cs);
 			m_points.clear();
@@ -206,6 +206,11 @@ void MainFrame::BundleAdjust()
                 for (const auto &view : point.m_views) views.push_back(ImageKey(added_order[view.first], view.second));
 
                 m_points.push_back(PointData(point.m_pos, point.m_color, views));
+			}
+
+			for (int i = 0; i < curr_num_cameras; i++)
+			{
+				m_images[added_order[i]].m_camera = cameras[i];
 			}
 		}
 
@@ -606,7 +611,7 @@ Camera MainFrame::BundleInitializeImage(int image_idx, int camera_idx, PointVec 
 
 	wxLogMessage("[BundleInitializeImage] Initializing took %0.3f s", (double) (end - start) / CLOCKS_PER_SEC);
 
-	image.m_camera.m_adjusted = true;
+	camera_new.m_adjusted = true;
 
 	success_out = true;
 	return camera_new;
@@ -635,8 +640,8 @@ bool MainFrame::EstimateRelativePose(int i1, int i2, Camera *camera1, Camera *ca
 
 	if (num_inliers == 0) return false;
 
-	m_images[i1].m_camera.m_adjusted = true;
-	m_images[i2].m_camera.m_adjusted = true;
+	camera1->m_adjusted = true;
+	camera2->m_adjusted = true;
 
     camera2->m_R = R;
     camera2->m_t = -(R.transpose() * t);

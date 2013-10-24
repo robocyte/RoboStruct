@@ -158,35 +158,26 @@ void MainFrame::SaveProjectionMatrix(std::string path, int img_idx)
 		wxLogMessage("Error: couldn't open file %s for writing", filename.c_str());
 	} else
 	{
-		//double focal = m_images[img_idx].m_camera.m_focal;
-		//double t[3], ttmp[3];
-		//double R[9];
-		//memcpy(ttmp, m_images[img_idx].m_camera.m_t, 3 * sizeof(double));
-		//memcpy(R, m_images[img_idx].m_camera.m_R, 9 * sizeof(double));
+		double focal = m_images[img_idx].m_camera.m_focal_length;
+		const auto &R = m_images[img_idx].m_camera.m_R;
 
-		//matrix_product(3, 3, 3, 1, R, ttmp, t);
-		//matrix_scale(3, 1, t, -1.0, t);
+		Mat3 K;
+		K << -focal,   0.0,   0.5 * this->GetImageWidth(img_idx) - 0.5,
+			    0.0, focal,   0.5 * this->GetImageHeight(img_idx) - 0.5,
+			    0.0,   0.0,   1.0;
 
-		//double K[9] = 
-		//{	-focal,	0.0,	0.5 * this->GetImageWidth(img_idx) - 0.5,
-		//	0.0,	focal,	0.5 * this->GetImageHeight(img_idx) - 0.5,
-		//	0.0,	0.0,	1.0	};
+		Mat34 Rigid;
+		Rigid << R;
+		Rigid.col(3) = -(R * m_images[img_idx].m_camera.m_t);
 
-		//double Ptmp[12] =
-		//{	R[0], R[1], R[2], t[0],
-		//	R[3], R[4], R[5], t[1],
-		//	R[6], R[7], R[8], t[2]};
+		Mat34 P = -(K * Rigid);
 
-		//double P[12];
-		//matrix_product(3, 3, 3, 4, K, Ptmp, P);
-		//matrix_scale(3, 4, P, -1.0, P);
+		txt_file << "CONTOUR" << std::endl;
+		txt_file << P(0, 0) << " " << P(0, 1) << " " << P(0, 2) << " " << P(0, 3) << std::endl;
+		txt_file << P(1, 0) << " " << P(1, 1) << " " << P(1, 2) << " " << P(1, 3) << std::endl;
+		txt_file << P(2, 0) << " " << P(2, 1) << " " << P(2, 2) << " " << P(2, 3) << std::endl;
 
-		//txt_file << "CONTOUR" << std::endl;
-		//txt_file << P[0] << " " << P[1] << " " << P[2] << " " << P[3] << std::endl;
-		//txt_file << P[4] << " " << P[5] << " " << P[6] << " " << P[7] << std::endl;
-		//txt_file << P[8] << " " << P[9] << " " << P[10] << " " << P[11] << std::endl;
-
-		//txt_file.close();
+		txt_file.close();
 	}
 }
 
@@ -198,7 +189,7 @@ void MainFrame::SaveUndistortedImage(std::string path, int img_idx)
 	cv::Mat img_undist(img.size(), CV_8UC3);
 
 	// Fill camera matrix
-	double focal = m_images[img_idx].m_camera.m_focal;
+	double focal = m_images[img_idx].m_camera.m_focal_length;
 	cv::Mat_<double> camMat(3, 3);
     camMat <<	focal,	0.0,	0.5 * img.cols - 0.5,
 				0.0,	focal,	0.5 * img.rows - 0.5,
@@ -275,17 +266,17 @@ void MainFrame::SaveBundleFile(std::string path)
 			if (!image.m_camera.m_adjusted) continue;
 
 			// Focal length
-			txt_file << image.m_camera.m_focal << " 0.0 0.0" << std::endl;
+			txt_file << image.m_camera.m_focal_length << " 0.0 0.0" << std::endl;
 
 			// Rotation
-			const double *R = image.m_camera.m_R;
-			txt_file	<< R[0] << " " << R[1] << " " << R[2] << std::endl
-						<< R[3] << " " << R[4] << " " << R[5] << std::endl
-						<< R[6] << " " << R[7] << " " << R[8] << std::endl;
+			const auto &R = image.m_camera.m_R;
+			txt_file	<< R(0, 0) << " " << R(0, 1) << " " << R(0, 2) << std::endl
+						<< R(1, 0) << " " << R(1, 1) << " " << R(1, 2) << std::endl
+						<< R(2, 0) << " " << R(2, 1) << " " << R(2, 2) << std::endl;
 
 			// Translation
-			const double *t = image.m_camera.m_t;
-			txt_file << t[0] << " " << t[1] << " " << t[2] << std::endl;
+			const auto &t = image.m_camera.m_t;
+			txt_file << t.x() << " " << t.y() << " " << t.z() << std::endl;
 		}
 
 		// Write points
@@ -364,8 +355,8 @@ void MainFrame::SavePlyFile()
 		{
 			if (!img.m_camera.m_adjusted) continue;
 
-			Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> R(img.m_camera.m_R);
-			Eigen::Map<Vec3> t(img.m_camera.m_t);
+			const auto &R = img.m_camera.m_R;
+			const auto &t = img.m_camera.m_t;
 
 			ply_file << t.x() << " " << t.y() << " " << t.z() << " ";
 			ply_file << 255 << " " << 0 << " " << 0 << std::endl;
@@ -474,32 +465,32 @@ void MainFrame::SaveMayaFile()
 
 			double width = static_cast<double>(m_images[i].GetWidth());
 			double height = static_cast<double>(m_images[i].GetHeight());
-			double CCDwidth = m_images[i].m_camera.GetCCDWidth();
-			double CCDheight = CCDwidth * height / width;
-			double focalpx = m_images[i].m_camera.m_focal;
+			double ccd_width = m_images[i].m_ccd_width;
+			double ccd_height = ccd_width * height / width;
+			double focalpx = m_images[i].m_camera.m_focal_length;
 			double focalmm;
 			double cap_w;	// cap = camera aperture
 			double cap_h;
-			double *R = m_images[i].m_camera.m_R;
-			double *t = m_images[i].m_camera.m_t;
+			const auto &R = m_images[i].m_camera.m_R;
+			const auto &t = m_images[i].m_camera.m_t;
 
 			if (width >= height)
 			{
-				focalmm = (focalpx * CCDwidth)/width;
-				cap_w = CCDwidth/25.4;		// mm to inches
-				cap_h = CCDheight/25.4;		// mm to inches
+				focalmm = (focalpx * ccd_width)/width;
+				cap_w = ccd_width/25.4;		// mm to inches
+				cap_h = ccd_height/25.4;		// mm to inches
 			} else
 			{
-				focalmm = (focalpx * CCDwidth)/height;
-				cap_w = CCDheight/25.4;		// mm to inches
-				cap_h = CCDwidth/25.4;		// mm to inches
+				focalmm = (focalpx * ccd_width)/height;
+				cap_w = ccd_height/25.4;		// mm to inches
+				cap_h = ccd_width/25.4;		// mm to inches
 			}
 
 			maya_file << "createNode transform -s -n \"Cam" << std::setw(4) << std::setfill('0') << i << "\";\n";
-			maya_file << "\tsetAttr -type \"matrix\" \".xformMatrix\" "	<< R[0] << " " << R[1] << " " << R[2] << " " << 0.0 << " "
-																		<< R[3] << " " << R[4] << " " << R[5] << " " << 0.0 << " "
-																		<< R[6] << " " << R[7] << " " << R[8] << " " << 0.0 << " "
-																		<< t[0] << " " << t[1] << " " << t[2] << " " << 1.0 << ";\n";
+			maya_file << "\tsetAttr -type \"matrix\" \".xformMatrix\" "	<< R(0, 0) << " " << R(0, 1) << " " << R(0, 2) << " " << 0.0 << " "
+																		<< R(1, 0) << " " << R(1, 1) << " " << R(1, 2) << " " << 0.0 << " "
+																		<< R(2, 0) << " " << R(2, 1) << " " << R(2, 2) << " " << 0.0 << " "
+																		<< t.x() << " " << t.y() << " " << t.z() << " " << 1.0 << ";\n";
 			maya_file << "\tsetAttr -l on \".tx\";\n";
 			maya_file << "\tsetAttr -l on \".ty\";\n";
 			maya_file << "\tsetAttr -l on \".tz\";\n";
@@ -562,7 +553,7 @@ void MainFrame::SaveMayaFile()
 		maya_file << "\tsetAttr \".pos0\" -type \"vectorArray\" " << std::setw(4) << std::setfill('0') << num_points;
 		for (const auto &point : m_points)
 		{
-			maya_file	<< " " << point.m_pos[0] << " " << point.m_pos[1] << " " << point.m_pos[2];
+			maya_file	<< " " << point.m_pos.x() << " " << point.m_pos.y() << " " << point.m_pos.z();
 		}
 		maya_file << ";\n";
 

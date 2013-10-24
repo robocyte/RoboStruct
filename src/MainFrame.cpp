@@ -133,7 +133,7 @@ bool MainFrame::AddImage(const std::string filename, const std::string filename_
 		} else
 		{
 			wxString caption;
-			caption << img.m_camera.m_camera_make << img.m_camera.m_camera_model << ": " << "Camera model not found!";
+			caption << img.m_camera_make << img.m_camera_model << ": " << "Camera model not found!";
 			wxTextEntryDialog dlg(this, "Add CCD width (in mm) to database...\n(decimal point must be a dot!)", caption);
 
 			CamDBEntry cam;
@@ -144,7 +144,7 @@ bool MainFrame::AddImage(const std::string filename, const std::string filename_
 				if (dlg.GetValue().ToCDouble(&cam.second)) break;
 			}
 
-			cam.first = img.m_camera.m_camera_make + img.m_camera.m_camera_model;
+			cam.first = img.m_camera_make + img.m_camera_model;
 			m_camDB.push_back(cam);
 			
 			this->FindCameraInDatabase(img);
@@ -160,12 +160,13 @@ bool MainFrame::FindCameraInDatabase(ImageData &img)
 {
 	auto found = std::find_if(m_camDB.begin(), m_camDB.end(), [&](CamDBEntry& entry)
 	{
-		return (entry.first.find(img.m_camera.m_camera_model) != std::string::npos);
+		return (entry.first.find(img.m_camera_model) != std::string::npos);
 	});
 
 	if (found != m_camDB.end())
 	{
-		img.ConvertFocalPx(found->second);
+		img.m_ccd_width = found->second;
+		img.ConvertFocalPx();
 		return true;
 	}
 

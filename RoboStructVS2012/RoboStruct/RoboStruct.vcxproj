@@ -178,7 +178,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\BundleAdjust.cpp" />
-    <ClCompile Include="..\..\src\CameraData.cpp" />
     <ClCompile Include="..\..\src\Distortion.cpp" />
     <ClCompile Include="..\..\src\EigenTools.cpp" />
     <ClCompile Include="..\..\src\ExifReader.cpp" />
@@ -201,7 +200,6 @@
   <ItemGroup>
     <ClInclude Include="..\..\include\EigenTools.hpp" />
     <ClInclude Include="..\..\include\FivePoint.hpp" />
-    <ClInclude Include="..\..\include\CameraData.hpp" />
     <ClInclude Include="..\..\include\ExifReader.hpp" />
     <ClInclude Include="..\..\include\ImageData.hpp" />
     <ClInclude Include="..\..\include\Keys.hpp" />

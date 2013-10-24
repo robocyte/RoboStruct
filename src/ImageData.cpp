@@ -41,8 +41,8 @@ bool ImageData::GetExifInfo()
 		m_width = er.m_width;
 		m_height = er.m_height;
 		m_init_focal_mm = er.m_focal;
-		m_camera.m_camera_make = er.m_camera_make;
-		m_camera.m_camera_model = er.m_camera_model;
+		m_camera_make = er.m_camera_make;
+		m_camera_model = er.m_camera_model;
 		return true;
 	} else return false;
 }
@@ -170,12 +170,10 @@ void ImageData::ConvertOpenCVKeys(const std::vector<cv::KeyPoint>& keys, const c
 	}
 }
 
-void ImageData::ConvertFocalPx(double ccd_width)
+void ImageData::ConvertFocalPx()
 {
-	m_camera.SetCCDWidth(ccd_width);
-
-	if (m_width > m_height)	m_init_focal = m_width * (m_init_focal_mm / ccd_width);
-	else					m_init_focal = m_height * (m_init_focal_mm / ccd_width);
+	if (m_width > m_height)	m_init_focal = m_width * (m_init_focal_mm / m_ccd_width);
+	else					m_init_focal = m_height * (m_init_focal_mm / m_ccd_width);
 }
 
 double ImageData::GetInitFocal()

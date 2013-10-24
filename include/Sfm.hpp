@@ -11,6 +11,7 @@ struct Camera
 		, m_t(Vec3::Zero())
 		, m_k(Vec2::Zero())
 		, m_k_inv(Vec6::Zero())
+		, m_adjusted(false)
 	{
 		m_k_inv(1) = 1.0;
 	}
@@ -21,6 +22,8 @@ struct Camera
 	Vec3	m_t;					// Camera translation
 	Vec2	m_k;					// Undistortion parameters
 	Vec6	m_k_inv;				// Inverse undistortion parameters
+
+	bool	m_adjusted;				// Has this camera been adjusted?
 
 	Mat3    GetIntrinsicMatrix() const;
     Mat34   GetProjectionMatrix() const;
