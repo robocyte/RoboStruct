@@ -143,7 +143,7 @@ void MainFrame::SaveMatchPics()
 	//}
 }
 
-void MainFrame::SaveProjectionMatrix(std::string path, int img_idx)
+void MainFrame::SaveProjectionMatrix(const std::string &path, int img_idx)
 {
 	if (!m_images[img_idx].m_camera.m_adjusted) return;
 
@@ -181,7 +181,7 @@ void MainFrame::SaveProjectionMatrix(std::string path, int img_idx)
 	}
 }
 
-void MainFrame::SaveUndistortedImage(std::string path, int img_idx)
+void MainFrame::SaveUndistortedImage(const std::string &path, int img_idx)
 {
 	if (!m_images[img_idx].m_camera.m_adjusted) return;
 
@@ -238,7 +238,7 @@ void MainFrame::ExportToCMVS()
 	wxLogMessage("Export to CMVS complete!");
 }
 
-void MainFrame::SaveBundleFile(std::string path)
+void MainFrame::SaveBundleFile(const std::string &path)
 {
 	std::string filename = path + "\\Result.rd.out";
 	std::ofstream txt_file(filename);

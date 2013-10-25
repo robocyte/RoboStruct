@@ -88,30 +88,30 @@ private:
 	void		DetectFeaturesAll();
 	void		DetectFeatures(int img_idx);
 	void		MatchAll();
-	KeyPoint&	GetKey(int img, int key) { return m_images[img].m_keys[key]; };
-	void		SetMatch(int i1, int i2) { m_matches.SetMatch(GetMatchIndex(i1, i2)); };
+	KeyPoint&	GetKey(int img, int key)    { return m_images[img].m_keys[key]; };
+	void		SetMatch(int i1, int i2)    { m_matches.SetMatch(GetMatchIndex(i1, i2)); };
 	int			PruneDoubleMatches(IntPairVec &matches);
-	int			ComputeEpipolarGeometry(int idx1, int idx2, IntPairVec &matches);	// Computes the fundamental matrix F and removes outliers
-	double		ComputeHomography(int idx1, int idx2, const IntPairVec &matches);	// Computes the homography H and returns the inlier ratio
+	int			ComputeEpipolarGeometry(int idx1, int idx2, IntPairVec &matches);	        // Computes the fundamental matrix F and removes outliers
+	double		ComputeHomography(int idx1, int idx2, const IntPairVec &matches);	        // Computes the homography H and returns the inlier ratio
 	void		MakeMatchListsSymmetric();
-	void		ComputeTracks();														// Organize the matches into tracks, where a track is a connected set of matching keypoints across multiple images
+	void		ComputeTracks();														    // Organize the matches into tracks, where a track is a connected set of matching keypoints across multiple images
 	void		SetMatchesFromTracks(int img1, int img2);
 	void		SetMatchesFromPoints();
 
-	int		GetImageWidth(int img_index) { return m_images[img_index].GetWidth(); };		// Returns the image width
-	int		GetImageHeight(int img_index) { return m_images[img_index].GetHeight(); };		// Returns the image height
-	double	GetFocalLength(int img_index) { return m_images[img_index].GetInitFocal(); };	// Returns the focal length
-	int		GetNumImages() { return (int)m_images.size(); };								// Returns the number of successfully added images
-	int		GetNumKeys(int img) { return (int)m_images[img].m_keys.size(); };				// Returns the number of detected features for the given image index
+	int		GetImageWidth(int img_index)    { return m_images[img_index].GetWidth(); };		// Returns the image width
+	int		GetImageHeight(int img_index)   { return m_images[img_index].GetHeight(); };	// Returns the image height
+	double	GetFocalLength(int img_index)   { return m_images[img_index].GetInitFocal(); };	// Returns the focal length
+	int		GetNumImages()                  { return (int)m_images.size(); };				// Returns the number of successfully added images
+	int		GetNumKeys(int img)             { return (int)m_images[img].m_keys.size(); };	// Returns the number of detected features for the given image index
 	int		GetNumTrackMatches(int img1, int img2);
 	double	GetInlierRatio(int idx1, int idx2);												// Returns the inlier ratio for an image pair
 	void	SaveMatchFile();
 	void	SaveMatchPics();
 	void	SaveTrackFile();
-	void	SaveProjectionMatrix(std::string path, int img_idx);
-	void	SaveUndistortedImage(std::string path, int img_idx);
+	void	SaveProjectionMatrix(const std::string &path, int img_idx);
+	void	SaveUndistortedImage(const std::string &path, int img_idx);
 	void	ExportToCMVS();
-	void	SaveBundleFile(std::string path);
+	void	SaveBundleFile(const std::string &path);
 	void	SavePlyFile();
 	void	SaveMayaFile();
 

@@ -877,7 +877,7 @@ double MainFrame::RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_o
 				if (key.m_extra >= 0)
 				{
 					int pt_idx = key.m_extra;
-					Vec2 pr = SfmProjectRD(nz_pts[remap[pt_idx]], cameras[i]);
+                    Vec2 pr = cameras[i].ProjectRD(nz_pts[remap[pt_idx]]);
 
 					double dist = (pr - key.m_coords).norm();
 					dists.push_back(dist);
@@ -1062,7 +1062,7 @@ void MainFrame::RefineCameraParameters(Camera *camera, const Vec3Vec &points, co
 		std::vector<double> errors;
 		for (int i = 0; i < points_curr.size(); i++)
 		{
-			Vec2 projection = SfmProjectFinal(points_curr[i], *camera);
+            Vec2 projection = camera->ProjectFinal(points_curr[i]);
 			errors.push_back((projection - projs_curr[i]).norm());
 		}
 
@@ -1223,7 +1223,7 @@ void MainFrame::BundleAdjustAddAllNewPoints(int num_cameras, IntVec &added_order
 			int image_idx	= added_order[track.first];
 			auto &key		= GetKey(image_idx, track.second);
 
-			Vec2 pr = SfmProjectFinal(point, cameras[track.first]);
+            Vec2 pr = cameras[track.first].ProjectFinal(point);
 
 			error += (pr - key.m_coords).squaredNorm();
 		}

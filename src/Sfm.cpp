@@ -90,28 +90,28 @@ Mat34 Camera::GetProjectionMatrix() const
     return GetIntrinsicMatrix() * P;
 }
 
-Vec2 SfmProjectFinal(const Vec3 &p, const Camera &cam)
+Vec2 Camera::ProjectFinal(const Vec3 &point)
 {
 	// HZ p. 153f
-	Vec3 tmp = cam.m_R * (p - cam.m_t);
+	Vec3 tmp = m_R * (point - m_t);
 	Vec2 projected = tmp.head<2>() / -tmp.z();
 
 	// Compute radial distortion
-	double r2 = projected.squaredNorm() / (cam.m_focal_length * cam.m_focal_length);
-	double factor = 1.0 + cam.m_k[0] * r2 + cam.m_k[1] * r2 * r2;	// Taylor expansion for L(r)
+	double r2 = projected.squaredNorm() / (m_focal_length * m_focal_length);
+	double factor = 1.0 + m_k[0] * r2 + m_k[1] * r2 * r2;	// Taylor expansion for L(r)
 
-    return projected * factor * cam.m_focal_length;
+    return projected * factor * m_focal_length;
 }
 
-Vec2 SfmProjectRD(const Vec3 &p, const Camera &cam)
+Vec2 Camera::ProjectRD(const Vec3 &point)
 {
 	// HZ p. 153f
-	Vec3 tmp = cam.m_R * (p - cam.m_t);
-	Vec2 projected = tmp.head<2>() * cam.m_focal_length / -tmp.z();
+	Vec3 tmp = m_R * (point - m_t);
+	Vec2 projected = tmp.head<2>() * m_focal_length / -tmp.z();
 
 	// Compute radial distortion
-	double r2 = projected.squaredNorm() / (cam.m_focal_length * cam.m_focal_length);
-	double factor = 1.0 + cam.m_k[0] * r2 + cam.m_k[1] * r2 * r2;	// Taylor expansion for L(r)
+	double r2 = projected.squaredNorm() / (m_focal_length * m_focal_length);
+	double factor = 1.0 + m_k[0] * r2 + m_k[1] * r2 * r2;	// Taylor expansion for L(r)
 
     return projected * factor;
 }

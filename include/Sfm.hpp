@@ -22,18 +22,16 @@ struct Camera
 	Vec3	m_t;					// Camera translation
 	Vec2	m_k;					// Undistortion parameters
 	Vec6	m_k_inv;				// Inverse undistortion parameters
-
 	bool	m_adjusted;				// Has this camera been adjusted?
 
 	Mat3    GetIntrinsicMatrix() const;
     Mat34   GetProjectionMatrix() const;
 
+    Vec2    ProjectFinal(const Vec3 &point);
+    Vec2    ProjectRD(const Vec3 &point);
+
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 };
-
-Vec2 SfmProjectFinal(const Vec3 &p, const Camera &cam);
-
-Vec2 SfmProjectRD(const Vec3 &p, const Camera &cam);
 
 Vec6 InvertDistortion(double r0, double r1, const Vec6 &k_in);
 
