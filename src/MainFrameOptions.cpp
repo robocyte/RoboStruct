@@ -77,6 +77,16 @@ void MainFrame::ResetOptions()
 	m_pg_options->Append( new wxFloatProperty("Ray angle threshold",				wxPG_LABEL,	m_options.ray_angle_threshold ) );
 	m_pg_options->Append( new wxIntProperty("Outlier threshold BA",					wxPG_LABEL,	m_options.outlier_threshold_ba ) );
 
+    // Ceres category
+    wxPGChoices choices;
+    choices.Add("Squared",  1);
+    choices.Add("Huber",    2);
+    choices.Add("SoftLOne", 3);
+    choices.Add("Cauchy",   4);
+    choices.Add("ArcTan",   5);
+    m_pg_options->Append( new wxEnumProperty("Loss function", wxPG_LABEL, choices, 1) );
+    m_pg_options->Append( new wxFloatProperty("Loss function scale",				wxPG_LABEL,	m_options.loss_function_scale ) );
+
 	// Display category
 	m_pg_options->Append( new wxPropertyCategory( "Display options" ) );
 	m_pg_options->Append( new wxColourProperty("Viewport gradient top",	wxPG_LABEL,	m_options.viewport_top_color ) );
@@ -136,6 +146,17 @@ void MainFrame::OnOptionsChanged(wxPropertyGridEvent& event)
 	m_options.max_reprojection_error_threshold =	m_pg_options->GetProperty("Max reprojection error threshold")->GetValue().GetDouble();
 	m_options.ray_angle_threshold =					m_pg_options->GetProperty("Ray angle threshold")->GetValue().GetDouble();
 	m_options.outlier_threshold_ba =				m_pg_options->GetProperty("Outlier threshold BA")->GetValue().GetInteger();
+    int sel =                                       m_pg_options->GetProperty("Loss function")->GetValue().GetInteger();
+    switch (sel)
+    {
+    case 1:     m_options.selected_loss = Options::loss_function::squared;  break;
+    case 2:     m_options.selected_loss = Options::loss_function::huber;    break;
+    case 3:     m_options.selected_loss = Options::loss_function::softlone; break;
+    case 4:     m_options.selected_loss = Options::loss_function::cauchy;   break;
+    case 5:     m_options.selected_loss = Options::loss_function::arctan;   break;
+    default: break;
+    }
+    m_options.loss_function_scale =                 m_pg_options->GetProperty("Loss function scale")->GetValue().GetDouble();
 
 	wxAny top = m_pg_options->GetProperty("Viewport gradient top")->GetValue();
 	wxAny bot = m_pg_options->GetProperty("Viewport gradient bot")->GetValue();

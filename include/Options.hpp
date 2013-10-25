@@ -50,6 +50,9 @@ struct Options
 		, ray_angle_threshold(2.0)
 		, outlier_threshold_ba(0.0)
 		
+        , selected_loss(loss_function::squared)
+        , loss_function_scale(0.5)
+
 		, viewport_top_color(77, 77, 77)
 		, viewport_bottom_color(204, 204, 204)
 		, trackball_visibility(true)
@@ -116,7 +119,17 @@ struct Options
 	int			outlier_threshold_ba;
 
 	// Ceres options
+    enum class loss_function
+    {
+        squared     = 1,
+        huber       = 2,
+        softlone    = 3,
+        cauchy      = 4,
+        arctan      = 5
+    };
 
+    loss_function   selected_loss;
+    double          loss_function_scale;
 
 	// Display options
 	wxColour	viewport_top_color;

@@ -657,7 +657,6 @@ double MainFrame::RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_o
 	int				total_outliers		= 0;
 	int				num_dists			= 0;
 	double			dist_total			= 0.0;
-	const double	huber_parameter		= 25.0;
 
     int num_pts = points.size();
     std::vector<int>	remap(num_pts);
@@ -775,10 +774,16 @@ double MainFrame::RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_o
 			// Each Residual block takes a point and a camera as input and outputs a 2 dimensional residual.
 			ceres::CostFunction *cost_function = SnavelyReprojectionError::Create(projections[2 * i + 0], projections[2 * i + 1]);
 
-			// If enabled use Huber's loss function.
 			ceres::LossFunction *loss_function = nullptr;
-
-			//loss_function = new ceres::HuberLoss(huber_parameter);
+            switch (m_options.selected_loss)
+            {
+            case Options::loss_function::squared:   break;   
+            case Options::loss_function::huber:     loss_function = new ceres::HuberLoss(m_options.loss_function_scale);    break;
+            case Options::loss_function::softlone:  loss_function = new ceres::SoftLOneLoss(m_options.loss_function_scale); break;
+            case Options::loss_function::cauchy:    loss_function = new ceres::CauchyLoss(m_options.loss_function_scale);   break;
+            case Options::loss_function::arctan:    loss_function = new ceres::ArctanLoss(m_options.loss_function_scale);   break;
+            default: break;
+            }
 
 			// Each observation correponds to a pair of a camera and a point which are identified by camera_index()[i] and point_index()[i] respectively.
 			double *camera	= pcameras	+ cnp * cidx[i];
