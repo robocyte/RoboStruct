@@ -79,11 +79,7 @@ void MainFrame::ResetOptions()
 
     // Ceres category
     wxPGChoices choices;
-    choices.Add("Squared",  1);
-    choices.Add("Huber",    2);
-    choices.Add("SoftLOne", 3);
-    choices.Add("Cauchy",   4);
-    choices.Add("ArcTan",   5);
+    choices.Add("Squared", 1); choices.Add("Huber", 2); choices.Add("SoftLOne", 3); choices.Add("Cauchy", 4); choices.Add("ArcTan", 5);
     m_pg_options->Append( new wxEnumProperty("Loss function", wxPG_LABEL, choices, 1) );
     m_pg_options->Append( new wxFloatProperty("Loss function scale",				wxPG_LABEL,	m_options.loss_function_scale ) );
 

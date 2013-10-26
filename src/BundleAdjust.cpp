@@ -649,14 +649,12 @@ bool MainFrame::EstimateRelativePose(int i1, int i2, Camera *camera1, Camera *ca
 	return true;
 }
 
-double MainFrame::RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_order, PointVec &points)
+void MainFrame::RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_order, PointVec &points)
 {
-	const int		min_points			= 20;
-	int				round				= 0;
-	int				num_outliers		= 0;
-	int				total_outliers		= 0;
-	int				num_dists			= 0;
-	double			dist_total			= 0.0;
+	const int	min_points		= 20;
+	int			round			= 0;
+	int			num_outliers	= 0;
+	int			total_outliers	= 0;
 
     int num_pts = points.size();
     std::vector<int>	remap(num_pts);
@@ -673,7 +671,6 @@ double MainFrame::RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_o
 		if (num_pts - total_outliers < min_points)
 		{
 			wxLogMessage("[RunSFM] Too few points remaining, exiting!");
-			dist_total = std::numeric_limits<double>::max();
 			break;
 		}
 
@@ -771,7 +768,7 @@ double MainFrame::RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_o
 
 		for (int i = 0; i < num_projections; ++i)
 		{
-			// Each Residual block takes a point and a camera as input and outputs a 2 dimensional residual.
+			// Each Residual block takes a point and a camera as input and outputs a 2 dimensional residual
 			ceres::CostFunction *cost_function = SnavelyReprojectionError::Create(projections[2 * i + 0], projections[2 * i + 1]);
 
 			ceres::LossFunction *loss_function = nullptr;
@@ -785,7 +782,7 @@ double MainFrame::RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_o
             default: break;
             }
 
-			// Each observation correponds to a pair of a camera and a point which are identified by camera_index()[i] and point_index()[i] respectively.
+			// Each observation correponds to a pair of a camera and a point which are identified by camera_index[i] and point_index[i] respectively
 			double *camera	= pcameras	+ cnp * cidx[i];
 			double *point	= ppoints	+ pnp * pidx[i];
 
@@ -808,9 +805,6 @@ double MainFrame::RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_o
 			problem.AddResidualBlock(prior_cost_function, nullptr, pcameras + cnp * i);
 		}
 
-		dist_total = 0.0;
-		num_dists = 0;
-
 		clock_t start = clock();
 
 		// Make call to Ceres
@@ -821,8 +815,7 @@ double MainFrame::RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_o
 		ceres::Solve(options, &problem, &summary);
 		wxLogMessage("%s", summary.BriefReport().c_str());
 
-        double *final_x	= init_x;
-		ptr				= final_x;
+		ptr = init_x;
 		for (int i = 0; i < num_cameras; i++)
 		{
 			// Get the camera parameters
@@ -860,34 +853,27 @@ double MainFrame::RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_o
 		std::vector<int>	outliers;
 		std::vector<double>	reproj_errors;
 
-		for (int i = 0; i < num_cameras; i++)
+        for (int i = 0; i < num_cameras; i++)
 		{
-			auto &data = m_images[added_order[i]];
+			auto &image = m_images[added_order[i]];
 
 			// Compute inverse distortion parameters
 			Vec6 k_dist; k_dist << 0.0, 1.0, 0.0, cameras[i].m_k[0], 0.0, cameras[i].m_k[1];
-			double w_2 = 0.5 * data.GetWidth();
-			double h_2 = 0.5 * data.GetHeight();
+			double w_2 = 0.5 * image.GetWidth();
+			double h_2 = 0.5 * image.GetHeight();
             double max_radius = sqrt(w_2 * w_2 + h_2 * h_2) / cameras[i].m_focal_length;
 			cameras[i].m_k_inv = InvertDistortion(0.0, max_radius, k_dist);
 
-			int num_keys = GetNumKeys(added_order[i]);
-			int num_pts_proj = 0;
-			for (int j = 0; j < num_keys; j++) if (GetKey(added_order[i], j).m_extra >= 0) num_pts_proj++;
-
 			std::vector<double> dists;
 
-			for (const auto &key : data.m_keys)
+			for (const auto &key : image.m_keys)
 			{
 				if (key.m_extra >= 0)
 				{
 					int pt_idx = key.m_extra;
-                    Vec2 pr = cameras[i].ProjectRD(nz_pts[remap[pt_idx]]);
+                    Vec2 reprojection = cameras[i].ProjectRD(nz_pts[remap[pt_idx]]);
 
-					double dist = (pr - key.m_coords).norm();
-					dists.push_back(dist);
-					dist_total += dist;
-					num_dists++;
+					dists.push_back((reprojection - key.m_coords).norm());
 				}
 			}
 
@@ -895,12 +881,12 @@ double MainFrame::RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_o
 			double median	= util::GetNthElement(util::iround(0.8 * dists.size()), dists);
 			double thresh	= util::clamp(2.4 * median, m_options.min_reprojection_error_threshold, m_options.max_reprojection_error_threshold);
 			double avg		= std::accumulate(dists.begin(), dists.end(), 0.0) / dists.size();
-			wxLogMessage("[RunSFM] Mean error cam %d[%d] [%d pts]: %.3f [med: %.3f, outlier threshold: %.3f]", i, added_order[i], num_pts_proj, avg, median, thresh);
+            wxLogMessage("[RunSFM] Mean error cam %d[%d] [%d pts]: %.3f [med: %.3f, outlier threshold: %.3f]", i, added_order[i], dists.size(), avg, median, thresh);
 
 			int pt_count = 0;
-			for (int j = 0; j < num_keys; j++)
+			for (const auto &key : image.m_keys)
 			{
-				int pt_idx = GetKey(added_order[i], j).m_extra;
+				int pt_idx = key.m_extra;
 				if (pt_idx < 0) continue;
 
 				if (dists[pt_count] > thresh)
@@ -984,8 +970,6 @@ double MainFrame::RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_o
 
 	stop_all = clock();
 	wxLogMessage("[RunSFM] Structure from motion with outlier removal took %0.3f s (%d rounds)", (double) (stop_all - start_all) / (double) CLOCKS_PER_SEC, round);
-
-	return dist_total / num_dists;
 }
 
 bool MainFrame::FindAndVerifyCamera(const Vec3Vec &points, const Vec2Vec &projections, int *idxs_solve, Mat3 *K, Mat3 *R, Vec3 *t, IntVec &inliers, IntVec &inliers_weak, IntVec &outliers)

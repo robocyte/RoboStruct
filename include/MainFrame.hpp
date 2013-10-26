@@ -125,7 +125,7 @@ private:
 	IntVec          	FindCamerasWithNMatches(int n, int num_cameras, const IntVec &added_order, const PointVec &points);
 	bool				FindAndVerifyCamera(const Vec3Vec &points, const Vec2Vec &projections, int *idxs_solve, Mat3 *K, Mat3 *R, Vec3 *t, IntVec &inliers, IntVec &inliers_weak, IntVec &outliers);
 	Camera	        	BundleInitializeImage(int image_idx, int camera_idx, PointVec &points, bool &success_out);
-	double				RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_order, PointVec &points);
+	void				RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_order, PointVec &points);
 	void				RefineCameraParameters(Camera *camera, const Vec3Vec &points, const Vec2Vec &projections, int *pt_idxs, IntVec &inliers);
 	void				BundleAdjustAddAllNewPoints(int num_cameras, IntVec &added_order, CamVec &cameras, PointVec &points);
 	int					RemoveBadPointsAndCameras(const IntVec &added_order, CamVec &cameras, PointVec &points);
