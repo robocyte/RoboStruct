@@ -1,7 +1,10 @@
 #include <fstream>
 
-#include "opencv2/features2d/features2d.hpp"
-#include "opencv2/legacy/legacy.hpp"
+#include "opencv2/core.hpp"
+#include "opencv2/imgproc.hpp"
+#include "opencv2/highgui.hpp"
+#include "opencv2/features2d.hpp"
+#include "opencv2/legacy.hpp"
 #include "opencv2/nonfree/features2d.hpp"
 #include "wx/log.h"
 
@@ -63,7 +66,7 @@ void ImageData::DetectFeatures(const Options& opts)
 	{
 	case 0: // Detect YAPE/Daisy features
 		{
-			cv::YAPE YapeDet(	opts.yape_radius,
+            cv::YAPE YapeDet(	opts.yape_radius,
 								opts.yape_threshold,
 								opts.yape_octaves,
 								opts.yape_views,

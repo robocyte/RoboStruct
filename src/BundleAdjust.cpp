@@ -1015,7 +1015,7 @@ bool MainFrame::FindAndVerifyCamera(const Vec3Vec &points, const Vec2Vec &projec
 			inliers_weak.push_back(j);
 		} else
 		{
-			wxLogMessage("[FindAndVerifyCamera] Removing point [%d] with reprojection error %0.3f", idxs_solve[j], diff);
+			//wxLogMessage("[FindAndVerifyCamera] Removing point [%d] with reprojection error %0.3f", idxs_solve[j], diff);
 			outliers.push_back(j);
 		}
 
@@ -1077,10 +1077,10 @@ void MainFrame::RefineCameraParameters(Camera *camera, const Vec3Vec &points, co
 			{
 				if (pt_idxs != nullptr)
 				{
-					wxLogMessage("[RefineCameraParameters] Removing point [%d] with reprojection error %0.3f", pt_idxs[i], errors[i]);
+					//wxLogMessage("[RefineCameraParameters] Removing point [%d] with reprojection error %0.3f", pt_idxs[i], errors[i]);
 				} else
 				{
-					wxLogMessage("[RefineCameraParameters] Removing point with reprojection error %0.3f", errors[i]);
+					//wxLogMessage("[RefineCameraParameters] Removing point with reprojection error %0.3f", errors[i]);
 				}
 			}
 		}
@@ -1292,7 +1292,7 @@ int MainFrame::RemoveBadPointsAndCameras(const IntVec &added_order, CamVec &came
 
 		if (util::rad2deg(max_angle) < 0.5 * m_options.ray_angle_threshold)
 		{
-			wxLogMessage("[RemoveBadPointsAndCamera] Removing point with angle %0.3f", util::rad2deg(max_angle));
+			//wxLogMessage("[RemoveBadPointsAndCamera] Removing point with angle %0.3f", util::rad2deg(max_angle));
 
 			for (const auto &view : point.m_views)
 			{

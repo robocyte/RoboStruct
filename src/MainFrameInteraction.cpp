@@ -1,5 +1,8 @@
 #include <numeric>
 
+#include "opencv2/core.hpp"
+#include "opencv2/core/utility.hpp"
+
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/compatibility.hpp"
 #include "glm/gtx/epsilon.hpp"

@@ -1,6 +1,9 @@
 #include <fstream>
 #include <iomanip>
 
+#include "opencv2/imgproc.hpp"
+#include "opencv2/highgui.hpp"
+
 #include "ImageData.hpp"
 #include "MainFrame.hpp"
 #include "Utilities.hpp"
