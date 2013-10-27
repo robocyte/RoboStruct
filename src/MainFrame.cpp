@@ -112,6 +112,9 @@ void MainFrame::InitializeLog()
 	// Redirect log messages
 	wxLog::SetActiveTarget(new wxLogTextCtrl(m_tc_log));
 	wxLogMessage("Log initialized");
+
+    auto font = new wxFont(9, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, "consolas");
+    m_tc_log->SetFont(*font);
 }
 
 void MainFrame::InitializeCameraDatabase()

@@ -942,7 +942,7 @@ void MainFrame::RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_ord
 		wxLogMessage("[Ceres] %d params",		num_parameters);
 		wxLogMessage("[Ceres] %d projections",	num_projections);
 		ceres::Solve(options, &problem, &summary);
-		wxLogMessage("%s", summary.BriefReport().c_str());
+		wxLogMessage("[Ceres] %s", summary.BriefReport().c_str());
 
 		ptr = init_x;
 		for (int i = 0; i < num_cameras; i++)

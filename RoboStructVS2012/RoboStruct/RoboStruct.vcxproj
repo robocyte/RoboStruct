@@ -157,7 +157,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN64;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)..\include;$(SolutionDir)..\wxfb;$(OPENCV_64_DIR)\3rdparty\libjpeg;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DisableSpecificWarnings>4996;4351</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4996;4351;</DisableSpecificWarnings>
       <WholeProgramOptimization>true</WholeProgramOptimization>
     </ClCompile>
     <Link>
