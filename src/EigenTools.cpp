@@ -5,7 +5,7 @@ Mat3 AngleAxisToRotationMatrix(const Vec3 &w)
 	Mat3 dR;
 	double theta = w.squaredNorm();
 
-	if (theta > std::numeric_limits<double>::epsilon())
+	if (theta > 0.0)
 	{
 		theta = sqrt(theta);
 		double wx = w.x() / theta, wy = w.y() / theta, wz = w.z() / theta;

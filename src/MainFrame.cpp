@@ -2,10 +2,10 @@
 #include <unordered_set>
 #include <queue>
 
-//#include "opencv2/core.hpp"
-//#include "opencv2/core/utility.hpp"
-//#include "opencv2/flann.hpp"
-//#include "opencv2/calib3d.hpp"
+#include "opencv2/core.hpp"
+#include "opencv2/core/utility.hpp"
+#include "opencv2/flann.hpp"
+#include "opencv2/calib3d.hpp"
 
 #include "wx/progdlg.h"
 #include "wx/textdlg.h"
@@ -532,13 +532,10 @@ void MainFrame::ComputeTracks()
 
 	for (int i = 0; i < num_pts; i++)
 	{
-		for (std::size_t j = 0; j < tracks[i].m_views.size(); j++)
+		for (const auto &view : tracks[i].m_views)
 		{
-			int img1 = tracks[i].m_views[j].first;
-			int key1 = tracks[i].m_views[j].second;
-
-			m_images[img1].m_visible_points.push_back(i);
-			m_images[img1].m_visible_keys.push_back(key1);
+			m_images[view.first].m_visible_points.push_back(i);
+			m_images[view.first].m_visible_keys.push_back(view.second);
 		}
 	}
 

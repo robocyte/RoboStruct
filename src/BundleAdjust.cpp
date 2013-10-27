@@ -358,6 +358,38 @@ void MainFrame::SetupInitialCameraPair(IntPair initial_pair, CamVec &cameras, Po
 	}
 }
 
+bool MainFrame::EstimateRelativePose(int i1, int i2, Camera *camera1, Camera *camera2)
+{
+	auto &matches = m_matches.GetMatchList(GetMatchIndex(i1, i2));
+
+    Vec2Vec projections1; projections1.reserve(matches.size());
+	Vec2Vec projections2; projections2.reserve(matches.size());
+
+	for (const auto &match : matches)
+	{
+		projections1.push_back(m_images[i1].m_keys[match.m_idx1].m_coords);
+		projections2.push_back(m_images[i2].m_keys[match.m_idx2].m_coords);
+	}
+
+	wxLogMessage("[EstimateRelativePose] EstimateRelativePose starting...");
+	clock_t start = clock();
+	Mat3 R; Vec3 t;
+    int num_inliers = ComputeRelativePoseRansac(projections1, projections2, camera1->GetIntrinsicMatrix(), camera2->GetIntrinsicMatrix(), m_options.ransac_threshold_five_point, m_options.ransac_rounds_five_point, &R, &t);
+	clock_t end = clock();
+	wxLogMessage("[EstimateRelativePose] EstimateRelativePose took %0.3f s", (double) (end - start) / (double) CLOCKS_PER_SEC);
+	wxLogMessage("[EstimateRelativePose] Found %d / %d inliers (%0.3f%%)", num_inliers, matches.size(), 100.0 * num_inliers / matches.size());
+
+	if (num_inliers == 0) return false;
+
+	camera1->m_adjusted = true;
+	camera2->m_adjusted = true;
+
+    camera2->m_R = R;
+    camera2->m_t = -(R.transpose() * t);
+
+	return true;
+}
+
 void MainFrame::SetMatchesFromTracks(int img1, int img2)
 {
 	auto &matches = m_matches.GetMatchList(GetMatchIndex(img1, img2));
@@ -576,9 +608,6 @@ Camera MainFrame::BundleInitializeImage(int image_idx, int camera_idx, PointVec 
 
 	// **** Finally, start the bundle adjustment ****
 	wxLogMessage("[BundleInitializeImage] Adjusting...");
-
-	int num_inliers = (int)inliers_weak.size();
-
 	Vec3Vec	points_final;
 	Vec2Vec	projs_final;
 	IntVec	idxs_final;
@@ -617,36 +646,136 @@ Camera MainFrame::BundleInitializeImage(int image_idx, int camera_idx, PointVec 
 	return camera_new;
 }
 
-bool MainFrame::EstimateRelativePose(int i1, int i2, Camera *camera1, Camera *camera2)
+bool MainFrame::FindAndVerifyCamera(const Vec3Vec &points, const Vec2Vec &projections, int *idxs_solve, Mat3 *K, Mat3 *R, Vec3 *t, IntVec &inliers, IntVec &inliers_weak, IntVec &outliers)
 {
-	auto &matches = m_matches.GetMatchList(GetMatchIndex(i1, i2));
+	// First, find the projection matrix
+	int r = -1;
 
-    Vec2Vec projections1; projections1.reserve(matches.size());
-	Vec2Vec projections2; projections2.reserve(matches.size());
+	Mat34 P;
+	if (points.size() >= 9) r = ComputeProjectionMatrixRansac(points, projections, m_options.ransac_rounds_projection,
+															m_options.projection_estimation_threshold * m_options.projection_estimation_threshold, &P);
 
-	for (const auto &match : matches)
+	if (r == -1)
 	{
-		projections1.push_back(m_images[i1].m_keys[match.m_idx1].m_coords);
-		projections2.push_back(m_images[i2].m_keys[match.m_idx2].m_coords);
+		wxLogMessage("[FindAndVerifyCamera] Couldn't find projection matrix");
+		return false;
 	}
 
-	wxLogMessage("[EstimateRelativePose] EstimateRelativePose starting...");
-	clock_t start = clock();
-	Mat3 R; Vec3 t;
-    int num_inliers = ComputeRelativePoseRansac(projections1, projections2, camera1->GetIntrinsicMatrix(), camera2->GetIntrinsicMatrix(), m_options.ransac_threshold_five_point, m_options.ransac_rounds_five_point, &R, &t);
-	clock_t end = clock();
-	wxLogMessage("[EstimateRelativePose] EstimateRelativePose took %0.3f s", (double) (end - start) / (double) CLOCKS_PER_SEC);
-	wxLogMessage("[EstimateRelativePose] Found %d / %d inliers (%0.3f%%)", num_inliers, matches.size(), 100.0 * num_inliers / matches.size());
+	// If number of inliers is too low, fail
+	if (r <= 6) // 7, 30 This constant needs adjustment
+	{
+		wxLogMessage("[FindAndVerifyCamera] Too few inliers to use projection matrix");
+		return false;
+	}
 
-	if (num_inliers == 0) return false;
+	DecomposeProjectionMatrix(P, K, R, t);
 
-	camera1->m_adjusted = true;
-	camera2->m_adjusted = true;
+	wxLogMessage("[FindAndVerifyCamera] Checking consistency...");
 
-    camera2->m_R = R;
-    camera2->m_t = -(R.transpose() * t);
+	Mat34 Rigid;
+	Rigid << *R;
+	Rigid.col(3) = *t;
+
+	int num_behind = 0;
+	for (int j = 0; j < points.size(); j++)
+	{
+		Vec3 q = *K * (Rigid * EuclideanToHomogenous(points[j]));
+		Vec2 pimg = -q.head<2>() / q.z();
+		double diff = (pimg - projections[j]).norm();
+
+		if (diff < m_options.projection_estimation_threshold) inliers.push_back(j);
+		if (diff < (16.0 * m_options.projection_estimation_threshold))
+		{
+			inliers_weak.push_back(j);
+		} else
+		{
+			//wxLogMessage("[FindAndVerifyCamera] Removing point [%d] with reprojection error %0.3f", idxs_solve[j], diff);
+			outliers.push_back(j);
+		}
+
+		if (q.z() > 0.0) num_behind++;	// Cheirality constraint violated
+	}
+
+    //TODO: use inliers instead of inliers_weak?
+    //wxLogMessage("     weak inliers: %d", inliers_weak.size());
+    //wxLogMessage("     inliers:      %d", inliers.size());
+    //wxLogMessage("     outliers:      %d", outliers.size());
+
+    if (num_behind >= 0.9 * points.size())
+	{
+		wxLogMessage("[FindAndVerifyCamera] Error: camera is pointing away from scene");
+		return false;
+	}
 
 	return true;
+}
+
+void MainFrame::RefineCameraParameters(Camera *camera, const Vec3Vec &points, const Vec2Vec &projections, int *pt_idxs, IntVec &inliers)
+{
+	Vec3Vec points_curr(points);
+	Vec2Vec projs_curr(projections);
+
+	inliers.resize(points.size());
+	std::iota(inliers.begin(), inliers.end(), 0);
+
+	// First refine with the focal length fixed
+	RefineCamera(camera, points_curr, projs_curr, false);
+
+	int round = 0;
+	while (true)
+	{
+		wxLogMessage("[RefineCameraParameters] Calling with %d points", points_curr.size());
+		RefineCamera(camera, points_curr, projs_curr, true);
+
+		std::vector<double> errors;
+		for (int i = 0; i < points_curr.size(); i++)
+		{
+            Vec2 reprojection = camera->ProjectFinal(points_curr[i]);
+			errors.push_back((reprojection - projs_curr[i]).norm());
+		}
+
+		// Sort and histogram errors
+		double median		= util::GetNthElement(util::iround(0.95 * points_curr.size()), errors);
+		double threshold	= util::clamp(2.4 * median, m_options.min_reprojection_error_threshold, m_options.max_reprojection_error_threshold);
+		double avg			= std::accumulate(errors.begin(), errors.end(), 0.0) / errors.size();
+		wxLogMessage("[RefineCameraParameters] Mean error [%d pts]: %.3f [med: %.3f, outlier threshold: = %.3f]", points_curr.size(), avg, median, threshold);
+
+		Vec3Vec points_next;
+		Vec2Vec projs_next;
+		std::vector<int> inliers_next;
+
+		for (int i = 0; i < points_curr.size(); i++)
+		{
+			if (errors[i] < threshold)
+			{
+				inliers_next.push_back(inliers[i]);
+
+				points_next.push_back(points_curr[i]);
+				projs_next.push_back(projs_curr[i]);
+			} else
+			{
+				if (pt_idxs != nullptr)
+				{
+					//wxLogMessage("[RefineCameraParameters] Removing point [%d] with reprojection error %0.3f", pt_idxs[i], errors[i]);
+				} else
+				{
+					//wxLogMessage("[RefineCameraParameters] Removing point with reprojection error %0.3f", errors[i]);
+				}
+			}
+		}
+
+		if (points_next.size() == points_curr.size()) break;	// We're done
+
+		points_curr	= points_next;
+		projs_curr	= projs_next;
+		inliers		= inliers_next;
+
+		if (points_curr.size() == 0) break;	// Out of measurements
+
+		round++;
+	}
+
+	wxLogMessage("[RefineCameraParameters] Exiting after %d rounds with %d/%d points", round + 1, points_curr.size(), points.size());
 }
 
 void MainFrame::RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_order, PointVec &points)
@@ -972,133 +1101,6 @@ void MainFrame::RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_ord
 	wxLogMessage("[RunSFM] Structure from motion with outlier removal took %0.3f s (%d rounds)", (double) (stop_all - start_all) / (double) CLOCKS_PER_SEC, round);
 }
 
-bool MainFrame::FindAndVerifyCamera(const Vec3Vec &points, const Vec2Vec &projections, int *idxs_solve, Mat3 *K, Mat3 *R, Vec3 *t, IntVec &inliers, IntVec &inliers_weak, IntVec &outliers)
-{
-	// First, find the projection matrix
-	int r = -1;
-
-	Mat34 P;
-	if (points.size() >= 9) r = ComputeProjectionMatrixRansac(points, projections, m_options.ransac_rounds_projection,
-															m_options.projection_estimation_threshold * m_options.projection_estimation_threshold, &P);
-
-	if (r == -1)
-	{
-		wxLogMessage("[FindAndVerifyCamera] Couldn't find projection matrix");
-		return false;
-	}
-
-	// If number of inliers is too low, fail
-	if (r <= 6) // 7, 30 This constant needs adjustment
-	{
-		wxLogMessage("[FindAndVerifyCamera] Too few inliers to use projection matrix");
-		return false;
-	}
-
-	DecomposeProjectionMatrix(P, K, R, t);
-
-	wxLogMessage("[FindAndVerifyCamera] Checking consistency...");
-
-	Mat34 Rigid;
-	Rigid << *R;
-	Rigid.col(3) = *t;
-
-	int num_behind = 0;
-	for (int j = 0; j < points.size(); j++)
-	{
-		Vec3 q = *K * (Rigid * EuclideanToHomogenous(points[j]));
-		Vec2 pimg = -q.head<2>() / q.z();
-		double diff = (pimg - projections[j]).norm();
-
-		if (diff < m_options.projection_estimation_threshold) inliers.push_back(j);
-		if (diff < (16.0 * m_options.projection_estimation_threshold))
-		{
-			inliers_weak.push_back(j);
-		} else
-		{
-			//wxLogMessage("[FindAndVerifyCamera] Removing point [%d] with reprojection error %0.3f", idxs_solve[j], diff);
-			outliers.push_back(j);
-		}
-
-		if (q.z() > 0.0) num_behind++;	// Cheirality constraint violated
-	}
-
-	if (num_behind >= 0.9 * points.size())
-	{
-		wxLogMessage("[FindAndVerifyCamera] Error: camera is pointing away from scene");
-		return false;
-	}
-
-	return true;
-}
-
-void MainFrame::RefineCameraParameters(Camera *camera, const Vec3Vec &points, const Vec2Vec &projections, int *pt_idxs, IntVec &inliers)
-{
-	Vec3Vec points_curr(points);
-	Vec2Vec projs_curr(projections);
-
-	inliers.resize(points.size());
-	std::iota(inliers.begin(), inliers.end(), 0);
-
-	// First refine with the focal length fixed
-	RefineCamera(camera, points_curr, projs_curr, false);
-
-	int round = 0;
-	while (true)
-	{
-		wxLogMessage("[RefineCameraParameters] Calling with %d points", points_curr.size());
-		RefineCamera(camera, points_curr, projs_curr, true);
-
-		std::vector<double> errors;
-		for (int i = 0; i < points_curr.size(); i++)
-		{
-            Vec2 projection = camera->ProjectFinal(points_curr[i]);
-			errors.push_back((projection - projs_curr[i]).norm());
-		}
-
-		// Sort and histogram errors
-		double median		= util::GetNthElement(util::iround(0.95 * points_curr.size()), errors);
-		double threshold	= util::clamp(2.4 * median, m_options.min_reprojection_error_threshold, m_options.max_reprojection_error_threshold);
-		double avg			= std::accumulate(errors.begin(), errors.end(), 0.0) / errors.size();
-		wxLogMessage("[RefineCameraParameters] Mean error [%d pts]: %.3f [med: %.3f, outlier threshold: = %.3f]", points_curr.size(), avg, median, threshold);
-
-		Vec3Vec points_next;
-		Vec2Vec projs_next;
-		std::vector<int> inliers_next;
-
-		for (int i = 0; i < points_curr.size(); i++)
-		{
-			if (errors[i] < threshold)
-			{
-				inliers_next.push_back(inliers[i]);
-
-				points_next.push_back(points_curr[i]);
-				projs_next.push_back(projs_curr[i]);
-			} else
-			{
-				if (pt_idxs != nullptr)
-				{
-					//wxLogMessage("[RefineCameraParameters] Removing point [%d] with reprojection error %0.3f", pt_idxs[i], errors[i]);
-				} else
-				{
-					//wxLogMessage("[RefineCameraParameters] Removing point with reprojection error %0.3f", errors[i]);
-				}
-			}
-		}
-
-		if (points_next.size() == points_curr.size()) break;	// We're done
-
-		points_curr	= points_next;
-		projs_curr	= projs_next;
-		inliers		= inliers_next;
-
-		if (points_curr.size() == 0) break;	// Out of measurements
-
-		round++;
-	}
-
-	wxLogMessage("[RefineCameraParameters] Exiting after %d rounds with %d/%d points", round + 1, points_curr.size(), points.size());
-}
-
 void MainFrame::BundleAdjustAddAllNewPoints(int num_cameras, IntVec &added_order, CamVec &cameras, PointVec &points)
 {
 	std::vector<ImageKeyVector>	new_tracks;
@@ -1212,9 +1214,9 @@ void MainFrame::BundleAdjustAddAllNewPoints(int num_cameras, IntVec &added_order
 			int image_idx	= added_order[track.first];
 			auto &key		= GetKey(image_idx, track.second);
 
-            Vec2 pr = cameras[track.first].ProjectFinal(point);
+            Vec2 reprojection = cameras[track.first].ProjectFinal(point);
 
-			error += (pr - key.m_coords).squaredNorm();
+			error += (reprojection - key.m_coords).squaredNorm();
 		}
 		error = sqrt(error / new_tracks[i].size());
 
