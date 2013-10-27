@@ -2,10 +2,10 @@
 #include <unordered_set>
 #include <queue>
 
-#include "opencv2/core.hpp"
-#include "opencv2/core/utility.hpp"
-#include "opencv2/flann.hpp"
-#include "opencv2/calib3d.hpp"
+//#include "opencv2/core.hpp"
+//#include "opencv2/core/utility.hpp"
+//#include "opencv2/flann.hpp"
+//#include "opencv2/calib3d.hpp"
 
 #include "wx/progdlg.h"
 #include "wx/textdlg.h"

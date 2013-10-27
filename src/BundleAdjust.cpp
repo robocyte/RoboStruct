@@ -15,7 +15,7 @@
 namespace
 {
 
-// Templated pinhole camera model for used with Ceres. The camera is
+// Templated pinhole camera model for use with Ceres. The camera is
 // parameterized using 9 parameters: 3 for rotation, 3 for translation, 1 for
 // focal length and 2 for radial distortion. The principal point is not modeled
 // (i.e. it is assumed be located at the image center).
