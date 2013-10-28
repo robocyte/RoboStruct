@@ -220,6 +220,15 @@
   <ItemGroup>
     <None Include="..\..\wxfb\RoboStruct.fbp" />
   </ItemGroup>
+  <ItemGroup>
+    <Xml Include="..\..\bin\shaders\Background.xml" />
+    <Xml Include="..\..\bin\shaders\Camera.xml" />
+    <Xml Include="..\..\bin\shaders\Grid.xml" />
+    <Xml Include="..\..\bin\shaders\Points.xml" />
+    <Xml Include="..\..\bin\shaders\TBNDisplay.xml" />
+    <Xml Include="..\..\bin\shaders\TBNDisplaySkinned.xml" />
+    <Xml Include="..\..\bin\shaders\Trackball.xml" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

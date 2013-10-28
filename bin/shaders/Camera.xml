@@ -97,6 +97,7 @@
 							+ diffuse_color		* lambert_term
 							+ specular_color	* blinn_term
 							+ reflected_color	* reflectivity;
+			fragment_color.a = 1.0;
 		}
 		"/>
 </glslprog>

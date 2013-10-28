@@ -2,6 +2,8 @@
 
 #include <vector>
 
+#include "gly_scene.hpp"
+
 #include "opencv2/core.hpp"
 
 #include "Keys.hpp"
@@ -19,8 +21,10 @@ public:
 	std::string				m_filename_short;		// Filename (without path)
 	std::string				m_camera_model;			// Camera model name
 	std::string				m_camera_make;			// Camera maker name
+    std::string             m_node_name;
 
 	Camera					m_camera;				// Information about the camera used to capture this image
+    gly::NodePtr            m_camera_mesh;
 	
 	std::vector<KeyPoint>	m_keys;					// Bundler keypoints
 	std::vector<bool>		m_key_flags;

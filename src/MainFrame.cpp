@@ -1,6 +1,7 @@
 ﻿#include <numeric>
 #include <unordered_set>
 #include <queue>
+#include <sstream>
 
 #include "opencv2/core.hpp"
 #include "opencv2/core/utility.hpp"
@@ -15,6 +16,7 @@
 
 #include "Eigen/Core"
 #include "Eigen/Dense"
+#include "Eigen/Geometry"
 
 #ifdef _DEBUG
 	#define _CRTDBG_MAP_ALLOC
@@ -104,7 +106,21 @@ void MainFrame::OnThreadUpdate(wxThreadEvent& event)
 
 	m_scene->GetNode("Points")->GetMesh()->ChangeData(data);
 
-	m_gl_canvas->Refresh(false);
+	for (const auto &image : m_images)
+	{
+        if (!image.m_camera.m_adjusted) continue;
+
+        image.m_camera_mesh->SetVisibilityMesh(true);
+
+        image.m_camera_mesh->GetTransform().Reset();
+        //image.m_camera_mesh->GetTransform().Rotate(glm::angleAxis(180.0f, glm::vec3(0.0f, 1.0f, 0.0f)));
+        image.m_camera_mesh->GetTransform().Translate(glm::vec3(image.m_camera.m_t.x(), image.m_camera.m_t.y(), image.m_camera.m_t.z()));
+        Eigen::Quaternion<double> quat(image.m_camera.m_R);
+        image.m_camera_mesh->GetTransform().Rotate(glm::quat(quat.w(), quat.x(), quat.y(), quat.z()));
+        image.m_camera_mesh->GetTransform().Scale(glm::vec3(0.02f, 0.02f, 0.02f));
+	}
+
+    m_gl_canvas->Refresh(false);
 }
 
 void MainFrame::InitializeLog()
@@ -136,8 +152,21 @@ bool MainFrame::AddImage(const std::string filename, const std::string filename_
 	{
 		if (this->FindCameraInDatabase(img))
 		{
-			m_images.push_back(img);
-			return true;
+            std::ostringstream node_name;
+            node_name << "camera " << m_images.size();
+            img.m_node_name = node_name.str();
+
+            m_scene->MakeNode(node_name.str(), "dslr_mesh", "cam_program");
+           	m_scene->AssignTexture(node_name.str(), "dslr_diffuse",		GL_TEXTURE0,		gly::SPL_MIPMAP_LINEAR);
+	        m_scene->AssignTexture(node_name.str(), "dslr_normal",		GL_TEXTURE0 + 1,	gly::SPL_MIPMAP_LINEAR);
+	        m_scene->AssignTexture(node_name.str(), "dslr_specular",	GL_TEXTURE0 + 2,	gly::SPL_MIPMAP_LINEAR);
+	        m_scene->AssignTexture(node_name.str(), "dslr_cube",		GL_TEXTURE0 + 3,	gly::SPL_MIPMAP_LINEAR);
+            img.m_camera_mesh = m_scene->GetNode(node_name.str());
+            img.m_camera_mesh->SetVisibilityMesh(false);
+
+   			m_images.push_back(img);
+
+            return true;
 		} else
 		{
 			wxString caption;

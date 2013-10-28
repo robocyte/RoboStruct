@@ -1089,8 +1089,14 @@ void MainFrame::RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_ord
 
                 m_points.push_back(PointData(point.m_pos, point.m_color, views));
 			}
-		}
 
+            for (int i = 0; i < num_cameras; i++)
+			{
+				m_images[added_order[i]].m_camera = cameras[i];
+			}
+		
+        }
+        
 		wxQueueEvent(this, new wxThreadEvent(wxEVT_THREAD_UPDATE));
 
 		round++;

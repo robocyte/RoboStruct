@@ -16,6 +16,9 @@
     <Filter Include="wxFormBuilder">
       <UniqueIdentifier>{a6d2a49b-7136-483c-b794-abb40cf56bc1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{c998a743-ca7f-4c20-953b-c93b5762dd36}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\res\resources.rc">
@@ -135,5 +138,28 @@
     <None Include="..\..\wxfb\RoboStruct.fbp">
       <Filter>wxFormBuilder</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="..\..\bin\shaders\Background.xml">
+      <Filter>Shaders</Filter>
+    </Xml>
+    <Xml Include="..\..\bin\shaders\Camera.xml">
+      <Filter>Shaders</Filter>
+    </Xml>
+    <Xml Include="..\..\bin\shaders\Grid.xml">
+      <Filter>Shaders</Filter>
+    </Xml>
+    <Xml Include="..\..\bin\shaders\Points.xml">
+      <Filter>Shaders</Filter>
+    </Xml>
+    <Xml Include="..\..\bin\shaders\TBNDisplay.xml">
+      <Filter>Shaders</Filter>
+    </Xml>
+    <Xml Include="..\..\bin\shaders\TBNDisplaySkinned.xml">
+      <Filter>Shaders</Filter>
+    </Xml>
+    <Xml Include="..\..\bin\shaders\Trackball.xml">
+      <Filter>Shaders</Filter>
+    </Xml>
   </ItemGroup>
 </Project>

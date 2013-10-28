@@ -64,18 +64,11 @@ void MainFrame::InitializeScene()
 	m_scene->AddTexture("dslr_cube",			gly::LoadTexture("textures\\Cube_reflection.dds"));
 
 	m_scene->MakeNode("Points",					"points_mesh",		"points_program");
-	m_scene->MakeNode("DSLR",					"dslr_mesh",		"cam_program");
 	m_scene->MakeNode("Grid",					"grid_mesh",		"grid_program");
 	m_scene->MakeNode("Trackball X",			"trackball_x_mesh",	"trackball_program");
 	m_scene->MakeNode("Trackball Y",			"trackball_y_mesh",	"trackball_program");
 	m_scene->MakeNode("Trackball Z",			"trackball_z_mesh",	"trackball_program");
 
-	m_scene->AssignTexture("DSLR",				"dslr_diffuse",		GL_TEXTURE0,		gly::SPL_MIPMAP_LINEAR);
-	m_scene->AssignTexture("DSLR",				"dslr_normal",		GL_TEXTURE0 + 1,	gly::SPL_MIPMAP_LINEAR);
-	m_scene->AssignTexture("DSLR",				"dslr_specular",	GL_TEXTURE0 + 2,	gly::SPL_MIPMAP_LINEAR);
-	m_scene->AssignTexture("DSLR",				"dslr_cube",		GL_TEXTURE0 + 3,	gly::SPL_MIPMAP_LINEAR);
-
-	m_scene->GetNode("DSLR")->GetTransform().Rotate(glm::angleAxis(90.0f, glm::vec3(0.0f, 1.0f, 0.0f)));
 	m_scene->GetNode("Grid")->GetTransform().Scale(glm::vec3(20.0f, 20.0f, 20.0f));
 	m_scene->GetNode("Trackball X")->GetTransform().Translate(glm::vec3(0.0f, 0.0f, -25.0f));
 	m_scene->GetNode("Trackball Y")->GetTransform().Translate(glm::vec3(0.0f, 0.0f, -25.0f));
@@ -84,7 +77,6 @@ void MainFrame::InitializeScene()
 	m_scene->GetNode("Trackball Y")->GetTransform().Scale(glm::vec3(14.0f, 14.0f, 14.0f));
 	m_scene->GetNode("Trackball Z")->GetTransform().Scale(glm::vec3(14.0f, 14.0f, 14.0f));
 
-	m_scene->GetNode("DSLR")->SetVisibilityMesh(false);
 }
 
 void MainFrame::ResetGLCanvas()
