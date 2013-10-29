@@ -95,21 +95,6 @@ struct PriorError
 
 }
 
-void MainFrame::StartBundlerThread()
-{
-	if (CreateThread(wxTHREAD_DETACHED) != wxTHREAD_NO_ERROR)
-	{
-		wxLogError("Could not create the worker thread!");
-		return;
-	}
-
-	if (GetThread()->Run() != wxTHREAD_NO_ERROR)
-	{
-		wxLogError("Could not run the worker thread!");
-		return;
-	}
-}
-
 wxThread::ExitCode MainFrame::Entry()
 {
 	this->BundleAdjust();
@@ -1043,7 +1028,7 @@ void MainFrame::RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_ord
 		{
 			int idx = outliers[i];
 
-			wxLogMessage("[RunSFM] Removing outlier %d (reproj error: %0.3f)", idx, reproj_errors[i]);
+			//wxLogMessage("[RunSFM] Removing outlier %d (reprojection error: %0.3f)", idx, reproj_errors[i]);
 
             points[idx].m_color = Vec3(0.0, 0.0, -1.0);
 

@@ -145,17 +145,23 @@ void MainFrame::OnToggleVisibility(wxCommandEvent& event)
 			else						grid->SetVisibilityMesh(true);
 			break;
 		}
-	//case ID_TOGGLE_NODE_VISIBILITY:
-	//	{
-	//		auto sel = m_scene_browser->GetSelection();
-	//		auto name = m_scene_browser->GetItemText(sel).ToStdString();
-	//		auto node = m_scene->GetNode(name);
-
-	//		if (node->IsVisibleMesh())	node->SetVisibilityMesh(false);
-	//		else						node->SetVisibilityMesh(true);
-	//		
-	//		break;
-	//	}
+    case ID_TOGGLE_CAMERAS_VISIBILITY:
+        {
+            for (const auto &image : m_images)
+            {
+                if (!image.m_camera.m_adjusted) continue;
+                if (image.m_camera_mesh->IsVisibleMesh())   image.m_camera_mesh->SetVisibilityMesh(false);
+                else                                        image.m_camera_mesh->SetVisibilityMesh(true);
+            }
+            break;
+        }
+    case ID_TOGGLE_POINTS_VISIBILITY:
+        {
+            auto points = m_scene->GetNode("Points");
+			if (points->IsVisibleMesh())	points->SetVisibilityMesh(false);
+			else						    points->SetVisibilityMesh(true);
+            break;
+        }
 	default: return;
 	}
 
@@ -346,6 +352,16 @@ void MainFrame::OnReconstruct(wxCommandEvent& event)
 	time = (double)cv::getTickCount() - time;
 	wxLogMessage("Matching all images took %.2f s", time / cv::getTickFrequency());
 
-	// Compute structure from motion
-	this->StartBundlerThread();
+	// Compute structure from motion in another thread
+	if (CreateThread(wxTHREAD_DETACHED) != wxTHREAD_NO_ERROR)
+	{
+		wxLogError("Could not create the worker thread!");
+		return;
+	}
+
+	if (GetThread()->Run() != wxTHREAD_NO_ERROR)
+	{
+		wxLogError("Could not run the worker thread!");
+		return;
+	}
 }

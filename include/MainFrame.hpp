@@ -115,7 +115,6 @@ private:
 	void	SavePlyFile();
 	void	SaveMayaFile();
 
-	void				StartBundlerThread();
 	wxThread::ExitCode	Entry();
 	void				BundleAdjust();
 	IntPair				PickInitialCameraPair();
