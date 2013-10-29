@@ -923,7 +923,7 @@ void MainFrame::RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_ord
 		{
 			ceres::CostFunction *prior_cost_function;
 
-            prior_cost_function = new ceres::AutoDiffCostFunction<PriorError, 1, 9>(new PriorError(6, cameras[i].m_init_focal_length, m_options.focal_length_constrain_weight* num_vis[i]));
+            prior_cost_function = new ceres::AutoDiffCostFunction<PriorError, 1, 9>(new PriorError(6, cameras[i].m_init_focal_length, m_options.focal_length_constrain_weight * num_vis[i]));
 			problem.AddResidualBlock(prior_cost_function, nullptr, pcameras + cnp * i);
 
 			// Take care of priors on distortion parameters
