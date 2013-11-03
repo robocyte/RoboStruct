@@ -12,6 +12,7 @@
 #include "ImageData.hpp"
 #include "Options.hpp"
 
+#include "src\lib\AKAZE.h"
 #include "daisy/daisy.h"
 #include "kutility/image.h"
 
@@ -80,7 +81,7 @@ void ImageData::DetectFeatures(const Options& opts)
 										opts.daisy_radius_quantization,
 										opts.daisy_angular_quantization,
 										opts.daisy_histogram_quantization);
-
+            DaisyDesc.verbose(0);
 			DaisyDesc.initialize_single_descriptor_mode();
 
 			m_desc_size = DaisyDesc.descriptor_size();
@@ -98,7 +99,6 @@ void ImageData::DetectFeatures(const Options& opts)
 	case 1: // Detect SIFT features
 		{
 			m_desc_size = 128;
-			m_descriptors.reserve(keys.size() * m_desc_size);
 
 			cv::SIFT Sift(	opts.sift_det_threshold,
 							opts.sift_det_edge_threshold,
@@ -111,7 +111,6 @@ void ImageData::DetectFeatures(const Options& opts)
 		{
 			if (opts.surf_desc_extended)	m_desc_size = 128;
 			else							m_desc_size = 64;
-			m_descriptors.reserve(keys.size() * m_desc_size);
 
 			cv::SURF Surf(	opts.surf_det_hessian_threshold,
 							opts.surf_common_octaves,
@@ -121,10 +120,44 @@ void ImageData::DetectFeatures(const Options& opts)
 			Surf(grey_img, cv::Mat(), keys, m_descriptors);
 			break;
 		}
+    case 3: // Detect AKAZE features
+        {
+            m_desc_size = opts.akaze_descriptor_size;
+            cv::Mat working_img;
+            grey_img.convertTo(working_img, CV_32F, 1.0 / 255.0, 0);
+
+            AKAZEOptions options;
+            options.img_width = grey_img.cols;
+            options.img_height = grey_img.rows;
+            options.soffset = DEFAULT_SCALE_OFFSET;
+            options.omin = DEFAULT_OCTAVE_MIN;
+            options.omax = DEFAULT_OCTAVE_MAX;
+            options.nsublevels = DEFAULT_NSUBLEVELS;
+            options.dthreshold = opts.akaze_threshold;
+            options.diffusivity = DEFAULT_DIFFUSIVITY_TYPE;
+            options.descriptor = DEFAULT_DESCRIPTOR;
+            options.descriptor_size = opts.akaze_descriptor_size;
+            options.descriptor_channels = DEFAULT_LDB_CHANNELS;
+            options.descriptor_pattern_size = DEFAULT_LDB_PATTERN_SIZE;
+            options.sderivatives = DEFAULT_SIGMA_SMOOTHING_DERIVATIVES;
+            options.upright = DEFAULT_UPRIGHT;
+            options.save_scale_space = DEFAULT_SAVE_SCALE_SPACE;
+            options.save_keypoints = DEFAULT_SAVE_KEYPOINTS;
+            options.verbosity = DEFAULT_VERBOSITY;
+
+            AKAZE akaze(options);
+            m_keys_opencv.clear();
+            akaze.Create_Nonlinear_Scale_Space(working_img);
+            akaze.Feature_Detection(m_keys_opencv);
+            akaze.Compute_Descriptors(m_keys_opencv, m_descriptors_akaze);
+            keys = m_keys_opencv;
+
+            break;
+        }
 	}
 
 	this->ConvertOpenCVKeys(keys, img);
-	this->SaveDescriptors(true);
+	//this->SaveDescriptors(true);
 }
 
 void ImageData::SaveDescriptors(bool clear)

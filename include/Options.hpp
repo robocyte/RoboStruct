@@ -32,6 +32,9 @@ struct Options
 		, surf_common_octave_layers(2)
 		, surf_desc_extended(false)
 		, surf_desc_upright(false)
+
+        , akaze_threshold(0.001)
+        , akaze_descriptor_size(0)
 		
 		, matching_trees(6)
 		, matching_checks(64)
@@ -98,6 +101,10 @@ struct Options
 	double		surf_det_hessian_threshold;
 	bool		surf_desc_extended;
 	bool		surf_desc_upright;
+
+    // AKAZE
+    double      akaze_threshold;
+    int         akaze_descriptor_size;
 
 	// Feature matching
 	int			matching_trees;

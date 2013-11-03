@@ -358,6 +358,218 @@ void MainFrame::MatchAll()
 	m_matches_loaded = true;
 }
 
+void MainFrame::MatchAllAkaze()
+{
+	//int num_images = this->GetNumImages();
+	//int num_pairs = (num_images * (num_images - 1)) / 2;
+	//int progress_idx = 0;
+
+	//// Clean up
+	//for (auto &image : m_images)
+	//{
+	//	image.m_visible_points.clear();
+	//	image.m_visible_keys.clear();
+	//	image.m_key_flags.clear();
+	//}
+
+	//m_tracks.clear();
+	//m_matches = MatchTable(num_images);
+	//m_matches.RemoveAll();
+	//m_transforms.clear();
+	//
+	//// Show progress dialog
+	//wxProgressDialog dialog("Progress", "Matching images...", num_pairs, this,
+	//						wxPD_APP_MODAL | wxPD_AUTO_HIDE | wxPD_ELAPSED_TIME |
+	//						wxPD_ESTIMATED_TIME | wxPD_REMAINING_TIME);
+
+	//for (int i = 1; i < num_images; i++)
+	//{
+	//	wxLogMessage("[MatchAll] Matching %s...", m_images[i].m_filename_short.c_str());
+	//	
+	//	// Create a search index
+ //       cv::flann::Index flann_index(m_images[i].m_descriptors_akaze, cv::flann::LshIndexParams(12, 24, 2));
+
+	//	for (int j = 0; j < i; j++)
+	//	{
+	//		// Setup query data
+	//		int num_descriptors = (int)m_images[j].m_keys.size();
+	//		cv::Mat indices(num_descriptors, 2, CV_32SC1);
+	//		cv::Mat dists(num_descriptors, 2, CV_32FC1);
+
+	//		// Match!
+	//		double time = (double)cv::getTickCount();
+ //           flann_index.knnSearch(m_images[j].m_descriptors_akaze, indices, dists, 2, cv::flann::SearchParams(/*m_options.matching_checks*/));
+	//		time = (double)cv::getTickCount() - time;
+
+	//		// Store putative matches in ptpairs
+	//		IntPairVec tmp_matches;
+	//		int *indices_ptr = indices.ptr<int>(0);
+	//		float *dists_ptr = dists.ptr<float>(0);
+
+	//		for (int k = 0; k < indices.rows; ++k) {
+	//			if (dists_ptr[2 * k] < (m_options.matching_distance_ratio * dists_ptr[2 * k + 1])) {
+	//				tmp_matches.push_back(IntPair(indices_ptr[2 * k], k));
+	//			}
+	//		}
+
+	//		int num_putative = static_cast<int>(tmp_matches.size());
+
+	//		// Find and delete double matches
+	//		int num_pruned = this->PruneDoubleMatches(tmp_matches);
+
+	//		// Compute the fundamental matrix and remove outliers
+	//		int num_inliers = this->ComputeEpipolarGeometry(i, j, tmp_matches);
+
+	//		// Compute transforms
+	//		TransformInfo tinfo;
+	//		MatchIndex midx(i, j);
+	//		tinfo.m_inlier_ratio = this->ComputeHomography(i, j, tmp_matches);
+
+	//		// Store matches and transforms
+	//		if (num_inliers > m_options.matching_min_matches)
+	//		{
+	//			TransformsEntry trans_entry(midx, tinfo);
+	//			m_transforms.insert(trans_entry);
+
+	//			this->SetMatch(i, j);
+	//			auto &matches = m_matches.GetMatchList(GetMatchIndex(i, j));
+
+	//			matches.clear();
+	//			matches.reserve(num_inliers);
+
+	//			for (const auto &match : tmp_matches) matches.push_back(KeypointMatch(match.first, match.second));
+
+	//			// Be verbose
+	//			wxLogMessage("[MatchAll]    ...with %s: %i inliers (%i putative, %i duplicates pruned), ratio = %.2f    (%.2f ms)",
+	//				m_images[j].m_filename_short.c_str(), num_inliers, num_putative, num_pruned, tinfo.m_inlier_ratio, time * 1000.0 / cv::getTickFrequency());
+	//		} else
+	//		{
+	//			// Be verbose
+	//			wxLogMessage("[MatchAll]    ...with %s: no match", m_images[j].m_filename_short.c_str());
+	//		}
+
+	//		//m_images[j].ClearDescriptors();
+
+	//		progress_idx++;
+	//		dialog.Update(progress_idx);
+	//		wxSafeYield();
+	//	}
+	//	//m_images[i].ClearDescriptors();
+	//}
+
+	//this->MakeMatchListsSymmetric();
+	//this->ComputeTracks();
+	//m_matches.RemoveAll();
+
+	//m_matches_loaded = true;
+	int num_images = this->GetNumImages();
+	int num_pairs = (num_images * (num_images - 1)) / 2;
+	int progress_idx = 0;
+
+	// Clean up
+	for (auto &image : m_images)
+	{
+		image.m_visible_points.clear();
+		image.m_visible_keys.clear();
+		image.m_key_flags.clear();
+	}
+
+	m_tracks.clear();
+	m_matches = MatchTable(num_images);
+	m_matches.RemoveAll();
+	m_transforms.clear();
+	
+	// Show progress dialog
+	wxProgressDialog dialog("Progress", "Matching images...", num_pairs, this,
+							wxPD_APP_MODAL | wxPD_AUTO_HIDE | wxPD_ELAPSED_TIME |
+							wxPD_ESTIMATED_TIME | wxPD_REMAINING_TIME);
+
+	for (int i = 1; i < num_images; i++)
+	{
+		wxLogMessage("[MatchAll] Matching %s...", m_images[i].m_filename_short.c_str());
+		
+		for (int j = 0; j < i; j++)
+		{
+            cv::BFMatcher matcher(cv::NORM_HAMMING);
+            //auto matcher = cv::DescriptorMatcher::create("BruteForce-Hamming");
+            std::vector<std::vector<cv::DMatch>> dmatches;
+
+			// Match!
+			double time = (double)cv::getTickCount();
+            matcher.knnMatch(m_images[j].m_descriptors_akaze, m_images[i].m_descriptors_akaze, dmatches, 2);
+            time = (double)cv::getTickCount() - time;
+
+			// Store putative matches in ptpairs
+			IntPairVec tmp_matches;
+            for (const auto &match : dmatches)
+            {
+                auto dist1 = match[0].distance;
+                auto dist2 = match[1].distance;
+
+                if (dist1 < (dist2 * m_options.matching_distance_ratio))
+                {
+                    tmp_matches.push_back(IntPair(match[0].trainIdx, match[0].queryIdx));
+                }
+            }
+
+            if (tmp_matches.size() < m_options.matching_min_matches)
+            {
+				wxLogMessage("[MatchAll]    ...with %s: no match before fundamental", m_images[j].m_filename_short.c_str());
+			    progress_idx++;
+			    dialog.Update(progress_idx);
+			    wxSafeYield();
+                continue;
+            }
+
+            int num_putative = static_cast<int>(tmp_matches.size());
+
+			// Find and delete double matches
+			int num_pruned = this->PruneDoubleMatches(tmp_matches);
+
+			// Compute the fundamental matrix and remove outliers
+			int num_inliers = this->ComputeEpipolarGeometryAkaze(i, j, tmp_matches);
+
+			// Compute transforms
+			TransformInfo tinfo;
+			MatchIndex midx(i, j);
+			tinfo.m_inlier_ratio = this->ComputeHomographyAkaze(i, j, tmp_matches);
+
+			// Store matches and transforms
+			if (num_inliers > m_options.matching_min_matches)
+			{
+				TransformsEntry trans_entry(midx, tinfo);
+				m_transforms.insert(trans_entry);
+
+				this->SetMatch(i, j);
+				auto &matches = m_matches.GetMatchList(GetMatchIndex(i, j));
+
+				matches.clear();
+				matches.reserve(num_inliers);
+
+				for (const auto &match : tmp_matches) matches.push_back(KeypointMatch(match.first, match.second));
+
+				// Be verbose
+				wxLogMessage("[MatchAll]    ...with %s: %i inliers (%i putative, %i duplicates pruned), ratio = %.2f    (%.2f ms)",
+					m_images[j].m_filename_short.c_str(), num_inliers, num_putative, num_pruned, tinfo.m_inlier_ratio, time * 1000.0 / cv::getTickFrequency());
+			} else
+			{
+				// Be verbose
+				wxLogMessage("[MatchAll]    ...with %s: no match", m_images[j].m_filename_short.c_str());
+			}
+
+			progress_idx++;
+			dialog.Update(progress_idx);
+			wxSafeYield();
+		}
+	}
+
+	this->MakeMatchListsSymmetric();
+	this->ComputeTracks();
+	m_matches.RemoveAll();
+
+	m_matches_loaded = true;
+}
+
 int	MainFrame::PruneDoubleMatches(IntPairVec &matches)
 {
 	int num_before = matches.size();
@@ -430,6 +642,65 @@ double MainFrame::ComputeHomography(int idx1, int idx2, const IntPairVec &matche
 
 	// Compute and return inlier ratio
 	return std::count(status.begin(), status.end(), 1) / static_cast<double>(num_matches);
+}
+
+int MainFrame::ComputeEpipolarGeometryAkaze(int idx1, int idx2, IntPairVec &matches)
+{
+	auto num_putative = matches.size();
+	std::vector<cv::Point2f> points1, points2;
+    cv::Mat status = cv::Mat::zeros(num_putative, 1, CV_8UC1);
+	points1.reserve(num_putative);
+	points2.reserve(num_putative);
+
+	const auto& keys1 = m_images[idx1].m_keys_opencv;
+	const auto& keys2 = m_images[idx2].m_keys_opencv;
+
+	for (const auto &match : matches)
+	{
+        points1.push_back(keys1[match.first].pt);
+		points2.push_back(keys2[match.second].pt);
+	}
+
+	// Find the fundamental matrix
+	double threshold(0.001 * std::max(m_images[idx1].GetWidth(), m_images[idx1].GetHeight()));
+	auto Fmat = cv::findFundamentalMat(points1, points2, cv::FM_RANSAC, 3.0, 0.99, status);//, threshold);
+
+	// Remove outliers from ptpairs
+	auto matches_old = matches;
+	matches.clear();
+
+	for (int m = 0; m < points1.size(); m++) if (status.at<unsigned char>(m) == 1) matches.push_back(matches_old[m]);
+
+	return (int)matches.size();
+}
+
+double MainFrame::ComputeHomographyAkaze(int idx1, int idx2, const IntPairVec &matches)
+{
+	auto num_matches = matches.size();
+	std::vector<cv::Point2f> points1, points2;
+    cv::Mat status = cv::Mat::zeros(num_matches, 1, CV_8UC1);
+	points1.reserve(num_matches);
+	points2.reserve(num_matches);
+	status.reserve(num_matches);
+
+	const auto& keys1 = m_images[idx1].m_keys_opencv;
+	const auto& keys2 = m_images[idx2].m_keys_opencv;
+
+	for (const auto &match : matches)
+	{
+        points1.push_back(keys1[match.first].pt);
+		points2.push_back(keys2[match.second].pt);
+	}
+
+	// Find the homography matrix
+	double threshold(0.001 * std::max(m_images[idx1].GetWidth(), m_images[idx1].GetHeight()));
+	cv::Mat Hmat = cv::findHomography(points1, points2, cv::RANSAC, 3.0, status);//, threshold);
+
+	// Compute and return inlier ratio
+    int count = 0;
+	for (int m = 0; m < points1.size(); m++) if (status.at<unsigned char>(m) == 1) count++;
+
+	return count / static_cast<double>(num_matches);
 }
 
 void MainFrame::ComputeTracks()

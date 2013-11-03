@@ -13,6 +13,7 @@ void MainFrame::ResetOptions()
 	features_list.Add("YAPE/Daisy");
 	features_list.Add("SIFT");
 	features_list.Add("SURF");
+    features_list.Add("AKAZE");
 
 	// Feature detectors/descriptors
 	wxPGProperty* feature_category = m_pg_options->Append( new wxPropertyCategory( "Feature detection/description", wxPG_LABEL ) );
@@ -55,6 +56,12 @@ void MainFrame::ResetOptions()
 		m_pg_options->AppendIn( surf_category, new wxBoolProperty("Surf extended",					wxPG_LABEL,		m_options.surf_desc_extended ) );
 		m_pg_options->AppendIn( surf_category, new wxBoolProperty("Surf upright",					wxPG_LABEL,		m_options.surf_desc_upright ) );
 		m_pg_options->GetProperty("SURF detector/descriptor")->SetExpanded(false);
+
+        // AKAZE category
+		wxPGProperty* akaze_category = m_pg_options->AppendIn( feature_category, new wxStringProperty( "AKAZE detector/descriptor", wxPG_LABEL, "<composed>" ) );
+        m_pg_options->AppendIn( akaze_category, new wxIntProperty("Akaze descriptor size",			wxPG_LABEL,		m_options.akaze_descriptor_size ) );
+        m_pg_options->AppendIn( akaze_category, new wxFloatProperty("Akaze threshold",	        	wxPG_LABEL,		m_options.akaze_threshold ) );
+		m_pg_options->GetProperty("AKAZE detector/descriptor")->SetExpanded(false);
 
 	// Feature matching category
 	m_pg_options->Append( new wxPropertyCategory( "Feature matching" ) );
@@ -126,7 +133,10 @@ void MainFrame::OnOptionsChanged(wxPropertyGridEvent& event)
 	m_options.surf_desc_extended =				m_pg_options->GetProperty("SURF detector/descriptor.Surf extended")->GetValue().GetBool();
 	m_options.surf_desc_upright =				m_pg_options->GetProperty("SURF detector/descriptor.Surf upright")->GetValue().GetBool();
 
-	m_options.matching_trees =					m_pg_options->GetProperty("Trees")->GetValue().GetInteger();
+    m_options.akaze_descriptor_size =	    	m_pg_options->GetProperty("AKAZE detector/descriptor.Akaze descriptor size")->GetValue().GetInteger();
+    m_options.akaze_threshold =         		m_pg_options->GetProperty("AKAZE detector/descriptor.Akaze threshold")->GetValue().GetDouble();
+
+    m_options.matching_trees =					m_pg_options->GetProperty("Trees")->GetValue().GetInteger();
 	m_options.matching_checks =					m_pg_options->GetProperty("Checks")->GetValue().GetInteger();
 	m_options.matching_distance_ratio =			m_pg_options->GetProperty("Distance ratio")->GetValue().GetDouble();
 	m_options.matching_min_matches =			m_pg_options->GetProperty("Min matches")->GetValue().GetInteger();

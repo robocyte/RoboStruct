@@ -348,7 +348,13 @@ void MainFrame::OnReconstruct(wxCommandEvent& event)
 	// Match features
 	wxLogMessage("Matching images...");
 	time = (double)cv::getTickCount();
-	if (m_options.feature_type != 3)	this->MatchAll();
+	if (m_options.feature_type != 3)
+    {
+        MatchAll();
+    } else
+    {
+        MatchAllAkaze();
+    }
 	time = (double)cv::getTickCount() - time;
 	wxLogMessage("Matching all images took %.2f s", time / cv::getTickFrequency());
 

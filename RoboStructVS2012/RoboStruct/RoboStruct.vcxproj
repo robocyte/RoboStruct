@@ -85,6 +85,7 @@
     <Import Project="..\..\..\- Visual Studio Property Sheets -\Daisy.props" />
     <Import Project="..\..\..\- Visual Studio Property Sheets -\Eigen.props" />
     <Import Project="..\..\..\- Visual Studio Property Sheets -\Ceres.props" />
+    <Import Project="..\..\..\- Visual Studio Property Sheets -\Akaze.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -159,6 +160,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)..\include;$(SolutionDir)..\wxfb;$(OPENCV_64_DIR)\3rdparty\libjpeg;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996;4351;</DisableSpecificWarnings>
       <WholeProgramOptimization>true</WholeProgramOptimization>
+      <ExceptionHandling>Async</ExceptionHandling>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
