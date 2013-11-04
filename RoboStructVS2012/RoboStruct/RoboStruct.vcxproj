@@ -200,6 +200,7 @@
     <ClCompile Include="..\..\wxfb\RoboStruct_GUI.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\include\Descriptor.hpp" />
     <ClInclude Include="..\..\include\EigenTools.hpp" />
     <ClInclude Include="..\..\include\FivePoint.hpp" />
     <ClInclude Include="..\..\include\ExifReader.hpp" />

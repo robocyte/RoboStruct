@@ -40,17 +40,16 @@ void MainFrame::ResetOptions()
 	
 		// SIFT category
 		wxPGProperty* sift_category = m_pg_options->AppendIn( feature_category, new wxStringProperty( "SIFT detector/descriptor", wxPG_LABEL, "<composed>" ) );
-		m_pg_options->AppendIn( sift_category, new wxIntProperty("Sift octaves",					wxPG_LABEL,		m_options.sift_common_octaves ) );
-		m_pg_options->AppendIn( sift_category, new wxIntProperty("Sift octave layers",				wxPG_LABEL,		m_options.sift_common_octave_layers ) );
-		m_pg_options->AppendIn( sift_category, new wxFloatProperty("Sift threshold",				wxPG_LABEL,		m_options.sift_det_threshold ) );
-		m_pg_options->AppendIn( sift_category, new wxFloatProperty("Sift edge threshold",			wxPG_LABEL,		m_options.sift_det_edge_threshold ) );
-		m_pg_options->AppendIn( sift_category, new wxFloatProperty("Sift magnification",			wxPG_LABEL,		m_options.sift_desc_magnification ) );
-		m_pg_options->AppendIn( sift_category, new wxBoolProperty("Sift recalculate angles",		wxPG_LABEL,		m_options.sift_desc_recalculate_angles ) );
+        m_pg_options->AppendIn( sift_category, new wxIntProperty("Sift num best features",			wxPG_LABEL,		m_options.sift_num_best_features ) );
+        m_pg_options->AppendIn( sift_category, new wxIntProperty("Sift octave layers",				wxPG_LABEL,		m_options.sift_octave_layers ) );
+        m_pg_options->AppendIn( sift_category, new wxFloatProperty("Sift contrast threshold",		wxPG_LABEL,		m_options.sift_contrast_threshold ) );
+		m_pg_options->AppendIn( sift_category, new wxFloatProperty("Sift edge threshold",			wxPG_LABEL,		m_options.sift_edge_threshold ) );
+		m_pg_options->AppendIn( sift_category, new wxFloatProperty("Sift sigma",			        wxPG_LABEL,		m_options.sift_sigma ) );
 		m_pg_options->GetProperty("SIFT detector/descriptor")->SetExpanded(false);
 
 		// SURF category
 		wxPGProperty* surf_category = m_pg_options->AppendIn( feature_category, new wxStringProperty( "SURF detector/descriptor", wxPG_LABEL, "<composed>" ) );
-		m_pg_options->AppendIn( surf_category, new wxIntProperty("Surf octaves",					wxPG_LABEL,		m_options.sift_common_octaves ) );
+		m_pg_options->AppendIn( surf_category, new wxIntProperty("Surf octaves",					wxPG_LABEL,		m_options.surf_common_octaves ) );
 		m_pg_options->AppendIn( surf_category, new wxIntProperty("Surf octave layers",				wxPG_LABEL,		m_options.surf_common_octave_layers ) );
 		m_pg_options->AppendIn( surf_category, new wxFloatProperty("Surf hessian threshold",		wxPG_LABEL,		m_options.surf_det_hessian_threshold ) );
 		m_pg_options->AppendIn( surf_category, new wxBoolProperty("Surf extended",					wxPG_LABEL,		m_options.surf_desc_extended ) );
@@ -65,10 +64,12 @@ void MainFrame::ResetOptions()
 
 	// Feature matching category
 	m_pg_options->Append( new wxPropertyCategory( "Feature matching" ) );
-	m_pg_options->Append( new wxIntProperty("Trees",			wxPG_LABEL,		m_options.matching_trees ) );
-	m_pg_options->Append( new wxIntProperty("Checks",			wxPG_LABEL,		m_options.matching_checks ) );
-	m_pg_options->Append( new wxFloatProperty("Distance ratio",	wxPG_LABEL,		m_options.matching_distance_ratio ) );
-	m_pg_options->Append( new wxIntProperty("Min matches",		wxPG_LABEL,		m_options.matching_min_matches ) );
+	m_pg_options->Append( new wxIntProperty("Trees",			                wxPG_LABEL,		m_options.matching_trees ) );
+	m_pg_options->Append( new wxIntProperty("Checks",			                wxPG_LABEL,		m_options.matching_checks ) );
+	m_pg_options->Append( new wxFloatProperty("Distance ratio",	                wxPG_LABEL,		m_options.matching_distance_ratio ) );
+	m_pg_options->Append( new wxIntProperty("Min matches",		                wxPG_LABEL,		m_options.matching_min_matches ) );
+    m_pg_options->Append( new wxFloatProperty("Fundamental RANSAC threshold",	wxPG_LABEL,		m_options.ransac_threshold_fundamental ) );
+    m_pg_options->Append( new wxFloatProperty("Homography RANSAC threshold",	wxPG_LABEL,		m_options.ransac_threshold_homography ) );
 	
 	// Structure from motion category
 	m_pg_options->Append( new wxPropertyCategory( "Structure from motion" ) );
@@ -120,12 +121,11 @@ void MainFrame::OnOptionsChanged(wxPropertyGridEvent& event)
 	m_options.daisy_angular_quantization =		m_pg_options->GetProperty("DAISY descriptor.Daisy angular quantization")->GetValue().GetInteger();
 	m_options.daisy_histogram_quantization =	m_pg_options->GetProperty("DAISY descriptor.Daisy histogram quantization")->GetValue().GetInteger();
 
-	m_options.sift_common_octaves =				m_pg_options->GetProperty("SIFT detector/descriptor.Sift octaves")->GetValue().GetInteger();
-	m_options.sift_common_octave_layers =		m_pg_options->GetProperty("SIFT detector/descriptor.Sift octave layers")->GetValue().GetInteger();
-	m_options.sift_det_threshold =				m_pg_options->GetProperty("SIFT detector/descriptor.Sift threshold")->GetValue().GetDouble();
-	m_options.sift_det_edge_threshold =			m_pg_options->GetProperty("SIFT detector/descriptor.Sift edge threshold")->GetValue().GetDouble();
-	m_options.sift_desc_magnification =			m_pg_options->GetProperty("SIFT detector/descriptor.Sift magnification")->GetValue().GetDouble();
-	m_options.sift_desc_recalculate_angles =	m_pg_options->GetProperty("SIFT detector/descriptor.Sift recalculate angles")->GetValue().GetBool();
+    m_options.sift_num_best_features =		    m_pg_options->GetProperty("SIFT detector/descriptor.Sift num best features")->GetValue().GetInteger();
+	m_options.sift_octave_layers =		        m_pg_options->GetProperty("SIFT detector/descriptor.Sift octave layers")->GetValue().GetInteger();
+	m_options.sift_contrast_threshold =			m_pg_options->GetProperty("SIFT detector/descriptor.Sift contrast threshold")->GetValue().GetDouble();
+	m_options.sift_edge_threshold =			    m_pg_options->GetProperty("SIFT detector/descriptor.Sift edge threshold")->GetValue().GetDouble();
+	m_options.sift_sigma =			            m_pg_options->GetProperty("SIFT detector/descriptor.Sift sigma")->GetValue().GetDouble();
 
 	m_options.surf_common_octaves =				m_pg_options->GetProperty("SURF detector/descriptor.Surf octaves")->GetValue().GetInteger();
 	m_options.surf_common_octave_layers =		m_pg_options->GetProperty("SURF detector/descriptor.Surf octave layers")->GetValue().GetInteger();
@@ -140,6 +140,8 @@ void MainFrame::OnOptionsChanged(wxPropertyGridEvent& event)
 	m_options.matching_checks =					m_pg_options->GetProperty("Checks")->GetValue().GetInteger();
 	m_options.matching_distance_ratio =			m_pg_options->GetProperty("Distance ratio")->GetValue().GetDouble();
 	m_options.matching_min_matches =			m_pg_options->GetProperty("Min matches")->GetValue().GetInteger();
+    m_options.ransac_threshold_fundamental =    m_pg_options->GetProperty("Fundamental RANSAC threshold")->GetValue().GetDouble();
+    m_options.ransac_threshold_homography =     m_pg_options->GetProperty("Homography RANSAC threshold")->GetValue().GetDouble();
 
 	m_options.ransac_threshold_five_point =			m_pg_options->GetProperty("5point RANSAC threshold")->GetValue().GetDouble();
 	m_options.ransac_rounds_five_point =			m_pg_options->GetProperty("5point RANSAC rounds")->GetValue().GetInteger();

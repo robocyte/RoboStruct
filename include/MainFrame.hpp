@@ -94,8 +94,6 @@ private:
 	int			PruneDoubleMatches(IntPairVec &matches);
 	int			ComputeEpipolarGeometry(int idx1, int idx2, IntPairVec &matches);	        // Computes the fundamental matrix F and removes outliers
 	double		ComputeHomography(int idx1, int idx2, const IntPairVec &matches);	        // Computes the homography H and returns the inlier ratio
-	int			ComputeEpipolarGeometryAkaze(int idx1, int idx2, IntPairVec &matches);	        // Computes the fundamental matrix F and removes outliers
-	double		ComputeHomographyAkaze(int idx1, int idx2, const IntPairVec &matches);	        // Computes the homography H and returns the inlier ratio
 	void		MakeMatchListsSymmetric();
 	void		ComputeTracks();														    // Organize the matches into tracks, where a track is a connected set of matching keypoints across multiple images
 	void		SetMatchesFromTracks(int img1, int img2);

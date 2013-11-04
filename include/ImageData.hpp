@@ -27,7 +27,6 @@ public:
     gly::NodePtr            m_camera_mesh;
 	
 	std::vector<KeyPoint>	m_keys;					// Bundler keypoints
-    std::vector<cv::KeyPoint> m_keys_opencv;
 	std::vector<bool>		m_key_flags;
 	std::vector<int>		m_visible_keys;			// Indices of keys visible in this image
 	std::vector<int>		m_visible_points;		// Indices of points visible in this image

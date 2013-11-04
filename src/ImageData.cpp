@@ -8,6 +8,7 @@
 #include "opencv2/nonfree/features2d.hpp"
 #include "wx/log.h"
 
+#include "Descriptor.hpp"
 #include "ExifReader.hpp"
 #include "ImageData.hpp"
 #include "Options.hpp"
@@ -82,6 +83,8 @@ void ImageData::DetectFeatures(const Options& opts)
 										opts.daisy_angular_quantization,
 										opts.daisy_histogram_quantization);
             DaisyDesc.verbose(0);
+            //DaisyDesc.scale_invariant();
+            //DaisyDesc.rotation_invariant();
 			DaisyDesc.initialize_single_descriptor_mode();
 
 			m_desc_size = DaisyDesc.descriptor_size();
@@ -90,8 +93,8 @@ void ImageData::DetectFeatures(const Options& opts)
 			// Compute Daisy descriptors at provided locations
 			for (const auto &key : keys)
 			{
-				std::vector<float> descriptor(m_desc_size);
-				DaisyDesc.get_descriptor(key.pt.y, key.pt.x, 35, descriptor.data());
+                std::vector<float> descriptor(m_desc_size);
+                DaisyDesc.get_descriptor(key.pt.y, key.pt.x, 35, descriptor.data());
 				m_descriptors.insert(m_descriptors.end(), descriptor.begin(), descriptor.end());
 			}
 			break;
@@ -100,10 +103,11 @@ void ImageData::DetectFeatures(const Options& opts)
 		{
 			m_desc_size = 128;
 
-			cv::SIFT Sift(	opts.sift_det_threshold,
-							opts.sift_det_edge_threshold,
-							opts.surf_common_octaves,
-							opts.sift_common_octave_layers);
+            cv::SIFT Sift(  opts.sift_num_best_features,
+                            opts.sift_octave_layers,
+                            opts.sift_contrast_threshold,
+                            opts.sift_edge_threshold,
+                            opts.sift_sigma);
 			Sift(grey_img, cv::Mat(), keys, m_descriptors);
 			break;
 		}
@@ -146,18 +150,16 @@ void ImageData::DetectFeatures(const Options& opts)
             options.verbosity = DEFAULT_VERBOSITY;
 
             AKAZE akaze(options);
-            m_keys_opencv.clear();
             akaze.Create_Nonlinear_Scale_Space(working_img);
-            akaze.Feature_Detection(m_keys_opencv);
-            akaze.Compute_Descriptors(m_keys_opencv, m_descriptors_akaze);
-            keys = m_keys_opencv;
+            akaze.Feature_Detection(keys);
+            akaze.Compute_Descriptors(keys, m_descriptors_akaze);
 
             break;
         }
 	}
 
 	this->ConvertOpenCVKeys(keys, img);
-	//this->SaveDescriptors(true);
+	this->SaveDescriptors(true);
 }
 
 void ImageData::SaveDescriptors(bool clear)
@@ -166,12 +168,10 @@ void ImageData::SaveDescriptors(bool clear)
 
 	std::string filename = m_filename;
 	filename.replace(filename.find(".jpg"), 4, ".desc");
-	std::ofstream file(filename.c_str(), std::ios::binary);
 
-	file.write(reinterpret_cast<char*>(m_descriptors.data()), m_descriptors.size() * sizeof(float));
-	file.close();
+    SaveDescriptorsToFileBinary(filename, m_descriptors);
 
-	if (clear) this->ClearDescriptors();
+    if (clear) this->ClearDescriptors();
 }
 
 void ImageData::LoadDescriptors()
@@ -180,12 +180,8 @@ void ImageData::LoadDescriptors()
 
 	std::string filename = m_filename;
 	filename.replace(filename.find(".jpg"), 4, ".desc");
-	std::ifstream file(filename.c_str(), std::ios::binary);
 
-	m_descriptors.resize(m_keys.size() * m_desc_size);
-
-	file.read(reinterpret_cast<char*>(m_descriptors.data()), m_keys.size() * m_desc_size * sizeof(float));
-	file.close();
+    LoadDescriptorsFromFileBinary(filename, m_descriptors);
 }
 
 void ImageData::ConvertOpenCVKeys(const std::vector<cv::KeyPoint>& keys, const cv::Mat& image)
@@ -209,7 +205,7 @@ void ImageData::ConvertOpenCVKeys(const std::vector<cv::KeyPoint>& keys, const c
 
 void ImageData::ClearDescriptors()
 {
-	std::vector<float>().swap(m_descriptors);	// STL swap trick
+    std::vector<float>().swap(m_descriptors);	// STL swap trick
 }
 
 void ImageData::SetTracks()

@@ -20,12 +20,11 @@ struct Options
 		, daisy_angular_quantization(8)
 		, daisy_histogram_quantization(8)
 		
-		, sift_common_octaves(4)
-		, sift_common_octave_layers(3)
-		, sift_det_threshold(0.04)
-		, sift_det_edge_threshold(10.0)
-		, sift_desc_magnification(3.0)
-		, sift_desc_recalculate_angles(true)
+		, sift_num_best_features(0)
+		, sift_octave_layers(3)
+		, sift_contrast_threshold(0.04)
+		, sift_edge_threshold(10.0)
+		, sift_sigma(1.6)
 		
 		, surf_det_hessian_threshold(400.0)
 		, surf_common_octaves(4)
@@ -40,6 +39,8 @@ struct Options
 		, matching_checks(64)
 		, matching_distance_ratio(0.6)
 		, matching_min_matches(20)
+        , ransac_threshold_fundamental(0.001)
+        , ransac_threshold_homography(0.001)
 
 		, ransac_threshold_five_point(2.25)
 		, ransac_rounds_five_point(500)
@@ -88,12 +89,11 @@ struct Options
 	int			daisy_histogram_quantization;
 
 	// SIFT
-	int			sift_common_octaves;
-	int			sift_common_octave_layers;
-	double		sift_det_threshold;
-	double		sift_det_edge_threshold;
-	double		sift_desc_magnification;
-	bool		sift_desc_recalculate_angles;
+	int			sift_num_best_features;
+	int			sift_octave_layers;
+	double		sift_contrast_threshold;
+	double		sift_edge_threshold;
+	double		sift_sigma;
 
 	// SURF
 	int			surf_common_octaves;
@@ -111,6 +111,9 @@ struct Options
 	int			matching_checks;
 	double		matching_distance_ratio;				// Ratio threshold for Lowe's test
 	int			matching_min_matches;
+    double      ransac_threshold_fundamental;
+    double      ransac_threshold_homography;
+
 
 	// Sfm options
 	double		ransac_threshold_five_point;
