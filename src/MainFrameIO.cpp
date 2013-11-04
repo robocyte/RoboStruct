@@ -243,7 +243,7 @@ void MainFrame::ExportToCMVS()
 
 void MainFrame::SaveBundleFile(const std::string &path)
 {
-	std::string filename = path + "\\Result.rd.out";
+	std::string filename = path + "\\bundle.rd.out";
 	std::ofstream txt_file(filename);
 
 	txt_file << "# Bundle file v0.3" << std::endl;

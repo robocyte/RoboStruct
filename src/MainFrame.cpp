@@ -18,16 +18,6 @@
 #include "Eigen/Dense"
 #include "Eigen/Geometry"
 
-#ifdef _DEBUG
-	#define _CRTDBG_MAP_ALLOC
-	#include <stdlib.h>
-	#include <crtdbg.h>
-	#ifndef DBG_NEW
-		#define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
-		#define new DBG_NEW
-	#endif
-#endif  // _DEBUG
-
 const wxEventTypeTag<wxThreadEvent> wxEVT_THREAD_UPDATE(wxNewEventType());
 
 MainFrame::MainFrame(wxWindow* parent)
@@ -42,10 +32,6 @@ MainFrame::MainFrame(wxWindow* parent)
 	, m_sfm_done(false)
 	, m_desc_length(0)
 {
-#ifdef _DEBUG
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-#endif
-
 	// Set default path
 	m_path = (m_dir_picker->GetPath()).mb_str();
 

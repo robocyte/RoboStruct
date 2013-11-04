@@ -5,7 +5,7 @@
 #include "opencv2/highgui.hpp"
 #include "opencv2/features2d.hpp"
 #include "opencv2/legacy.hpp"
-#include "opencv2/nonfree/features2d.hpp"
+#include "opencv2/nonfree.hpp"
 #include "wx/log.h"
 
 #include "Descriptor.hpp"
@@ -13,7 +13,7 @@
 #include "ImageData.hpp"
 #include "Options.hpp"
 
-#include "src\lib\AKAZE.h"
+#include "src/lib/AKAZE.h"
 #include "daisy/daisy.h"
 #include "kutility/image.h"
 
@@ -99,19 +99,7 @@ void ImageData::DetectFeatures(const Options& opts)
 			}
 			break;
 		}
-	case 1: // Detect SIFT features
-		{
-			m_desc_size = 128;
-
-            cv::SIFT Sift(  opts.sift_num_best_features,
-                            opts.sift_octave_layers,
-                            opts.sift_contrast_threshold,
-                            opts.sift_edge_threshold,
-                            opts.sift_sigma);
-			Sift(grey_img, cv::Mat(), keys, m_descriptors);
-			break;
-		}
-	case 2: // Detect SURF features
+	case 1: // Detect SURF features
 		{
 			if (opts.surf_desc_extended)	m_desc_size = 128;
 			else							m_desc_size = 64;
@@ -124,7 +112,7 @@ void ImageData::DetectFeatures(const Options& opts)
 			Surf(grey_img, cv::Mat(), keys, m_descriptors);
 			break;
 		}
-    case 3: // Detect AKAZE features
+    case 2: // Detect AKAZE features
         {
             m_desc_size = opts.akaze_descriptor_size;
             cv::Mat working_img;

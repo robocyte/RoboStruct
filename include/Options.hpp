@@ -20,19 +20,13 @@ struct Options
 		, daisy_angular_quantization(8)
 		, daisy_histogram_quantization(8)
 		
-		, sift_num_best_features(0)
-		, sift_octave_layers(3)
-		, sift_contrast_threshold(0.04)
-		, sift_edge_threshold(10.0)
-		, sift_sigma(1.6)
-		
 		, surf_det_hessian_threshold(400.0)
 		, surf_common_octaves(4)
 		, surf_common_octave_layers(2)
 		, surf_desc_extended(false)
 		, surf_desc_upright(false)
 
-        , akaze_threshold(0.001)
+        , akaze_threshold(0.0007)
         , akaze_descriptor_size(0)
 		
 		, matching_trees(6)
@@ -88,14 +82,7 @@ struct Options
 	int			daisy_angular_quantization;
 	int			daisy_histogram_quantization;
 
-	// SIFT
-	int			sift_num_best_features;
-	int			sift_octave_layers;
-	double		sift_contrast_threshold;
-	double		sift_edge_threshold;
-	double		sift_sigma;
-
-	// SURF
+    // SURF
 	int			surf_common_octaves;
 	int			surf_common_octave_layers;
 	double		surf_det_hessian_threshold;

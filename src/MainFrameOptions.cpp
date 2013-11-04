@@ -11,7 +11,6 @@ void MainFrame::ResetOptions()
 	// Detection category
 	wxArrayString features_list;
 	features_list.Add("YAPE/Daisy");
-	features_list.Add("SIFT");
 	features_list.Add("SURF");
     features_list.Add("AKAZE");
 
@@ -38,15 +37,6 @@ void MainFrame::ResetOptions()
 		m_pg_options->AppendIn( daisy_category, new wxIntProperty("Daisy histogram quantization",	wxPG_LABEL,		m_options.daisy_histogram_quantization ) );
 		m_pg_options->GetProperty("DAISY descriptor")->SetExpanded(false);
 	
-		// SIFT category
-		wxPGProperty* sift_category = m_pg_options->AppendIn( feature_category, new wxStringProperty( "SIFT detector/descriptor", wxPG_LABEL, "<composed>" ) );
-        m_pg_options->AppendIn( sift_category, new wxIntProperty("Sift num best features",			wxPG_LABEL,		m_options.sift_num_best_features ) );
-        m_pg_options->AppendIn( sift_category, new wxIntProperty("Sift octave layers",				wxPG_LABEL,		m_options.sift_octave_layers ) );
-        m_pg_options->AppendIn( sift_category, new wxFloatProperty("Sift contrast threshold",		wxPG_LABEL,		m_options.sift_contrast_threshold ) );
-		m_pg_options->AppendIn( sift_category, new wxFloatProperty("Sift edge threshold",			wxPG_LABEL,		m_options.sift_edge_threshold ) );
-		m_pg_options->AppendIn( sift_category, new wxFloatProperty("Sift sigma",			        wxPG_LABEL,		m_options.sift_sigma ) );
-		m_pg_options->GetProperty("SIFT detector/descriptor")->SetExpanded(false);
-
 		// SURF category
 		wxPGProperty* surf_category = m_pg_options->AppendIn( feature_category, new wxStringProperty( "SURF detector/descriptor", wxPG_LABEL, "<composed>" ) );
 		m_pg_options->AppendIn( surf_category, new wxIntProperty("Surf octaves",					wxPG_LABEL,		m_options.surf_common_octaves ) );
@@ -120,12 +110,6 @@ void MainFrame::OnOptionsChanged(wxPropertyGridEvent& event)
 	m_options.daisy_radius_quantization =		m_pg_options->GetProperty("DAISY descriptor.Daisy radius quantization")->GetValue().GetInteger();
 	m_options.daisy_angular_quantization =		m_pg_options->GetProperty("DAISY descriptor.Daisy angular quantization")->GetValue().GetInteger();
 	m_options.daisy_histogram_quantization =	m_pg_options->GetProperty("DAISY descriptor.Daisy histogram quantization")->GetValue().GetInteger();
-
-    m_options.sift_num_best_features =		    m_pg_options->GetProperty("SIFT detector/descriptor.Sift num best features")->GetValue().GetInteger();
-	m_options.sift_octave_layers =		        m_pg_options->GetProperty("SIFT detector/descriptor.Sift octave layers")->GetValue().GetInteger();
-	m_options.sift_contrast_threshold =			m_pg_options->GetProperty("SIFT detector/descriptor.Sift contrast threshold")->GetValue().GetDouble();
-	m_options.sift_edge_threshold =			    m_pg_options->GetProperty("SIFT detector/descriptor.Sift edge threshold")->GetValue().GetDouble();
-	m_options.sift_sigma =			            m_pg_options->GetProperty("SIFT detector/descriptor.Sift sigma")->GetValue().GetDouble();
 
 	m_options.surf_common_octaves =				m_pg_options->GetProperty("SURF detector/descriptor.Surf octaves")->GetValue().GetInteger();
 	m_options.surf_common_octave_layers =		m_pg_options->GetProperty("SURF detector/descriptor.Surf octave layers")->GetValue().GetInteger();

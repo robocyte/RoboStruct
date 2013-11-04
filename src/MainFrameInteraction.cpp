@@ -348,7 +348,7 @@ void MainFrame::OnReconstruct(wxCommandEvent& event)
 	// Match features
 	wxLogMessage("Matching images...");
 	time = (double)cv::getTickCount();
-	if (m_options.feature_type != 3)
+	if (m_options.feature_type != 2)
     {
         MatchAll();
     } else
