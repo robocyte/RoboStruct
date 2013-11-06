@@ -4,11 +4,11 @@ RoboStruct
 This program implements a full structure from motion pipeline, from detecting and matching image features
 to computing 3d structure and camera positions.
 
-It's based on Noah Snavely's bundler (http://www.cs.cornell.edu/~snavely/bundler/).
-The original code has changed quite a bit, mainly by using OpenCV for feature detection, matching and
-homography/fundamental matrix estimation. Furthermore, Eigen is used for linear algebra,
-SBA was dropped in favor of Ceres for bundle adjustment.
-WxWidgets is used for the GUI, glm and GLEW for OpenGL related stuff. You can find a complete list
+It's based on [Noah Snavely's bundler](http://www.cs.cornell.edu/~snavely/bundler/).
+The original code has changed quite a bit, mainly by using [OpenCV](http://opencv.org/) for feature detection, matching and
+homography/fundamental matrix estimation. Furthermore, [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page) is used for linear algebra,
+SBA was dropped in favor of [Ceres](http://code.google.com/p/ceres-solver/) for bundle adjustment.
+[wxWidgets](http://www.wxwidgets.org/) is used for the GUI, [glm](http://glm.g-truc.net/0.9.4/index.html) and [GLEW](http://glew.sourceforge.net/) for OpenGL related stuff. You can find a complete list
 of used libraries under compiling.
 
 
@@ -39,14 +39,14 @@ This will change soon, so stay tuned.
 
 As for the rest of the dependencies, here is the list:
 
-wxWidgets    http://www.wxwidgets.org/
-OpenCV       http://opencv.org/
-Ceres        http://code.google.com/p/ceres-solver/
-Eigen        http://eigen.tuxfamily.org/index.php?title=Main_Page
-Daisy        http://cvlab.epfl.ch/software/daisy
-OpenCTM      http://openctm.sourceforge.net/
-glm          http://glm.g-truc.net/0.9.4/index.html
-GLEW         http://glew.sourceforge.net/
+[wxWidgets](http://www.wxwidgets.org/)
+[OpenCV](http://opencv.org/)
+[Ceres](http://code.google.com/p/ceres-solver/)
+[Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page)
+[Daisy](http://cvlab.epfl.ch/software/daisy)
+[OpenCTM](http://openctm.sourceforge.net/)
+[glm](http://glm.g-truc.net/0.9.4/index.html)
+[GLEW](http://glew.sourceforge.net/)
 glocyte      coming soon...
 
 The program is currently developed for Windows, a Visual Studio 2012 solution is provided.
