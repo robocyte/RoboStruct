@@ -30,7 +30,7 @@ struct Options
         , akaze_descriptor_size(0)
 		
 		, matching_trees(6)
-		, matching_checks(64)
+		, matching_checks(32)
 		, matching_distance_ratio(0.6)
 		, matching_min_matches(20)
         , ransac_threshold_fundamental(0.001)

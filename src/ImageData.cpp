@@ -55,63 +55,61 @@ bool ImageData::GetExifInfo()
 
 void ImageData::DetectFeatures(const Options& opts)
 {
-	// Cleanup data structures
-	this->ClearDescriptors();
-	m_keys.clear();
+    // Cleanup data structures
+    this->ClearDescriptors();
+    m_keys.clear();
 
-	std::vector<cv::KeyPoint> keys;
-	const auto img = cv::imread(m_filename);
-	cv::Mat grey_img;
-	cv::cvtColor(img, grey_img, CV_BGR2GRAY);
+    std::vector<cv::KeyPoint> keys;
+    const auto img = cv::imread(m_filename);
+    cv::Mat grey_img;
+    cv::cvtColor(img, grey_img, CV_BGR2GRAY);
 
-	switch (opts.feature_type)
-	{
-	case 0: // Detect YAPE/Daisy features
-		{
-            cv::YAPE YapeDet(	opts.yape_radius,
-								opts.yape_threshold,
-								opts.yape_octaves,
-								opts.yape_views,
-								opts.yape_base_feature_size,
-								opts.yape_clustering_distance);
-			YapeDet(grey_img, keys);
+    switch (opts.feature_type)
+    {
+    case 0: // Detect YAPE/Daisy features
+        {
+            cv::YAPE YapeDet(   opts.yape_radius,
+                                opts.yape_threshold,
+                                opts.yape_octaves,
+                                opts.yape_views,
+                                opts.yape_base_feature_size,
+                                opts.yape_clustering_distance);
+            YapeDet(grey_img, keys);
 
-			daisy DaisyDesc = daisy();
-			DaisyDesc.set_image(grey_img.data, m_height, m_width);
-			DaisyDesc.set_parameters(	opts.daisy_radius,
-										opts.daisy_radius_quantization,
-										opts.daisy_angular_quantization,
-										opts.daisy_histogram_quantization);
+            daisy DaisyDesc = daisy();
+            DaisyDesc.set_image(grey_img.data, m_height, m_width);
+            DaisyDesc.set_parameters(	opts.daisy_radius,
+                                        opts.daisy_radius_quantization,
+                                        opts.daisy_angular_quantization,
+                                        opts.daisy_histogram_quantization);
             DaisyDesc.verbose(0);
-            //DaisyDesc.scale_invariant();
-            //DaisyDesc.rotation_invariant();
-			DaisyDesc.initialize_single_descriptor_mode();
+            DaisyDesc.initialize_single_descriptor_mode();
 
-			m_desc_size = DaisyDesc.descriptor_size();
-			m_descriptors.reserve(m_keys.size() * m_desc_size);
+            m_desc_size = DaisyDesc.descriptor_size();
+            m_descriptors.reserve(m_keys.size() * m_desc_size);
 
-			// Compute Daisy descriptors at provided locations
-			for (const auto &key : keys)
-			{
+            // Compute Daisy descriptors at provided locations
+            for (const auto &key : keys)
+            {
                 std::vector<float> descriptor(m_desc_size);
                 DaisyDesc.get_descriptor(key.pt.y, key.pt.x, 35, descriptor.data());
-				m_descriptors.insert(m_descriptors.end(), descriptor.begin(), descriptor.end());
-			}
-			break;
-		}
-	case 1: // Detect SURF features
-		{
-			if (opts.surf_desc_extended)	m_desc_size = 128;
-			else							m_desc_size = 64;
+                m_descriptors.insert(m_descriptors.end(), descriptor.begin(), descriptor.end());
+            }
+            break;
+        }
+    case 1: // Detect SURF features
+	    {
+		    if (opts.surf_desc_extended)	m_desc_size = 128;
+		    else							m_desc_size = 64;
 
-			cv::SURF Surf(	opts.surf_det_hessian_threshold,
-							opts.surf_common_octaves,
-							opts.surf_common_octave_layers,
-							opts.surf_desc_extended,
-							opts.surf_desc_upright);
-			Surf(grey_img, cv::Mat(), keys, m_descriptors);
-			break;
-		}
+		    cv::SURF Surf(	opts.surf_det_hessian_threshold,
+						    opts.surf_common_octaves,
+						    opts.surf_common_octave_layers,
+						    opts.surf_desc_extended,
+						    opts.surf_desc_upright);
+		    Surf(grey_img, cv::Mat(), keys, m_descriptors);
+		    break;
+	    }
     case 2: // Detect AKAZE features
         {
             m_desc_size = opts.akaze_descriptor_size;
@@ -119,23 +117,23 @@ void ImageData::DetectFeatures(const Options& opts)
             grey_img.convertTo(working_img, CV_32F, 1.0 / 255.0, 0);
 
             AKAZEOptions options;
-            options.img_width = grey_img.cols;
-            options.img_height = grey_img.rows;
-            options.soffset = DEFAULT_SCALE_OFFSET;
-            options.omin = DEFAULT_OCTAVE_MIN;
-            options.omax = DEFAULT_OCTAVE_MAX;
-            options.nsublevels = DEFAULT_NSUBLEVELS;
-            options.dthreshold = opts.akaze_threshold;
-            options.diffusivity = DEFAULT_DIFFUSIVITY_TYPE;
-            options.descriptor = DEFAULT_DESCRIPTOR;
-            options.descriptor_size = opts.akaze_descriptor_size;
-            options.descriptor_channels = DEFAULT_LDB_CHANNELS;
+            options.img_width               = grey_img.cols;
+            options.img_height              = grey_img.rows;
+            options.soffset                 = DEFAULT_SCALE_OFFSET;
+            options.omin                    = DEFAULT_OCTAVE_MIN;
+            options.omax                    = DEFAULT_OCTAVE_MAX;
+            options.nsublevels              = DEFAULT_NSUBLEVELS;
+            options.dthreshold              = opts.akaze_threshold;
+            options.diffusivity             = DEFAULT_DIFFUSIVITY_TYPE;
+            options.descriptor              = DEFAULT_DESCRIPTOR;
+            options.descriptor_size         = opts.akaze_descriptor_size;
+            options.descriptor_channels     = DEFAULT_LDB_CHANNELS;
             options.descriptor_pattern_size = DEFAULT_LDB_PATTERN_SIZE;
-            options.sderivatives = DEFAULT_SIGMA_SMOOTHING_DERIVATIVES;
-            options.upright = DEFAULT_UPRIGHT;
-            options.save_scale_space = DEFAULT_SAVE_SCALE_SPACE;
-            options.save_keypoints = DEFAULT_SAVE_KEYPOINTS;
-            options.verbosity = DEFAULT_VERBOSITY;
+            options.sderivatives            = DEFAULT_SIGMA_SMOOTHING_DERIVATIVES;
+            options.upright                 = DEFAULT_UPRIGHT;
+            options.save_scale_space        = DEFAULT_SAVE_SCALE_SPACE;
+            options.save_keypoints          = DEFAULT_SAVE_KEYPOINTS;
+            options.verbosity               = DEFAULT_VERBOSITY;
 
             AKAZE akaze(options);
             akaze.Create_Nonlinear_Scale_Space(working_img);
