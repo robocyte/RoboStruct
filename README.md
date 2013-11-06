@@ -7,7 +7,7 @@ to computing 3d structure and camera positions.
 It's based on [Noah Snavely's bundler](http://www.cs.cornell.edu/~snavely/bundler/).
 The original code has changed quite a bit, mainly by using [OpenCV](http://opencv.org/) for feature detection, matching and
 homography/fundamental matrix estimation. Furthermore, [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page) is used for linear algebra,
-SBA was dropped in favor of [Ceres](http://code.google.com/p/ceres-solver/) for bundle adjustment.
+[SBA](http://users.ics.forth.gr/~lourakis/sba/) was dropped in favor of [Ceres](http://code.google.com/p/ceres-solver/) for bundle adjustment.
 [wxWidgets](http://www.wxwidgets.org/) is used for the GUI, [glm](http://glm.g-truc.net/0.9.4/index.html) and [GLEW](http://glew.sourceforge.net/) for OpenGL related stuff. You can find a complete list
 of used libraries under compiling.
 
@@ -28,7 +28,8 @@ optimal candidates for reconstruction.
 In order to see something in the 3d viewport, a graphics card capable of OpenGL 3.3 and above is needed.
 
 Results will be automatically saved as a .ply file in the directory of the source images,
-exporting the solution to MAYA, .out files (from bundler) and CMVS is also possible.
+exporting the solution to Autodesk Maya, .out files (bundler) and [CMVS](http://www.di.ens.fr/cmvs/) is also possible.
+[Blender](http://www.blender.org/) export is planned for the future.
 
 
 Compiling
@@ -40,13 +41,16 @@ This will change soon, so stay tuned.
 As for the rest of the dependencies, here is the list:
 
 [wxWidgets](http://www.wxwidgets.org/)
+
+[AKAZE](https://github.com/davidok8/AKAZE)
+
+[Daisy](http://cvlab.epfl.ch/software/daisy)
+
 [OpenCV](http://opencv.org/)
 
 [Ceres](http://code.google.com/p/ceres-solver/)
 
 [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page)
-
-[Daisy](http://cvlab.epfl.ch/software/daisy)
 
 [OpenCTM](http://openctm.sourceforge.net/)
 
@@ -54,6 +58,6 @@ As for the rest of the dependencies, here is the list:
 
 [GLEW](http://glew.sourceforge.net/)
 
-glocyte coming soon...
+glocyte      coming soon...
 
-The program is currently developed for Windows, a Visual Studio 2012 solution is provided.
+The program is currently being developed for Windows, a Visual Studio 2012 solution is provided.
