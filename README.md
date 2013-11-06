@@ -41,12 +41,19 @@ As for the rest of the dependencies, here is the list:
 
 [wxWidgets](http://www.wxwidgets.org/)
 [OpenCV](http://opencv.org/)
+
 [Ceres](http://code.google.com/p/ceres-solver/)
+
 [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page)
+
 [Daisy](http://cvlab.epfl.ch/software/daisy)
+
 [OpenCTM](http://openctm.sourceforge.net/)
+
 [glm](http://glm.g-truc.net/0.9.4/index.html)
+
 [GLEW](http://glew.sourceforge.net/)
-glocyte      coming soon...
+
+glocyte coming soon...
 
 The program is currently developed for Windows, a Visual Studio 2012 solution is provided.
