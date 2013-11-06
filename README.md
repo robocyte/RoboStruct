@@ -40,24 +40,15 @@ This will change soon, so stay tuned.
 
 As for the rest of the dependencies, here is the list:
 
-[wxWidgets](http://www.wxwidgets.org/)
-
-[AKAZE](https://github.com/davidok8/AKAZE)
-
-[Daisy](http://cvlab.epfl.ch/software/daisy)
-
-[OpenCV](http://opencv.org/)
-
-[Ceres](http://code.google.com/p/ceres-solver/)
-
-[Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page)
-
-[OpenCTM](http://openctm.sourceforge.net/)
-
-[glm](http://glm.g-truc.net/0.9.4/index.html)
-
-[GLEW](http://glew.sourceforge.net/)
-
-glocyte      coming soon...
+  * [wxWidgets](http://www.wxwidgets.org/)
+  * [AKAZE](https://github.com/davidok8/AKAZE)
+  * [Daisy](http://cvlab.epfl.ch/software/daisy)
+  * [OpenCV](http://opencv.org/)
+  * [Ceres](http://code.google.com/p/ceres-solver/)
+  * [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page)
+  * [OpenCTM](http://openctm.sourceforge.net/)
+  * [glm](http://glm.g-truc.net/0.9.4/index.html)
+  * [GLEW](http://glew.sourceforge.net/)
+  * glocyte (coming soon...)
 
 The program is currently being developed for Windows, a Visual Studio 2012 solution is provided.
