@@ -7,7 +7,7 @@ namespace
 {
 	struct ProjectionResidual : LMFunctor<double>
 	{
-		ProjectionResidual(const Vec3Vec &points, const Vec2Vec &projections)
+		ProjectionResidual(const Point3Vec &points, const Point2Vec &projections)
 			: LMFunctor<double>(11, 2 * static_cast<int>(points.size()))
 			, m_points(points)
 			, m_projections(projections)
@@ -23,11 +23,11 @@ namespace
 			int position = 0;
 			for (int i = 0; i < m_points.size(); ++i)
 			{
-				Vec3 pr = P * Vec4(m_points[i].x(), m_points[i].y(), m_points[i].z(), 1.0);
-				pr /= -pr.z();
+				Point3 projection = P * EuclideanToHomogenous(m_points[i]);
+				projection /= -projection.z();
 
-				fvec(position + 0) = pr.x() - m_projections[i].x();
-				fvec(position + 1) = pr.y() - m_projections[i].y();
+				fvec(position + 0) = projection.x() - m_projections[i].x();
+				fvec(position + 1) = projection.y() - m_projections[i].y();
 
 				position += 2;
 			}
@@ -40,11 +40,11 @@ namespace
 			int position = 0;
 			for (int i = 0; i < m_points.size(); ++i)
 			{
-				Vec3 pr = P * Vec4(m_points[i].x(), m_points[i].y(), m_points[i].z(), 1.0);
-				pr /= -pr.z();
+				Point3 projection = P * EuclideanToHomogenous(m_points[i]);
+				projection /= -projection.z();
 
-				fvec(position + 0) = pr.x() - m_projections[i].x();
-				fvec(position + 1) = pr.y() - m_projections[i].y();
+				fvec(position + 0) = projection.x() - m_projections[i].x();
+				fvec(position + 1) = projection.y() - m_projections[i].y();
 
 				position += 2;
 			}
@@ -52,21 +52,21 @@ namespace
 			return 0;
 		}
 
-		Vec3Vec m_points;
-		Vec2Vec m_projections;
+		Point3Vec m_points;
+		Point2Vec m_projections;
 	};
 
-	std::vector<int> EvaluateProjectionMatrix(const Mat34 &P, const Vec3Vec &points, const Vec2Vec &projections, double threshold, double *error)
+	std::vector<int> EvaluateProjectionMatrix(const Mat34 &P, const Point3Vec &points, const Point2Vec &projections, double threshold, double *error)
 	{
 		std::vector<int> inlier_indices;
 		*error = 0.0;
 
 		for (int i = 0; i < points.size(); ++i)
 		{
-			Vec3 pr = P * Vec4(points[i].x(), points[i].y(), points[i].z(), 1.0);
-			pr /= -pr.z();
+			Point3 projection = P * EuclideanToHomogenous(points[i]);
+			projection /= -projection.z();
 			    
-			double dist = (pr.head(2) - projections[i]).squaredNorm();
+			double dist = (projection.head<2>() - projections[i]).squaredNorm();
 
 			if (dist < threshold)
 			{
@@ -78,7 +78,7 @@ namespace
 		return inlier_indices;
 	}
 
-	Mat34 RefineProjectionMatrixNonlinear(const Mat34& P, const Vec3Vec &points, const Vec2Vec &projections)
+	Mat34 RefineProjectionMatrixNonlinear(const Mat34& P, const Point3Vec &points, const Point2Vec &projections)
 	{
 		Vec x(11);
 	
@@ -99,7 +99,7 @@ namespace
 	}
 }
 
-Mat34 ComputeProjectionMatrix(const Vec3Vec &points, const Vec2Vec &projections, bool optimize)
+Mat34 ComputeProjectionMatrix(const Point3Vec &points, const Point2Vec &projections, bool optimize)
 {
 	int num_pts((int)points.size());
 
@@ -137,7 +137,7 @@ Mat34 ComputeProjectionMatrix(const Vec3Vec &points, const Vec2Vec &projections,
 	return P;
 }
 
-int ComputeProjectionMatrixRansac(const Vec3Vec &points, const Vec2Vec &projections,
+int ComputeProjectionMatrixRansac(const Point3Vec &points, const Point2Vec &projections,
 								  int ransac_rounds, double ransac_threshold,
 								  Mat34 *P)
 {
@@ -149,15 +149,15 @@ int ComputeProjectionMatrixRansac(const Vec3Vec &points, const Vec2Vec &projecti
 		return -1;
 	}
 
-	Vec3Vec final_pts;
-	Vec2Vec final_projs;
+	Point3Vec final_pts;
+	Point2Vec final_projs;
 
 	int max_inliers		= 0;
 	double max_error	= std::numeric_limits<double>::max();
 	for (int round = 0; round < ransac_rounds; round++)
 	{
-		Vec3Vec sample_pts;
-		Vec2Vec sample_projs;
+		Point3Vec sample_pts;
+		Point2Vec sample_projs;
 
 		auto sample_indices = util::GetNRandomIndices(6, num_pts);
 		for (int i : sample_indices)

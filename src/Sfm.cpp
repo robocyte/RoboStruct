@@ -4,7 +4,7 @@ namespace
 {
 	struct CameraResidual : LMFunctor<double>
 	{
-		CameraResidual(const Camera &camera, const Vec3Vec &points, const Vec2Vec &projections, bool adjust_focal)
+		CameraResidual(const Camera &camera, const Point3Vec &points, const Point2Vec &projections, bool adjust_focal)
 			: LMFunctor<double>(adjust_focal ? 9 : 6, adjust_focal ? 2 * points.size() + 3 : 2 * points.size())
 			, m_camera(camera)
 			, m_points(points)
@@ -20,7 +20,7 @@ namespace
 
 			for (int i = 0; i < num_points; ++i)
 			{
-				Vec2 projection = ProjectPoint(x, m_points[i]);
+				Point2 projection = ProjectPoint(x, m_points[i]);
 
 				fvec(2 * i + 0) = m_projections[i].x() - projection.x();
 				fvec(2 * i + 1) = m_projections[i].y() - projection.y();
@@ -36,7 +36,7 @@ namespace
 			return 0;
 		}
 
-		Vec2 ProjectPoint(const Vec &x, const Vec3 &point) const
+		Point2 ProjectPoint(const Vec &x, const Point3 &point) const
 		{
 			double focal_length = 0.0;
 			if (m_adjust_focal)	focal_length = x(6);
@@ -46,8 +46,8 @@ namespace
 			Mat3 Rnew = AngleAxisToRotationMatrix(x.segment(3, 3)) * m_camera.m_R;
 
 			// Project
-			Vec3 tmp = Rnew * (point - x.head<3>());
-			Vec2 projection = tmp.head<2>() / -tmp.z();
+			Point3 tmp = Rnew * (point - x.head<3>());
+			Point2 projection = tmp.head<2>() / -tmp.z();
 
 			if (m_adjust_focal)
 			{
@@ -62,8 +62,8 @@ namespace
 		}
 
 		Camera m_camera;
-		Vec3Vec	m_points;
-		Vec2Vec	m_projections;
+		Point3Vec	m_points;
+		Point2Vec	m_projections;
 
 		bool	m_adjust_focal;
 
@@ -90,11 +90,11 @@ Mat34 Camera::GetProjectionMatrix() const
     return GetIntrinsicMatrix() * P;
 }
 
-Vec2 Camera::ProjectFinal(const Vec3 &point)
+Point2 Camera::ProjectFinal(const Point3 &point)
 {
 	// HZ p. 153f
-	Vec3 tmp = m_R * (point - m_t);
-	Vec2 projected = tmp.head<2>() / -tmp.z();
+	Point3 tmp = m_R * (point - m_t);
+	Point2 projected = tmp.head<2>() / -tmp.z();
 
 	// Compute radial distortion
 	double r2 = projected.squaredNorm() / (m_focal_length * m_focal_length);
@@ -103,11 +103,11 @@ Vec2 Camera::ProjectFinal(const Vec3 &point)
     return projected * factor * m_focal_length;
 }
 
-Vec2 Camera::ProjectRD(const Vec3 &point)
+Point2 Camera::ProjectRD(const Point3 &point)
 {
 	// HZ p. 153f
-	Vec3 tmp = m_R * (point - m_t);
-	Vec2 projected = tmp.head<2>() * m_focal_length / -tmp.z();
+	Point3 tmp = m_R * (point - m_t);
+	Point2 projected = tmp.head<2>() * m_focal_length / -tmp.z();
 
 	// Compute radial distortion
 	double r2 = projected.squaredNorm() / (m_focal_length * m_focal_length);
@@ -116,7 +116,7 @@ Vec2 Camera::ProjectRD(const Vec3 &point)
     return projected * factor;
 }
 
-void RefineCamera(Camera *camera, const Vec3Vec &points, const Vec2Vec &projections, bool adjust_focal)
+void RefineCamera(Camera *camera, const Point3Vec &points, const Point2Vec &projections, bool adjust_focal)
 {
 	Vec x(adjust_focal ? 9 : 6);
 	if (adjust_focal)	x << camera->m_t.x(), camera->m_t.y(), camera->m_t.z(), 0.0, 0.0, 0.0, camera->m_focal_length, camera->m_k(0), camera->m_k(1);

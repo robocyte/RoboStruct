@@ -63,17 +63,22 @@ Vec3 RotationMatrixToAngleAxis(const Mat3 &R)
 	return angle_axis;
 }
 
-Vec3 EuclideanToHomogenous(const Vec2 &x)
+Point3 EuclideanToHomogenous(const Point2 &x)
 {
-    return Vec3(x.x(), x.y(), 1.0);
+    return Point3(x.x(), x.y(), 1.0);
 }
 
-Vec4 EuclideanToHomogenous(const Vec3 &x)
+Point4 EuclideanToHomogenous(const Point3 &x)
 {
-    return Vec4(x.x(), x.y(), x.z(), 1.0);
+    return Point4(x.x(), x.y(), x.z(), 1.0);
 }
 
-Vec2 HomogenousToEuclidean(const Vec3 &x)
+Point2 HomogenousToEuclidean(const Point3 &x)
 {
     return x.head<2>() / x.z();
+}
+
+Point3 HomogenousToEuclidean(const Point4 &x)
+{
+    return x.head<3>() / x[3];
 }

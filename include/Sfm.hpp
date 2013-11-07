@@ -27,15 +27,15 @@ struct Camera
 	Mat3    GetIntrinsicMatrix() const;
     Mat34   GetProjectionMatrix() const;
 
-    Vec2    ProjectFinal(const Vec3 &point);
-    Vec2    ProjectRD(const Vec3 &point);
+    Point2    ProjectFinal(const Point3 &point);
+    Point2    ProjectRD(const Point3 &point);
 
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 };
 
 Vec6 InvertDistortion(double r0, double r1, const Vec6 &k_in);
 
-Vec2 UndistortNormalizedPoint(const Vec2 &p, const Vec6 & k_inverse);
+Point2 UndistortNormalizedPoint(const Point2 &p, const Vec6 & k_inverse);
 
 // Refine the position of a single camera
-void RefineCamera(Camera *camera, const Vec3Vec &points, const Vec2Vec &projections, bool adjust_focal);
+void RefineCamera(Camera *camera, const Point3Vec &points, const Point2Vec &projections, bool adjust_focal);

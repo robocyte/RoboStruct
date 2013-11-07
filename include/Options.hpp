@@ -29,7 +29,7 @@ struct Options
         , akaze_threshold(0.0007)
         , akaze_descriptor_size(0)
 		
-		, matching_trees(6)
+		, matching_trees(4)
 		, matching_checks(32)
 		, matching_distance_ratio(0.6)
 		, matching_min_matches(20)

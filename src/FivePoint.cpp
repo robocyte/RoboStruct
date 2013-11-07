@@ -9,7 +9,7 @@ namespace
 {
 	typedef std::vector<Poly3> PolyVec;
 
-	Mat		ComputeNullspaceBasis(const Vec2Vec &pts1, const Vec2Vec &pts2)
+	Mat		ComputeNullspaceBasis(const Point2Vec &pts1, const Point2Vec &pts2)
 	{
 		// Generate the epipolar constraint matrix
 		Eigen::Matrix<double, 5, 9> A;
@@ -200,7 +200,7 @@ namespace
 		return solutions;
 	}
 
-	Mat3Vec GenerateEssentialMatrixHypotheses(const Vec2Vec &pts1, const Vec2Vec &pts2)
+	Mat3Vec GenerateEssentialMatrixHypotheses(const Point2Vec &pts1, const Point2Vec &pts2)
 	{
 		auto basis =		ComputeNullspaceBasis(pts1, pts2);
 		auto constraints =	ComputeConstraintMatrix(basis);
@@ -209,17 +209,17 @@ namespace
 		return				ComputeEssentialMatricesGroebner(action, basis);
 	}
 
-	double	FundamentalMatrixComputeResidual(const Mat3 &F, const Vec3 &pt1, const Vec3 &pt2)
+	double	FundamentalMatrixComputeResidual(const Mat3 &F, const Point3 &pt1, const Point3 &pt2)
 	{
-		Vec3 Fl = F * pt2;
-		Vec3 Fr = F * pt1;
+		Point3 Fl = F * pt2;
+		Point3 Fr = F * pt1;
 
 		double pt = pt1.dot(Fl);
 
 		return (1.0 / (Fl(0) * Fl(0) + Fl(1) * Fl(1)) + 1.0 / (Fr(0) * Fr(0) + Fr(1) * Fr(1))) * (pt * pt);
 	}
 
-	int		EvaluateFundamentalMatrix(const Mat3 &F, const Vec2Vec &pts1, const Vec2Vec &pts2, double thresh_norm, double *score)
+	int		EvaluateFundamentalMatrix(const Mat3 &F, const Point2Vec &pts1, const Point2Vec &pts2, double thresh_norm, double *score)
 	{
 		int num_inliers		= 0;
 		double min_resid	= 1.0e20;
@@ -227,7 +227,7 @@ namespace
 
 		for (int i = 0; i < pts1.size(); i++)
 		{
-			double resid = FundamentalMatrixComputeResidual(F, Vec3(pts2[i].x(), pts2[i].y(), 1.0), Vec3(pts1[i].x(), pts1[i].y(), 1.0));
+			double resid = FundamentalMatrixComputeResidual(F, Point3(pts2[i].x(), pts2[i].y(), 1.0), Point3(pts1[i].x(), pts1[i].y(), 1.0));
 
 			likelihood += log(1.0 + resid * resid / (thresh_norm));
 
@@ -244,26 +244,26 @@ namespace
 	}
 }
 
-int ComputeRelativePoseRansac(	const Vec2Vec &pts1, const Vec2Vec &pts2,
+int ComputeRelativePoseRansac(	const Point2Vec &pts1, const Point2Vec &pts2,
 								const Mat &K1, const Mat &K2,
 								double ransac_threshold, int ransac_rounds,
 								Mat3 *R, Vec3 *t)
 {
 	int num_matches = static_cast<int>(pts1.size());
 
-	Vec2Vec pts1_norm;	pts1_norm.reserve(num_matches);
-	Vec2Vec pts2_norm;	pts2_norm.reserve(num_matches);
+	Point2Vec pts1_norm;	pts1_norm.reserve(num_matches);
+	Point2Vec pts2_norm;	pts2_norm.reserve(num_matches);
 
 	Mat3 K1_inv = K1.inverse();
 	Mat3 K2_inv = K2.inverse();
 
 	for (int i = 0; i < num_matches; i++)
 	{
-		Vec3 r_norm = K1_inv * Vec3(pts1[i].x(), pts1[i].y(), 1.0);
-		Vec3 l_norm = K2_inv * Vec3(pts2[i].x(), pts2[i].y(), 1.0);
+		Point3 r_norm = K1_inv * EuclideanToHomogenous(pts1[i]);
+		Point3 l_norm = K2_inv * EuclideanToHomogenous(pts2[i]);
 
-		pts1_norm.push_back(Vec2(-r_norm(0), -r_norm(1)));
-		pts2_norm.push_back(Vec2(-l_norm(0), -l_norm(1)));
+        pts1_norm.push_back(-r_norm.head<2>());
+		pts2_norm.push_back(-l_norm.head<2>());
 	}
 
 	Mat3 E_best;
@@ -271,7 +271,7 @@ int ComputeRelativePoseRansac(	const Vec2Vec &pts1, const Vec2Vec &pts2,
 	auto min_score	= std::numeric_limits<double>::max();
 	for (int round = 0; round < ransac_rounds; round++)
 	{
-		Vec2Vec sample_pts1, sample_pts2;
+		Point2Vec sample_pts1, sample_pts2;
 		int num_ident = 0;
 
 		auto sample_indices = util::GetNRandomIndices(5, num_matches);

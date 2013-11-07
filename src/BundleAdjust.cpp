@@ -312,13 +312,13 @@ void MainFrame::SetupInitialCameraPair(IntPair initial_pair, CamVec &cameras, Po
 		int key_idx2(list[i].m_idx2);
 
 		// Normalize the point
-		Vec3 p_norm1 = K1_inv * Vec3(m_images[i_best].m_keys[key_idx1].m_coords.x(), m_images[i_best].m_keys[key_idx1].m_coords.y(), -1.0);
-		Vec3 p_norm2 = K2_inv * Vec3(m_images[j_best].m_keys[key_idx2].m_coords.x(), m_images[j_best].m_keys[key_idx2].m_coords.y(), -1.0);
+		Point3 p_norm1 = K1_inv * Point3(m_images[i_best].m_keys[key_idx1].m_coords.x(), m_images[i_best].m_keys[key_idx1].m_coords.y(), -1.0);
+		Point3 p_norm2 = K2_inv * Point3(m_images[j_best].m_keys[key_idx2].m_coords.x(), m_images[j_best].m_keys[key_idx2].m_coords.y(), -1.0);
 
 		// Put the translation in standard form
 		Observations observations;
-        observations.push_back(Observation(Vec2(p_norm1.head<2>() / p_norm1.z()), cameras[0]));
-        observations.push_back(Observation(Vec2(p_norm2.head<2>() / p_norm2.z()), cameras[1]));
+        observations.push_back(Observation(Point2(p_norm1.head<2>() / p_norm1.z()), cameras[0]));
+        observations.push_back(Observation(Point2(p_norm2.head<2>() / p_norm2.z()), cameras[1]));
 
 		double error;
 		auto position = Triangulate(observations, &error);
@@ -347,8 +347,8 @@ bool MainFrame::EstimateRelativePose(int i1, int i2, Camera *camera1, Camera *ca
 {
 	auto &matches = m_matches.GetMatchList(GetMatchIndex(i1, i2));
 
-    Vec2Vec projections1; projections1.reserve(matches.size());
-	Vec2Vec projections2; projections2.reserve(matches.size());
+    Point2Vec projections1; projections1.reserve(matches.size());
+	Point2Vec projections2; projections2.reserve(matches.size());
 
 	for (const auto &match : matches)
 	{
@@ -535,8 +535,8 @@ Camera MainFrame::BundleInitializeImage(int image_idx, int camera_idx, PointVec 
 	image.SetTracks();
 
 	// **** Connect the new camera to any existing points ****
-	Vec3Vec	points_solve;
-	Vec2Vec	projs_solve;
+	Point3Vec	points_solve;
+	Point2Vec	projs_solve;
 	IntVec	idxs_solve;
 	IntVec	keys_solve;
 
@@ -593,8 +593,8 @@ Camera MainFrame::BundleInitializeImage(int image_idx, int camera_idx, PointVec 
 
 	// **** Finally, start the bundle adjustment ****
 	wxLogMessage("[BundleInitializeImage] Adjusting...");
-	Vec3Vec	points_final;
-	Vec2Vec	projs_final;
+	Point3Vec	points_final;
+	Point2Vec	projs_final;
 	IntVec	idxs_final;
 	IntVec	keys_final;
 
@@ -631,7 +631,7 @@ Camera MainFrame::BundleInitializeImage(int image_idx, int camera_idx, PointVec 
 	return camera_new;
 }
 
-bool MainFrame::FindAndVerifyCamera(const Vec3Vec &points, const Vec2Vec &projections, int *idxs_solve, Mat3 *K, Mat3 *R, Vec3 *t, IntVec &inliers, IntVec &inliers_weak, IntVec &outliers)
+bool MainFrame::FindAndVerifyCamera(const Point3Vec &points, const Point2Vec &projections, int *idxs_solve, Mat3 *K, Mat3 *R, Vec3 *t, IntVec &inliers, IntVec &inliers_weak, IntVec &outliers)
 {
 	// First, find the projection matrix
 	int r = -1;
@@ -664,8 +664,8 @@ bool MainFrame::FindAndVerifyCamera(const Vec3Vec &points, const Vec2Vec &projec
 	int num_behind = 0;
 	for (int j = 0; j < points.size(); j++)
 	{
-		Vec3 q = *K * (Rigid * EuclideanToHomogenous(points[j]));
-		Vec2 pimg = -q.head<2>() / q.z();
+		Point3 q = *K * (Rigid * EuclideanToHomogenous(points[j]));
+		Point2 pimg = -q.head<2>() / q.z();
 		double diff = (pimg - projections[j]).norm();
 
 		if (diff < m_options.projection_estimation_threshold) inliers.push_back(j);
@@ -695,10 +695,10 @@ bool MainFrame::FindAndVerifyCamera(const Vec3Vec &points, const Vec2Vec &projec
 	return true;
 }
 
-void MainFrame::RefineCameraParameters(Camera *camera, const Vec3Vec &points, const Vec2Vec &projections, int *pt_idxs, IntVec &inliers)
+void MainFrame::RefineCameraParameters(Camera *camera, const Point3Vec &points, const Point2Vec &projections, int *pt_idxs, IntVec &inliers)
 {
-	Vec3Vec points_curr(points);
-	Vec2Vec projs_curr(projections);
+	Point3Vec points_curr(points);
+	Point2Vec projs_curr(projections);
 
 	inliers.resize(points.size());
 	std::iota(inliers.begin(), inliers.end(), 0);
@@ -715,8 +715,8 @@ void MainFrame::RefineCameraParameters(Camera *camera, const Vec3Vec &points, co
 		std::vector<double> errors;
 		for (int i = 0; i < points_curr.size(); i++)
 		{
-            Vec2 reprojection = camera->ProjectFinal(points_curr[i]);
-			errors.push_back((reprojection - projs_curr[i]).norm());
+            Point2 projection = camera->ProjectFinal(points_curr[i]);
+			errors.push_back((projection - projs_curr[i]).norm());
 		}
 
 		// Sort and histogram errors
@@ -725,8 +725,8 @@ void MainFrame::RefineCameraParameters(Camera *camera, const Vec3Vec &points, co
 		double avg			= std::accumulate(errors.begin(), errors.end(), 0.0) / errors.size();
 		wxLogMessage("[RefineCameraParameters] Mean error [%d pts]: %.3f [med: %.3f, outlier threshold: = %.3f]", points_curr.size(), avg, median, threshold);
 
-		Vec3Vec points_next;
-		Vec2Vec projs_next;
+		Point3Vec points_next;
+		Point2Vec projs_next;
 		std::vector<int> inliers_next;
 
 		for (int i = 0; i < points_curr.size(); i++)
@@ -772,7 +772,7 @@ void MainFrame::RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_ord
 
     int num_pts = points.size();
     std::vector<int>	remap(num_pts);
-    Vec3Vec         	nz_pts(num_pts);
+    Point3Vec         	nz_pts(num_pts);
 
 	clock_t start_all, stop_all;
 	start_all = clock();
@@ -985,9 +985,9 @@ void MainFrame::RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_ord
 				if (key.m_extra >= 0)
 				{
 					int pt_idx = key.m_extra;
-                    Vec2 reprojection = cameras[i].ProjectRD(nz_pts[remap[pt_idx]]);
+                    Point2 projection = cameras[i].ProjectRD(nz_pts[remap[pt_idx]]);
 
-					dists.push_back((reprojection - key.m_coords).norm());
+					dists.push_back((projection - key.m_coords).norm());
 				}
 			}
 
@@ -1189,10 +1189,8 @@ void MainFrame::BundleAdjustAddAllNewPoints(int num_cameras, IntVec &added_order
 			int image_idx	= added_order[track.first];
 			auto &key		= GetKey(image_idx, track.second);
 
-            Mat3 K = cam.GetIntrinsicMatrix();
-
-			Vec3 pn = K.inverse() * EuclideanToHomogenous(key.m_coords);
-            Vec2 pu = UndistortNormalizedPoint(Vec2(-pn.x(), -pn.y()), cam.m_k_inv);
+			Point3 pn = cam.GetIntrinsicMatrix().inverse() * EuclideanToHomogenous(key.m_coords);
+            Point2 pu = UndistortNormalizedPoint(-pn.head<2>(), cam.m_k_inv);
 
 			observations.push_back(Observation(pu, cam));
 		}
@@ -1205,9 +1203,9 @@ void MainFrame::BundleAdjustAddAllNewPoints(int num_cameras, IntVec &added_order
 			int image_idx	= added_order[track.first];
 			auto &key		= GetKey(image_idx, track.second);
 
-            Vec2 reprojection = cameras[track.first].ProjectFinal(point);
+            Point2 projection = cameras[track.first].ProjectFinal(point);
 
-			error += (reprojection - key.m_coords).squaredNorm();
+			error += (projection - key.m_coords).squaredNorm();
 		}
 		error = sqrt(error / new_tracks[i].size());
 
@@ -1267,15 +1265,15 @@ int MainFrame::RemoveBadPointsAndCameras(const IntVec &added_order, CamVec &came
 		{
             int v1(point.m_views[j].first);
 
-            Vec3 re1 = point.m_pos - cameras[v1].m_t;
-			re1 *= 1.0 / re1.norm();
+            Point3 re1 = point.m_pos - cameras[v1].m_t;
+			re1 /= re1.norm();
 
 			for (int k = j + 1; k < point.m_views.size(); k++)
 			{
                 int v2(point.m_views[k].first);
 
-                Vec3 re2 = point.m_pos - cameras[v2].m_t;
-				re2 *= 1.0 / re2.norm();
+                Point3 re2 = point.m_pos - cameras[v2].m_t;
+				re2 /= re2.norm();
 
 				double angle = acos(util::clamp(re1.dot(re2), (-1.0 + 1.0e-8), (1.0 - 1.0e-8)));
 

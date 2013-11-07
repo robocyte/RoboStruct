@@ -17,10 +17,10 @@ namespace
 			int position = 0;
 			for (const auto &observation : m_observations)
 			{
-				auto reprojected_point = Project(x, observation);
+				auto projection = Project(x, observation);
 
-				fvec(position + 0) = observation.m_point.x() - reprojected_point.x();
-				fvec(position + 1) = observation.m_point.y() - reprojected_point.y();
+				fvec(position + 0) = observation.m_point.x() - projection.x();
+				fvec(position + 1) = observation.m_point.y() - projection.y();
 
 				position += 2;
 			}
@@ -32,19 +32,19 @@ namespace
 	};
 }
 
-double ComputeRayAngle(Vec2 p, Vec2 q, const Camera &cam1, const Camera &cam2)
+double ComputeRayAngle(Point2 p, Point2 q, const Camera &cam1, const Camera &cam2)
 {
 	Mat3 K1_inv = cam1.GetIntrinsicMatrix().inverse();
 	Mat3 K2_inv = cam2.GetIntrinsicMatrix().inverse();
 
-	Vec3 p3n = K1_inv * Vec3(p.x(), p.y(), 1.0);
-	Vec3 q3n = K2_inv * Vec3(q.x(), q.y(), 1.0);
+	Point3 p3n = K1_inv * EuclideanToHomogenous(p);
+	Point3 q3n = K2_inv * EuclideanToHomogenous(q);
 
-	Vec2 pn(p3n.x() / p3n.z(), p3n.y() / p3n.z());
-	Vec2 qn(q3n.x() / q3n.z(), q3n.y() / q3n.z());
+    Point2 pn = p3n.head<2>() / p3n.z();
+	Point2 qn = q3n.head<2>() / q3n.z();
 
-	Vec3 p_w = cam1.m_R.transpose() * Vec3(pn.x(), pn.y(), -1.0);
-	Vec3 q_w = cam2.m_R.transpose() * Vec3(qn.x(), qn.y(), -1.0);
+	Point3 p_w = cam1.m_R.transpose() * Point3(pn.x(), pn.y(), -1.0);
+	Point3 q_w = cam2.m_R.transpose() * Point3(qn.x(), qn.y(), -1.0);
 
 	// Compute the angle between the rays
 	double dot = p_w.dot(q_w);
@@ -53,19 +53,19 @@ double ComputeRayAngle(Vec2 p, Vec2 q, const Camera &cam1, const Camera &cam2)
 	return acos(util::clamp((dot / mag), (-1.0 + 1.0e-8), (1.0 - 1.0e-8)));
 }
 
-bool CheckCheirality(const Vec3 p, const Camera &cam)
+bool CheckCheirality(const Point3 p, const Camera &cam)
 {
-	Vec3 pt = cam.m_R * (p - cam.m_t);
+	Point3 pt = cam.m_R * (p - cam.m_t);
 	return (pt.z() < 0.0);
 }
 
-Vec2 Project(const Vec3 &p, const Observation &observation)
+Point2 Project(const Point3 &p, const Observation &observation)
 {
-	Vec3 proj = observation.m_R * p + observation.m_t;
-	return Vec2(proj.x() / proj.z(), proj.y() / proj.z());
+	Point3 projection = observation.m_R * p + observation.m_t;
+	return projection.head<2>() / projection.z();
 }
 
-Vec3 Triangulate(const Observations &observations, double *error, bool optimize)
+Point3 Triangulate(const Observations &observations, double *error, bool optimize)
 {
 	int num_points = static_cast<int>(observations.size());
 
@@ -104,7 +104,7 @@ Vec3 Triangulate(const Observations &observations, double *error, bool optimize)
 	return x;
 }
 
-bool FindExtrinsics(const Mat3 &E, const Vec2Vec &pts1, const Vec2Vec &pts2, Mat3 *R, Vec3 *t)
+bool FindExtrinsics(const Mat3 &E, const Point2Vec &pts1, const Point2Vec &pts2, Mat3 *R, Vec3 *t)
 {
 	int num_correspondences = static_cast<int>(pts1.size());
 
@@ -140,8 +140,8 @@ bool FindExtrinsics(const Mat3 &E, const Vec2Vec &pts1, const Vec2Vec &pts2, Mat
 		observations.push_back(Observation(pts1[i], R0, t0));
 		observations.push_back(Observation(pts2[i], Ra, tu));
 
-		Vec3 Q = Triangulate(observations);
-		Vec3 PQ = (Ra * Q) + tu;
+		Point3 Q = Triangulate(observations);
+		Point3 PQ = (Ra * Q) + tu;
 
 		if (Q.z() > 0)	c1_pos++;
 		else			c1_neg++;
@@ -152,11 +152,11 @@ bool FindExtrinsics(const Mat3 &E, const Vec2Vec &pts1, const Vec2Vec &pts2, Mat
 
 	if (c1_pos < c1_neg && c2_pos < c2_neg)
 	{
-		*R = Ra;
-		*t = tu;
+		*R =  Ra;
+		*t =  tu;
 	} else if (c1_pos > c1_neg && c2_pos > c2_neg)
 	{
-		*R = Ra;
+		*R =  Ra;
 		*t = -tu;
 	} else
 	{
@@ -169,8 +169,8 @@ bool FindExtrinsics(const Mat3 &E, const Vec2Vec &pts1, const Vec2Vec &pts2, Mat
 			observations.push_back(Observation(pts1[i], R0, t0));
 			observations.push_back(Observation(pts2[i], Rb, tu));
 
-			Vec3 Q = Triangulate(observations);
-			Vec3 PQ = (Rb * Q) + tu;
+			Point3 Q = Triangulate(observations);
+			Point3 PQ = (Rb * Q) + tu;
 
 			if (Q.z() > 0)	c1_pos++;
 			else			c1_neg++;
@@ -181,11 +181,11 @@ bool FindExtrinsics(const Mat3 &E, const Vec2Vec &pts1, const Vec2Vec &pts2, Mat
 
 		if (c1_pos < c1_neg && c2_pos < c2_neg)
 		{
-			*R = Rb;
-			*t = tu;
+			*R =  Rb;
+			*t =  tu;
 		} else if (c1_pos > c1_neg && c2_pos > c2_neg)
 		{
-			*R = Rb;
+			*R =  Rb;
 			*t = -tu;
 		} else
 		{
