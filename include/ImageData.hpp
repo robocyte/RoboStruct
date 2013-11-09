@@ -42,17 +42,17 @@ public:
     bool                    m_ignore_in_bundle;
     bool                    m_descriptors_loaded;
 
-    bool	GetExifInfo();                              // Get focal length (mm) and other info from EXIF tags
-    double	GetInitFocal()  { return m_init_focal; }    // Returns the initial focal length in px
-    int		GetWidth()      { return m_width; }         // Returns the image width in px
-    int		GetHeight()     { return m_height; }        // Returns the image height in px
+    bool    GetExifInfo();                              // Get focal length (mm) and other info from EXIF tags
+    double  GetInitFocal()  { return m_init_focal; }    // Returns the initial focal length in px
+    int     GetWidth()      { return m_width; }         // Returns the image width in px
+    int     GetHeight()     { return m_height; }        // Returns the image height in px
 
-    void	DetectFeatures(const Options& opts);        // Detects features and returns the descriptor length
+    void    DetectFeatures(const Options& opts);        // Detects features and returns the descriptor length
 
-    void	ClearDescriptors();
-    void	SaveDescriptors(bool clear = true);
-    void	LoadDescriptors();
-    void	SetTracks();
+    void    ClearDescriptors();
+    void    SaveDescriptors(bool clear = true);
+    void    LoadDescriptors();
+    void    SetTracks();
 
 private:
     int     m_width;                                // Width from exif tags

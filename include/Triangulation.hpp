@@ -4,11 +4,11 @@
 
 struct Observation
 {
-	explicit Observation(const Point2 &point, const Mat3 &R, const Vec3 &t)
-		: m_point(point)
-		, m_R(R)
-		, m_t(t)
-	{}
+    explicit Observation(const Point2 &point, const Mat3 &R, const Vec3 &t)
+        : m_point(point)
+        , m_R(R)
+        , m_t(t)
+    {}
 
     explicit Observation(const Point2 &point, const Camera &camera)
         : m_point(point)
@@ -16,11 +16,11 @@ struct Observation
         , m_t(-(camera.m_R * camera.m_t))
     {}
 
-	Point2 m_point;
-	Mat3 m_R;
-	Vec3 m_t;
+    Point2 m_point;
+    Mat3 m_R;
+    Vec3 m_t;
 
-	EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 };
 
 typedef std::vector<Observation> Observations;

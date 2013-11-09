@@ -2,18 +2,18 @@
 
 enum Poly3Coefficients
 {
-	coef_1,
-	coef_x, coef_y, coef_z, 
-	coef_xy, coef_xz, coef_yz,
-	coef_xx, coef_yy, coef_zz,
-	coef_xxy, coef_xxz, coef_xyy, coef_yyz, coef_xzz, coef_yzz, coef_xyz,
-	coef_xxx, coef_yyy, coef_zzz,
-	num_poly3_coefs
+    coef_1,
+    coef_x, coef_y, coef_z, 
+    coef_xy, coef_xz, coef_yz,
+    coef_xx, coef_yy, coef_zz,
+    coef_xxy, coef_xxz, coef_xyy, coef_yyz, coef_xzz, coef_yzz, coef_xyz,
+    coef_xxx, coef_yyy, coef_zzz,
+    num_poly3_coefs
 };
 
 struct Poly3
 {
-	double v[num_poly3_coefs];
+    double v[num_poly3_coefs];
 };
 
 Poly3 Poly3New(double x, double y, double z, double unit);
