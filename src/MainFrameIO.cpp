@@ -342,7 +342,7 @@ void MainFrame::SavePlyFile()
 		ply_file << "end_header" << std::endl;
 
 		// Output the vertices
-		for (const auto point : m_points)
+		for (const auto &point : m_points)
 		{
 			// Point positions
 			ply_file	<< point.m_pos[0] << " " << point.m_pos[1] << " " << point.m_pos[2] << " ";
@@ -354,7 +354,7 @@ void MainFrame::SavePlyFile()
 		}
 
 		// Output the cameras
-		for (auto img : m_images)
+		for (const auto &img : m_images)
 		{
 			if (!img.m_camera.m_adjusted) continue;
 

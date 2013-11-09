@@ -560,7 +560,7 @@ void MainFrame::ComputeTracks()
 	bool *img_marked = new bool[num_images];
 	memset(img_marked, 0, num_images * sizeof(bool));
 
-	std::vector<int> touched(num_images);
+	IntVec touched(num_images);
 	std::vector<TrackData> tracks;
 
 	for (int i = 0; i < num_images; i++)
@@ -675,7 +675,7 @@ void MainFrame::ComputeTracks()
 	wxLogMessage("[ComputeTracks] Found %i tracks in %.2f ms", (int)m_tracks.size(), time * 1000.0 / cv::getTickFrequency());
 
 	// Print track stats
-	std::vector<int> stats(num_images + 1);
+	IntVec stats(num_images + 1);
 	for (const auto &track : m_tracks) stats[track.m_views.size()] += 1;
 	for (int i = 2; i < (num_images + 1); i++) wxLogMessage("[ComputeTracks] %i projections: %i", i, stats[i]);
 }

@@ -121,9 +121,9 @@ private:
 	IntPair				PickInitialCameraPair();
     void				SetupInitialCameraPair(IntPair initial_pair, CamVec &cameras, PointVec &points);
 	bool				EstimateRelativePose(int i1, int i2, Camera *camera1, Camera *camera2);
-	int					FindCameraWithMostMatches(int num_cameras, const IntVec &added_order, int &max_matches, const PointVec &points);
-	IntVec          	FindCamerasWithNMatches(int n, int num_cameras, const IntVec &added_order, const PointVec &points);
-	bool				FindAndVerifyCamera(const Point3Vec &points, const Point2Vec &projections, int *idxs_solve, Mat3 *K, Mat3 *R, Vec3 *t, IntVec &inliers, IntVec &inliers_weak, IntVec &outliers);
+	int					FindCameraWithMostMatches(const IntVec &added_order, int &max_matches, const PointVec &points);
+	IntVec          	FindCamerasWithNMatches(int n, const IntVec &added_order, const PointVec &points);
+	bool				FindAndVerifyCamera(const Point3Vec &points, const Point2Vec &projections, Mat3 *K, Mat3 *R, Vec3 *t, IntVec &inliers, IntVec &inliers_weak, IntVec &outliers);
 	Camera	        	BundleInitializeImage(int image_idx, int camera_idx, PointVec &points, bool &success_out);
 	void				RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_order, PointVec &points);
 	void				RefineCameraParameters(Camera *camera, const Point3Vec &points, const Point2Vec &projections, int *pt_idxs, IntVec &inliers);
