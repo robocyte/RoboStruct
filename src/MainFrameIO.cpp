@@ -415,7 +415,7 @@ void MainFrame::SaveMayaFile()
         maya_file << "\tsetAttr \".man\" -type \"string\" \"side_mask\";\n";
         maya_file << "\tsetAttr \".hc\" -type \"string\" \"viewSet -s %%camera\";\n";
         maya_file << "\tsetAttr \".o\" yes;\n";
-	
+
         // Write cameras
         for (int i = 0; i < m_images.size(); i++)
         {
@@ -427,7 +427,7 @@ void MainFrame::SaveMayaFile()
             double ccd_height = ccd_width * height / width;
             double focalpx = m_images[i].m_camera.m_focal_length;
             double focalmm;
-            double cap_w;	// cap = camera aperture
+            double cap_w;   // cap = camera aperture
             double cap_h;
             const auto &R = m_images[i].m_camera.m_R;
             const auto &t = m_images[i].m_camera.m_t;

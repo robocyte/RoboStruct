@@ -149,7 +149,6 @@ protected:
     void OnReconstruct(wxCommandEvent& event);
     void OnViewWindows(wxCommandEvent& event);
     void OnReset3dViewport(wxCommandEvent& event);
-    void OnChangeMSAASamples(wxSpinEvent& event);
     void OnToggleTurntableAnimation(wxCommandEvent& event);
     void OnToggleVisibility(wxCommandEvent& event);
     void OnExport(wxCommandEvent& event);

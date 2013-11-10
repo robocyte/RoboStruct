@@ -5,14 +5,14 @@ IMPLEMENT_APP(MyApp);
 
 bool MyApp::OnInit()
 {
-	wxImage::AddHandler(new wxPNGHandler());
-	wxImage::AddHandler(new wxJPEGHandler());
+    wxImage::AddHandler(new wxPNGHandler());
+    wxImage::AddHandler(new wxJPEGHandler());
 
-	MainFrame* frame = new MainFrame();
+    MainFrame* frame = new MainFrame();
 
-	frame->SetIcon(wxICON(aaaamain));
-	frame->Maximize();
-	frame->Show();
+    frame->SetIcon(wxICON(aaaamain));
+    frame->Maximize();
+    frame->Show();
 
-	return true;
+    return true;
 }

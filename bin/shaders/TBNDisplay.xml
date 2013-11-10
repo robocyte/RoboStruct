@@ -1,89 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
 <glslprog glslversion="330" name="tbndisplay">
-	<attribute name="position" type="vec3"/>
-	<attribute name="normal" type="vec3"/>
-	<attribute name="tangent" type="vec4"/>
-	<block name="camera_matrices" binding="0"/>
-	<uniform name="model_matrix" type="mat4"/>
-	<vertexshader source="
- 		#version 330
+    <attribute name="position" type="vec3"/>
+    <attribute name="normal" type="vec3"/>
+    <attribute name="tangent" type="vec4"/>
+    <block name="camera_matrices" binding="0"/>
+    <uniform name="model_matrix" type="mat4"/>
+    <vertexshader source="
+        #version 330
 
-		layout(location = 0) in vec3 position;
-		layout(location = 1) in vec3 normal;
-		layout(location = 2) in vec4 tangent;
+        layout(location = 0) in vec3 position;
+        layout(location = 1) in vec3 normal;
+        layout(location = 2) in vec4 tangent;
 
-		out vec3 vertex_normal;
-		out vec4 vertex_tangent;
+        out vec3 vertex_normal;
+        out vec4 vertex_tangent;
 
-		void main()
-		{
-			gl_Position = vec4(position, 1.0);
-			
-			vertex_normal	= normalize(normal);
-			vertex_tangent	= normalize(tangent);
-		}
-		"/>
-	<geometryshader source="
-		#version 330
-		
-		layout(points) in;
-		layout(line_strip) out;
-		layout(max_vertices = 6) out;
-		
-		layout(std140) uniform camera_matrices
-		{
-			mat4 perspective_matrix;
-			mat4 view_matrix;
-			mat4 projection_matrix;
-		};
+        void main()
+        {
+            gl_Position     = vec4(position, 1.0);
 
-		uniform mat4 model_matrix;
-		
-		in vec3 vertex_normal[];
-		in vec4 vertex_tangent[];
-		
-		out vec3 vertex_color;
-		
-		void main()
-		{
-			mat4 final_transform	= projection_matrix * model_matrix;
-			vec4 base_position		= final_transform * gl_in[0].gl_Position;
-			vec3 bitangent			= cross(vertex_normal[0], vertex_tangent[0].xyz) * vertex_tangent[0].w;
+            vertex_normal   = normalize(normal);
+            vertex_tangent  = normalize(tangent);
+        }
+        "/>
+    <geometryshader source="
+        #version 330
 
-					
-			vertex_color	= vec3(0.0, 1.0, 0.0);
-			gl_Position		= base_position;
-			EmitVertex();
-			gl_Position		= final_transform * vec4(gl_in[0].gl_Position.xyz + vertex_normal[0], 1.0);
-			EmitVertex();
-			EndPrimitive();
-					
-			vertex_color	= vec3(1.0, 0.0, 0.0);
-			gl_Position		= base_position;
-			EmitVertex();
-			gl_Position		= final_transform * vec4(gl_in[0].gl_Position.xyz + vertex_tangent[0].xyz, 1.0);
-			EmitVertex();
-			EndPrimitive();
+        layout(points) in;
+        layout(line_strip) out;
+        layout(max_vertices = 6) out;
 
-			vertex_color	= vec3(0.0, 0.0, 1.0);
-			gl_Position		= base_position;
-			EmitVertex();
-			gl_Position		= final_transform * vec4(gl_in[0].gl_Position.xyz + bitangent, 1.0);
-			EmitVertex();
-			EndPrimitive();
-		}
-		"/>
-	<fragmentshader source="
-		#version 330
+        layout(std140) uniform camera_matrices
+        {
+            mat4 perspective_matrix;
+            mat4 view_matrix;
+            mat4 projection_matrix;
+        };
 
-		in vec3 vertex_color;
+        uniform mat4 model_matrix;
 
-		out vec4 fragment_color;
+        in vec3 vertex_normal[];
+        in vec4 vertex_tangent[];
 
-		void main()
-		{
-			fragment_color = vec4(vertex_color, 1.0);
-		}
-		"/>
+        out vec3 vertex_color;
+
+        void main()
+        {
+            mat4 final_transform    = projection_matrix * model_matrix;
+            vec4 base_position      = final_transform * gl_in[0].gl_Position;
+            vec3 bitangent          = cross(vertex_normal[0], vertex_tangent[0].xyz) * vertex_tangent[0].w;
+
+            vertex_color    = vec3(0.0, 1.0, 0.0);
+            gl_Position     = base_position;
+            EmitVertex();
+            gl_Position     = final_transform * vec4(gl_in[0].gl_Position.xyz + vertex_normal[0], 1.0);
+            EmitVertex();
+            EndPrimitive();
+
+            vertex_color    = vec3(1.0, 0.0, 0.0);
+            gl_Position     = base_position;
+            EmitVertex();
+            gl_Position     = final_transform * vec4(gl_in[0].gl_Position.xyz + vertex_tangent[0].xyz, 1.0);
+            EmitVertex();
+            EndPrimitive();
+
+            vertex_color    = vec3(0.0, 0.0, 1.0);
+            gl_Position     = base_position;
+            EmitVertex();
+            gl_Position     = final_transform * vec4(gl_in[0].gl_Position.xyz + bitangent, 1.0);
+            EmitVertex();
+            EndPrimitive();
+        }
+        "/>
+    <fragmentshader source="
+        #version 330
+
+        in vec3 vertex_color;
+
+        out vec4 fragment_color;
+
+        void main()
+        {
+            fragment_color = vec4(vertex_color, 1.0);
+        }
+        "/>
 </glslprog>
-

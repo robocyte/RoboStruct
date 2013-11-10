@@ -1,41 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <glslprog glslversion="330" name="background">
-	<attribute name="position" type="vec3"/>
-	<uniform name="top_color" type="vec3" default="0.3 0.3 0.3"/>
-	<uniform name="bottom_color" type="vec3" default="0.8 0.8 0.8"/>
-	<vertexshader source="
-		#version 330
+    <attribute name="position" type="vec3"/>
+    <uniform name="top_color" type="vec3" default="0.3 0.3 0.3"/>
+    <uniform name="bottom_color" type="vec3" default="0.8 0.8 0.8"/>
+    <vertexshader source="
+        #version 330
 
-		layout(location = 0) in vec3 position;
+        layout(location = 0) in vec3 position;
 
-		uniform vec3 top_color;
-		uniform vec3 bottom_color;
+        uniform vec3 top_color;
+        uniform vec3 bottom_color;
 
-		smooth out vec4 vertex_color;
+        smooth out vec4 vertex_color;
 
-		void main()
-		{
-			gl_Position = vec4(position, 1.0);
-			if (position.y > 0.0)
-			{
-				vertex_color = vec4(top_color, 1.0);
-			} else
-			{
-				vertex_color = vec4(bottom_color, 1.0);
-			}
-		}
-		"/>
-	<fragmentshader source="
-		#version 330
+        void main()
+        {
+            gl_Position = vec4(position, 1.0);
+            if (position.y > 0.0)
+            {
+                vertex_color = vec4(top_color, 1.0);
+            } else
+            {
+                vertex_color = vec4(bottom_color, 1.0);
+            }
+        }
+        "/>
+    <fragmentshader source="
+        #version 330
 
-		smooth in vec4 vertex_color;
+        smooth in vec4 vertex_color;
 
-		out vec4 fragment_color;
+        out vec4 fragment_color;
 
-		void main()
-		{
-			fragment_color = vertex_color;
-		}
-		"/>
+        void main()
+        {
+            fragment_color = vertex_color;
+        }
+        "/>
 </glslprog>
-

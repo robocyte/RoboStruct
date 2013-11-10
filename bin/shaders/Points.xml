@@ -1,48 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <glslprog glslversion="330" name="points">
-	<attribute name="position" type="vec3"/>
-	<attribute name="color" type="vec3"/>
-	<block name="camera_matrices" binding="0"/>
-	<uniform name="model_matrix" type="mat4"/>
-	<vertexshader source="
-		#version 330
+        <attribute name="position" type="vec3"/>
+        <attribute name="color" type="vec3"/>
+        <block name="camera_matrices" binding="0"/>
+        <uniform name="model_matrix" type="mat4"/>
+        <vertexshader source="
+        #version 330
 
-		layout(location = 0) in vec3 position;
-		layout(location = 4) in vec3 color;
+        layout(location = 0) in vec3 position;
+        layout(location = 4) in vec3 color;
 
-		layout(std140) uniform camera_matrices
-		{
-			mat4 perspective_matrix;
-			mat4 view_matrix;
-			mat4 projection_matrix;
-		};
-		
-		uniform mat4 model_matrix;
+        layout(std140) uniform camera_matrices
+        {
+            mat4 perspective_matrix;
+            mat4 view_matrix;
+            mat4 projection_matrix;
+        };
 
-		out vec3 point_color;
-		
-		void main()
-		{
-			float point_width = 0.2;
-			float screen_width = 1000.0;
-			vec4 eye_pos = view_matrix * model_matrix * vec4(position, 1.0);
-			vec4 proj_corner = perspective_matrix * vec4(0.5 * point_width, 0.5 * point_width, eye_pos.z, eye_pos.w);
-			gl_PointSize = screen_width * proj_corner.x / proj_corner.w;
-			gl_Position = projection_matrix * model_matrix * vec4(position, 1.0);
-			point_color = color;
-		}
-		"/>
-	<fragmentshader source="
-		#version 330
+        uniform mat4 model_matrix;
 
-		in vec3 point_color;
+        out vec3 point_color;
 
-		out vec4 fragment_color;
+        void main()
+        {
+            float point_width = 0.2;
+            float screen_width = 1000.0;
+            vec4 eye_pos = view_matrix * model_matrix * vec4(position, 1.0);
+            vec4 proj_corner = perspective_matrix * vec4(0.5 * point_width, 0.5 * point_width, eye_pos.z, eye_pos.w);
+            gl_PointSize = screen_width * proj_corner.x / proj_corner.w;
+            gl_Position = projection_matrix * model_matrix * vec4(position, 1.0);
+            point_color = color;
+        }
+        "/>
+        <fragmentshader source="
+        #version 330
 
-		void main()
-		{
-			fragment_color = vec4(point_color, 1.0);
-		}
-		"/>
+        in vec3 point_color;
+
+        out vec4 fragment_color;
+
+        void main()
+        {
+            fragment_color = vec4(point_color, 1.0);
+        }
+        "/>
 </glslprog>
-

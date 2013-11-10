@@ -18,39 +18,39 @@
 #include "kutility/image.h"
 
 ImageData::ImageData(const std::string &filename, const std::string &filename_short)
-	: m_filename(filename)
-	, m_filename_short(filename_short)
-	, m_camera()
-	, m_keys()
-	, m_key_flags()
-	, m_visible_keys()
-	, m_visible_points()
-	, m_descriptors()
-	, m_ccd_width(0.0)
-	, m_init_focal(0.0)
-	, m_init_focal_mm(0.0)
-	, m_desc_size(0)
-	, m_ignore_in_bundle(false)
-	, m_descriptors_loaded(false)
-	, m_width(0)
-	, m_height(0)
+    : m_filename(filename)
+    , m_filename_short(filename_short)
+    , m_camera()
+    , m_keys()
+    , m_key_flags()
+    , m_visible_keys()
+    , m_visible_points()
+    , m_descriptors()
+    , m_ccd_width(0.0)
+    , m_init_focal(0.0)
+    , m_init_focal_mm(0.0)
+    , m_desc_size(0)
+    , m_ignore_in_bundle(false)
+    , m_descriptors_loaded(false)
+    , m_width(0)
+    , m_height(0)
 {
 }
 
 bool ImageData::GetExifInfo()
 {
-	ExifReader er(m_filename.c_str());
+    ExifReader er(m_filename.c_str());
 
-	//TODO: ReadExifInfo maybe should take ref to this as argument..
-	if (er.ReadExifInfo())
-	{
-		m_width = er.m_width;
-		m_height = er.m_height;
-		m_init_focal_mm = er.m_focal;
-		m_camera_make = er.m_camera_make;
-		m_camera_model = er.m_camera_model;
-		return true;
-	} else return false;
+    //TODO: ReadExifInfo maybe should take ref to this as argument..
+    if (er.ReadExifInfo())
+    {
+        m_width = er.m_width;
+        m_height = er.m_height;
+        m_init_focal_mm = er.m_focal;
+        m_camera_make = er.m_camera_make;
+        m_camera_model = er.m_camera_model;
+        return true;
+    } else return false;
 }
 
 void ImageData::DetectFeatures(const Options& opts)
@@ -98,18 +98,18 @@ void ImageData::DetectFeatures(const Options& opts)
             break;
         }
     case 1: // Detect SURF features
-	    {
-		    if (opts.surf_desc_extended)	m_desc_size = 128;
-		    else							m_desc_size = 64;
+        {
+            if (opts.surf_desc_extended)    m_desc_size = 128;
+            else                            m_desc_size = 64;
 
-		    cv::SURF Surf(	opts.surf_det_hessian_threshold,
-						    opts.surf_common_octaves,
-						    opts.surf_common_octave_layers,
-						    opts.surf_desc_extended,
-						    opts.surf_desc_upright);
-		    Surf(grey_img, cv::Mat(), keys, m_descriptors);
-		    break;
-	    }
+            cv::SURF Surf(  opts.surf_det_hessian_threshold,
+                            opts.surf_common_octaves,
+                            opts.surf_common_octave_layers,
+                            opts.surf_desc_extended,
+                            opts.surf_desc_upright);
+            Surf(grey_img, cv::Mat(), keys, m_descriptors);
+            break;
+        }
     case 2: // Detect AKAZE features
         {
             m_desc_size = opts.akaze_descriptor_size;
@@ -142,18 +142,18 @@ void ImageData::DetectFeatures(const Options& opts)
 
             break;
         }
-	}
+    }
 
-	this->ConvertOpenCVKeys(keys, img);
-	this->SaveDescriptors(true);
+    this->ConvertOpenCVKeys(keys, img);
+    this->SaveDescriptors(true);
 }
 
 void ImageData::SaveDescriptors(bool clear)
 {
-	if (m_descriptors.empty()) return;
+    if (m_descriptors.empty()) return;
 
-	std::string filename = m_filename;
-	filename.replace(filename.find(".jpg"), 4, ".desc");
+    std::string filename = m_filename;
+    filename.replace(filename.find(".jpg"), 4, ".desc");
 
     SaveDescriptorsToFileBinary(filename, m_descriptors);
 
@@ -162,47 +162,47 @@ void ImageData::SaveDescriptors(bool clear)
 
 void ImageData::LoadDescriptors()
 {
-	if (!m_descriptors.empty()) return;
+    if (!m_descriptors.empty()) return;
 
-	std::string filename = m_filename;
-	filename.replace(filename.find(".jpg"), 4, ".desc");
+    std::string filename = m_filename;
+    filename.replace(filename.find(".jpg"), 4, ".desc");
 
     LoadDescriptorsFromFileBinary(filename, m_descriptors);
 }
 
 void ImageData::ConvertOpenCVKeys(const std::vector<cv::KeyPoint>& keys, const cv::Mat& image)
 {
-	m_keys.reserve(keys.size());
+    m_keys.reserve(keys.size());
 
-	float x_correction_factor = 0.5 * m_width;
-	float y_correction_factor = 0.5 * m_height - 1.0;
+    float x_correction_factor = 0.5 * m_width;
+    float y_correction_factor = 0.5 * m_height - 1.0;
 
-	for (auto &key : keys)
-	{
-		float x = key.pt.x - x_correction_factor;
-		float y = y_correction_factor - key.pt.y;
-		
-		int xf = static_cast<int>(std::floor(key.pt.x)), yf = static_cast<int>(std::floor(key.pt.y));
-		const uchar *ptr = image.ptr<uchar>(yf);
+    for (auto &key : keys)
+    {
+        float x = key.pt.x - x_correction_factor;
+        float y = y_correction_factor - key.pt.y;
 
-		m_keys.push_back(KeyPoint(x, y, ptr[3 * xf + 2], ptr[3 * xf + 1], ptr[3 * xf]));
-	}
+        int xf = static_cast<int>(std::floor(key.pt.x)), yf = static_cast<int>(std::floor(key.pt.y));
+        const uchar *ptr = image.ptr<uchar>(yf);
+
+        m_keys.push_back(KeyPoint(x, y, ptr[3 * xf + 2], ptr[3 * xf + 1], ptr[3 * xf]));
+    }
 }
 
 void ImageData::ClearDescriptors()
 {
-    std::vector<float>().swap(m_descriptors);	// STL swap trick
+    std::vector<float>().swap(m_descriptors);   // STL swap trick
 }
 
 void ImageData::SetTracks()
 {
-	for (unsigned int i = 0; i < m_visible_points.size(); i++)
-	{
-		int track(m_visible_points[i]);
-		int key(m_visible_keys[i]);
+    for (unsigned int i = 0; i < m_visible_points.size(); i++)
+    {
+        int track(m_visible_points[i]);
+        int key(m_visible_keys[i]);
 
-		m_keys[key].m_track = track;
-	}
+        m_keys[key].m_track = track;
+    }
 
-	wxLogMessage("[SetTracks] %i tracks set for image %s", m_visible_points.size(), m_filename_short.c_str());
+    wxLogMessage("[SetTracks] %i tracks set for image %s", m_visible_points.size(), m_filename_short.c_str());
 }

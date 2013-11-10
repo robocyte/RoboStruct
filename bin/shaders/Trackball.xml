@@ -1,43 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <glslprog glslversion="330" name="trackball">
-	<attribute name="position" type="vec3"/>
-	<block name="camera_matrices" binding="0"/>
-	<uniform name="model_matrix" type="mat4"/>
-	<vertexshader source="
-		#version 330
+    <attribute name="position" type="vec3"/>
+    <block name="camera_matrices" binding="0"/>
+    <uniform name="model_matrix" type="mat4"/>
+    <vertexshader source="
+        #version 330
 
-		layout(location = 0) in vec3 position;
-		layout(location = 4) in vec3 color;
+        layout(location = 0) in vec3 position;
+        layout(location = 4) in vec3 color;
 
-		layout(std140) uniform camera_matrices
-		{
-			mat4 perspective_matrix;
-			mat4 view_matrix;
-			mat4 projection_matrix;
-		};
+        layout(std140) uniform camera_matrices
+        {
+            mat4 perspective_matrix;
+            mat4 view_matrix;
+            mat4 projection_matrix;
+        };
 
-		uniform mat4 model_matrix;
-		
-		smooth out vec4 vertex_color;
+        uniform mat4 model_matrix;
 
-		void main()
-		{
-			vertex_color = vec4(color, 1.0);
+        smooth out vec4 vertex_color;
 
-			gl_Position = perspective_matrix * model_matrix * vec4(position, 1.0);
-		}
-		"/>
-	<fragmentshader source="
-		#version 330
+        void main()
+        {
+            gl_Position     = perspective_matrix * model_matrix * vec4(position, 1.0);
 
-		smooth in vec4 vertex_color;
+            vertex_color    = vec4(color, 1.0);
+        }
+        "/>
+    <fragmentshader source="
+        #version 330
 
-		out vec4 fragment_color;
+        smooth in vec4 vertex_color;
 
-		void main()
-		{
-			fragment_color = vertex_color;
-		}
-		"/>
+        out vec4 fragment_color;
+
+        void main()
+        {
+            fragment_color = vertex_color;
+        }
+        "/>
 </glslprog>
-
