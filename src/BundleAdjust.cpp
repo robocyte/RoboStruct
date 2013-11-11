@@ -441,9 +441,8 @@ int MainFrame::FindCameraWithMostMatches(const IntVec &added_order, int &max_mat
         // Check if we added this image already
         if (std::find(added_order.begin(), added_order.end(), i) != added_order.end()) continue;
 
-        int num_existing_matches = 0;
-
         // Find the tracks seen by this image
+        int num_existing_matches = 0;
         for (const auto & track : m_images[i].m_visible_points)
         {
             if (m_tracks[track].m_extra < 0) continue;
@@ -477,10 +476,8 @@ IntVec MainFrame::FindCamerasWithNMatches(int n, const IntVec &added_order, cons
         // Check if we added this image already
         if (std::find(added_order.begin(), added_order.end(), i) != added_order.end()) continue;
 
-        int num_existing_matches = 0;
-        int parent_idx_best = -1;
-
         // Find the tracks seen by this image
+        int num_existing_matches = 0;
         for (const auto & track : m_images[i].m_visible_points)
         {
             if (m_tracks[track].m_extra < 0) continue;
@@ -762,12 +759,11 @@ void MainFrame::RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_ord
         // Set up the projections
         int num_projections = 0;
         for (const auto &point : points) num_projections += point.m_views.size();
-        std::vector<double>     projections(2 * num_projections);
-        IntVec                  pidx(num_projections);
-        IntVec                  cidx(num_projections);
+        std::vector<double>         projections;
+        IntVec                      pidx;
+        IntVec                      cidx;
         std::vector<unsigned int>	num_vis(num_cameras, 0);
 
-        int arr_idx = 0;
         int nz_count = 0;
         for (int i = 0; i < num_pts; i++)
         {
@@ -775,18 +771,13 @@ void MainFrame::RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_ord
             {
                 for (const auto &view : points[i].m_views)
                 {
-                    int c = view.first;
-                    int k = view.second;
+                    projections.push_back(GetKey(added_order[view.first], view.second).m_coords.x());
+                    projections.push_back(GetKey(added_order[view.first], view.second).m_coords.y());
 
-                    projections[2 * arr_idx + 0] = GetKey(added_order[c], k).m_coords.x();
-                    projections[2 * arr_idx + 1] = GetKey(added_order[c], k).m_coords.y();
+                    pidx.push_back(nz_count);
+                    cidx.push_back(view.first);
 
-                    pidx[arr_idx] = nz_count;
-                    cidx[arr_idx] = c;
-
-                    num_vis[c]++;
-
-                    arr_idx++;
+                    num_vis[view.first]++;
                 }
 
                 remap[i] = nz_count;
