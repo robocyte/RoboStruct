@@ -78,7 +78,6 @@ private:
     void ResetOptions();
     void ResetGLCanvas();
     void ResetPerspectiveMatrix();
-    void UpdateGLTransformations();
 
     bool AddImage(const std::string filename, const std::string filename_short);            // Try to add an image to the initial list of images
     bool ReadCamDBFile(const std::string filename);
@@ -117,18 +116,18 @@ private:
     void    SaveMayaFile();
 
     wxThread::ExitCode  Entry();
-    void                BundleAdjust();
+    void                RunSFM();
     IntPair             PickInitialCameraPair();
     void                SetupInitialCameraPair(IntPair initial_pair, CamVec &cameras, PointVec &points);
     bool                EstimateRelativePose(int i1, int i2, Camera *camera1, Camera *camera2);
     int                 FindCameraWithMostMatches(const IntVec &added_order, int &max_matches, const PointVec &points);
     IntVec              FindCamerasWithNMatches(int n, const IntVec &added_order, const PointVec &points);
     bool                FindAndVerifyCamera(const Point3Vec &points, const Point2Vec &projections, Mat3 *K, Mat3 *R, Vec3 *t, IntVec &inliers, IntVec &inliers_weak, IntVec &outliers);
-    Camera              BundleInitializeImage(int image_idx, int camera_idx, PointVec &points, bool &success_out);
-    void                RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_order, PointVec &points);
+    Camera              InitializeImage(int image_idx, int camera_idx, PointVec &points, bool &success_out);
+    void                BundleAdjust(CamVec &cameras, const IntVec &added_order, PointVec &points);
     void                RefineCameraParameters(Camera *camera, const Point3Vec &points, const Point2Vec &projections, int *pt_idxs, IntVec &inliers);
-    void                BundleAdjustAddAllNewPoints(int num_cameras, IntVec &added_order, CamVec &cameras, PointVec &points);
-    int                 RemoveBadPointsAndCameras(const IntVec &added_order, CamVec &cameras, PointVec &points);
+    void                AddNewPoints(IntVec &added_order, CamVec &cameras, PointVec &points);
+    int                 RemoveBadPointsAndCameras(const IntVec &added_order, const CamVec &cameras, PointVec &points);
 
 protected:
     // Handlers for MainFrame events

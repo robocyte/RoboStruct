@@ -97,81 +97,79 @@ struct PriorError
 
 wxThread::ExitCode MainFrame::Entry()
 {
-    this->BundleAdjust();
+    this->RunSFM();
 
     return (wxThread::ExitCode)0;
 }
 
-void MainFrame::BundleAdjust()
+void MainFrame::RunSFM()
 {
-    wxLogMessage("[BundleAdjust] Computing structure from motion...");
+    wxLogMessage("[RunSFM] Computing structure from motion...");
     clock_t start = clock();
 
     // Reset track to key mappings and vice versa
     for (auto &track : m_tracks) track.m_extra = -1;
     for (auto &img : m_images) for (auto &key : img.m_keys) key.m_extra = -1;
 
-    int num_images = GetNumImages();
+    auto num_images = GetNumImages();
     IntVec      added_order;
-    CamVec      cameras(num_images);
+    CamVec      cameras;
     PointVec    points;
 
     auto initial_pair = PickInitialCameraPair();
     added_order.push_back(initial_pair.first);
     added_order.push_back(initial_pair.second);
+    cameras.push_back(Camera());
+    cameras.push_back(Camera());
 
-    wxLogMessage("[BundleAdjust] Adjusting cameras %d and %d...", initial_pair.first, initial_pair.second);
+    wxLogMessage("[RunSFM] Adjusting cameras %d and %d...", initial_pair.first, initial_pair.second);
     SetupInitialCameraPair(initial_pair, cameras, points);
-    RunSFM(2, cameras, added_order, points);
-    int curr_num_cameras = 2;
+    BundleAdjust(cameras, added_order, points);
 
     // Main loop
     int round = 0;
-    while (curr_num_cameras < num_images)
+    while (cameras.size() < num_images)
     {
         int max_matches = 0;
         int max_cam = FindCameraWithMostMatches(added_order, max_matches, points);
 
         if (max_matches < m_options.min_max_matches)
         {
-            wxLogMessage("[BundleAdjust] No more connections!");
+            wxLogMessage("[RunSFM] No more connections!");
             break;
         }
 
         auto image_set = FindCamerasWithNMatches(util::iround(0.75 * max_matches), added_order, points);
-        wxLogMessage("[BundleAdjust] Registering %d images", (int)image_set.size());
+        wxLogMessage("[RunSFM] Registering %d images", (int)image_set.size());
 
         // Now, throw the new cameras into the mix
-        int image_count = 0;
         for (const int &image_idx : image_set)
         {
-            wxLogMessage("[BundleAdjust[round %i]] Adjusting camera %d", round, image_idx);
+            wxLogMessage("[RunSFM[round %i]] Adjusting camera %d", round, image_idx);
             added_order.push_back(image_idx);
 
             bool success = false;
-            auto camera_new = BundleInitializeImage(image_idx, curr_num_cameras + image_count, points, success);
+            auto camera_new = InitializeImage(image_idx, cameras.size(), points, success);
             if (success)
             {
-                cameras[curr_num_cameras + image_count] = camera_new;
-                image_count++;
+                cameras.push_back(camera_new);
             } else
             {
-                wxLogMessage("[BundleAdjust] Couldn't initialize image %d", image_idx);
+                wxLogMessage("[RunSFM] Couldn't initialize image %d", image_idx);
                 m_images[image_idx].m_ignore_in_bundle = true;
             }
         }
 
-        wxLogMessage("[BundleAdjust] Adding new matches");
-        curr_num_cameras += image_count;
-        BundleAdjustAddAllNewPoints(curr_num_cameras, added_order, cameras, points);
-        wxLogMessage("[BundleAdjust] Number of points = %d", points.size());
+        wxLogMessage("[RunSFM] Adding new matches");
+        AddNewPoints(added_order, cameras, points);
+        wxLogMessage("[RunSFM] Number of points = %d", points.size());
 
-        RunSFM(curr_num_cameras, cameras, added_order, points);
+        BundleAdjust(cameras, added_order, points);
 
         RemoveBadPointsAndCameras(added_order, cameras, points);
 
-        wxLogMessage("[BundleAdjust] Focal lengths:");
-        for (int i = 0; i < curr_num_cameras; i++)
+        wxLogMessage("[RunSFM] Focal lengths:");
+        for (int i = 0; i < cameras.size(); i++)
         {
             wxLogMessage("  [%03d] %.3f %s %d; %.3f %.3f", i, cameras[i].m_focal_length, m_images[added_order[i]].m_filename_short.c_str(), added_order[i], cameras[i].m_k[0], cameras[i].m_k[1]);
         }
@@ -192,7 +190,7 @@ void MainFrame::BundleAdjust()
                 m_points.push_back(PointData(point.m_pos, point.m_color, views));
             }
 
-            for (int i = 0; i < curr_num_cameras; i++) m_images[added_order[i]].m_camera = cameras[i];
+            for (std::size_t i = 0; i < cameras.size(); i++) m_images[added_order[i]].m_camera = cameras[i];
         }
 
         wxQueueEvent(this, new wxThreadEvent(wxEVT_THREAD_UPDATE));
@@ -200,7 +198,7 @@ void MainFrame::BundleAdjust()
     }
 
     clock_t end = clock();
-    wxLogMessage("[BundleAdjust] Computing structure from motion took %0.3f s", (double) (end - start) / (double) CLOCKS_PER_SEC);
+    wxLogMessage("[RunSFM] Computing structure from motion took %0.3f s", (double) (end - start) / (double) CLOCKS_PER_SEC);
 
     SavePlyFile();
     SetMatchesFromPoints();
@@ -293,7 +291,7 @@ void MainFrame::SetupInitialCameraPair(IntPair initial_pair, CamVec &cameras, Po
     EstimateRelativePose(i_best, j_best, &cameras[0], &cameras[1]);
 
     // Triangulate the initial 3D points
-    wxLogMessage("[SetupInitialCameraPair] Adding initial matches...");
+    wxLogMessage("[SetupInitialCameraPair] Triangulating initial matches...");
 
     Mat3 K1_inv = cameras[0].GetIntrinsicMatrix().inverse();
     Mat3 K2_inv = cameras[1].GetIntrinsicMatrix().inverse();
@@ -497,7 +495,7 @@ IntVec MainFrame::FindCamerasWithNMatches(int n, const IntVec &added_order, cons
     return found_cameras;
 }
 
-Camera MainFrame::BundleInitializeImage(int image_idx, int camera_idx, PointVec &points, bool &success_out)
+Camera MainFrame::InitializeImage(int image_idx, int camera_idx, PointVec &points, bool &success_out)
 {
     clock_t start = clock();
     Camera dummy;
@@ -513,7 +511,7 @@ Camera MainFrame::BundleInitializeImage(int image_idx, int camera_idx, PointVec 
     IntVec      idxs_solve;
     IntVec      keys_solve;
 
-    wxLogMessage("[BundleInitializeImage] Connecting existing matches...");
+    wxLogMessage("[InitializeImage] Connecting existing matches...");
 
     // Find the tracks seen by this image
     for (int i = 0; i < image.m_visible_points.size(); i++)
@@ -536,12 +534,12 @@ Camera MainFrame::BundleInitializeImage(int image_idx, int camera_idx, PointVec 
 
     if (points_solve.size() < m_options.min_max_matches)
     {
-        wxLogMessage("[BundleInitializeImage] Couldn't initialize (too few points)");
+        wxLogMessage("[InitializeImage] Couldn't initialize (too few points)");
         return dummy;
     }
 
     // **** Solve for the camera position ****
-    wxLogMessage("[BundleInitializeImage] Initializing camera...");
+    wxLogMessage("[InitializeImage] Initializing camera...");
 
     Mat3 Kinit, Rinit;
     Vec3 tinit;
@@ -557,15 +555,15 @@ Camera MainFrame::BundleInitializeImage(int image_idx, int camera_idx, PointVec 
 
         // Set up the new focal length
         camera_new.m_focal_length = camera_new.m_init_focal_length = image.m_init_focal;
-        wxLogMessage("[BundleInitializeImage] Camera has initial focal length of %0.3f", camera_new.m_init_focal_length);
+        wxLogMessage("[InitializeImage] Camera has initial focal length of %0.3f", camera_new.m_init_focal_length);
     } else
     {
-        wxLogMessage("[BundleInitializeImage] Couldn't initialize (couldn't solve for the camera position)");
+        wxLogMessage("[InitializeImage] Couldn't initialize (couldn't solve for the camera position)");
         return dummy;
     }
 
     // Optimize camera parameters
-    wxLogMessage("[BundleInitializeImage] Adjusting...");
+    wxLogMessage("[InitializeImage] Adjusting...");
     Point3Vec   points_final;
     Point2Vec   projs_final;
     IntVec      idxs_final;
@@ -583,7 +581,7 @@ Camera MainFrame::BundleInitializeImage(int image_idx, int camera_idx, PointVec 
 
     if ((inliers.size() < 8) || (camera_new.m_focal_length < 0.1 * image.GetWidth()))
     {
-        wxLogMessage("[BundleInitializeImage] Bad camera");
+        wxLogMessage("[InitializeImage] Bad camera");
         return dummy;
     }
 
@@ -596,7 +594,7 @@ Camera MainFrame::BundleInitializeImage(int image_idx, int camera_idx, PointVec 
 
     clock_t end = clock();
 
-    wxLogMessage("[BundleInitializeImage] Initializing took %0.3f s", (double) (end - start) / CLOCKS_PER_SEC);
+    wxLogMessage("[InitializeImage] Initializing took %0.3f s", (double) (end - start) / CLOCKS_PER_SEC);
 
     camera_new.m_adjusted = true;
 
@@ -731,14 +729,17 @@ void MainFrame::RefineCameraParameters(Camera *camera, const Point3Vec &points, 
     wxLogMessage("[RefineCameraParameters] Exiting after %d rounds with %d/%d points", round + 1, points_curr.size(), points.size());
 }
 
-void MainFrame::RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_order, PointVec &points)
+void MainFrame::BundleAdjust(CamVec &cameras, const IntVec &added_order, PointVec &points)
 {
+    wxLogMessage("[BundleAdjust] Optimizing...");
+
     const int   min_points      = 20;
     int         round           = 0;
     int         num_outliers    = 0;
     int         total_outliers  = 0;
 
-    int num_pts = points.size();
+    int num_cameras = cameras.size();
+    int num_pts     = points.size();
     IntVec      remap(num_pts);
     Point3Vec   nz_pts(num_pts);
 
@@ -752,7 +753,7 @@ void MainFrame::RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_ord
 
         if (num_pts - total_outliers < min_points)
         {
-            wxLogMessage("[RunSFM] Too few points remaining, exiting!");
+            wxLogMessage("[BundleAdjust] Too few points remaining, exiting!");
             break;
         }
 
@@ -810,15 +811,15 @@ void MainFrame::RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_ord
         double *ptr = init_x;
 
         int idx = 0;
-        for (int i = 0; i < num_cameras; i++)
+        for (const auto &camera : cameras)
         {
             // Get the rotation
-            Vec3 axis = RotationMatrixToAngleAxis(cameras[i].m_R);
-            Vec3 t = -(cameras[i].m_R * cameras[i].m_t);
+            Vec3 axis = RotationMatrixToAngleAxis(camera.m_R);
+            Vec3 t = -(camera.m_R * camera.m_t);
 
-            double f = cameras[i].m_focal_length;
-            double k1 = cameras[i].m_k[0];
-            double k2 = cameras[i].m_k[1];
+            double f = camera.m_focal_length;
+            double k1 = camera.m_k[0];
+            double k2 = camera.m_k[1];
 
             ptr[idx] = axis[0]; idx++;
             ptr[idx] = axis[1]; idx++;
@@ -832,13 +833,13 @@ void MainFrame::RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_ord
         }
 
         // Insert point parameters
-        for (int i = 0; i < num_pts; i++)
+        for (const auto &point : points)
         {
-            if (!points[i].m_views.empty())
+            if (!point.m_views.empty())
             {
-                ptr[idx] = points[i].m_pos.x(); idx++;
-                ptr[idx] = points[i].m_pos.y(); idx++;
-                ptr[idx] = points[i].m_pos.z(); idx++;
+                ptr[idx] = point.m_pos.x(); idx++;
+                ptr[idx] = point.m_pos.y(); idx++;
+                ptr[idx] = point.m_pos.z(); idx++;
             }
         }
 
@@ -892,7 +893,7 @@ void MainFrame::RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_ord
         wxLogMessage("[Ceres] %s", summary.BriefReport().c_str());
 
         ptr = init_x;
-        for (int i = 0; i < num_cameras; i++)
+        for (auto &camera : cameras)
         {
             // Get the camera parameters
             Vec3 axis, t;
@@ -904,11 +905,11 @@ void MainFrame::RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_ord
             t[1]    = *ptr; ptr++;
             t[2]    = *ptr; ptr++;
 
-            cameras[i].m_R = AngleAxisToRotationMatrix(axis);
-            cameras[i].m_t = -(cameras[i].m_R.transpose() * t);
-            double f = cameras[i].m_focal_length = *ptr; ptr++;
-            cameras[i].m_k[0] = *ptr * (f * f); ptr++;
-            cameras[i].m_k[1] = *ptr * (f * f * f * f); ptr++;
+            camera.m_R = AngleAxisToRotationMatrix(axis);
+            camera.m_t = -(camera.m_R.transpose() * t);
+            double f = camera.m_focal_length = *ptr; ptr++;
+            camera.m_k[0] = *ptr * (f * f); ptr++;
+            camera.m_k[1] = *ptr * (f * f * f * f); ptr++;
         }
 
         // Insert point parameters
@@ -921,7 +922,7 @@ void MainFrame::RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_ord
 
         clock_t end = clock();
 
-        wxLogMessage("[RunSFM] RunSFM took %0.3fs", (double) (end - start) / (double) CLOCKS_PER_SEC);
+        wxLogMessage("[BundleAdjust] Bundle adjustment took %0.3fs", (double) (end - start) / (double) CLOCKS_PER_SEC);
 
         // Check for outliers
         start = clock();
@@ -957,7 +958,7 @@ void MainFrame::RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_ord
             double median   = util::GetNthElement(util::iround(0.8 * dists.size()), dists);
             double thresh   = util::clamp(2.4 * median, m_options.min_reprojection_error_threshold, m_options.max_reprojection_error_threshold);
             double avg      = std::accumulate(dists.begin(), dists.end(), 0.0) / dists.size();
-            wxLogMessage("[RunSFM] Mean error cam %d[%d] [%d pts]: %.3f [med: %.3f, outlier threshold: %.3f]", i, added_order[i], dists.size(), avg, median, thresh);
+            wxLogMessage("[BundleAdjust] Mean error cam %d[%d] [%d pts]: %.3f [med: %.3f, outlier threshold: %.3f]", i, added_order[i], dists.size(), avg, median, thresh);
 
             int pt_count = 0;
             for (const auto &key : image.m_keys)
@@ -990,7 +991,7 @@ void MainFrame::RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_ord
         {
             int idx = outliers[i];
 
-            //wxLogMessage("[RunSFM] Removing outlier %d (reprojection error: %0.3f)", idx, reproj_errors[i]);
+            //wxLogMessage("[BundleAdjust] Removing outlier %d (reprojection error: %0.3f)", idx, reproj_errors[i]);
 
             points[idx].m_color = Vec3(0.0, 0.0, -1.0);
 
@@ -1012,14 +1013,14 @@ void MainFrame::RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_ord
         total_outliers += num_outliers;
 
         end = clock();
-        wxLogMessage("[RunSFM] Removed %d outliers in %0.3f s", num_outliers, (double) (end - start) / (double) CLOCKS_PER_SEC);
+        wxLogMessage("[BundleAdjust] Removed %d outliers in %0.3f s", num_outliers, (double) (end - start) / (double) CLOCKS_PER_SEC);
 
         RemoveBadPointsAndCameras(added_order, cameras, points);
 
         for (int i = 0; i < num_pts; i++) if (remap[i] != -1) points[i].m_pos = nz_pts[remap[i]];
 
         round_stop = clock();
-        wxLogMessage("[RunSFM] Round %d took %0.3f s", round, (double) (round_stop - round_start) / (double) CLOCKS_PER_SEC);
+        wxLogMessage("[BundleAdjust] Round %d took %0.3f s", round, (double) (round_stop - round_start) / (double) CLOCKS_PER_SEC);
 
         // Update points for display
         {
@@ -1047,17 +1048,17 @@ void MainFrame::RunSFM(int num_cameras, CamVec &cameras, const IntVec &added_ord
     } while (num_outliers > m_options.outlier_threshold_ba);
 
     stop_all = clock();
-    wxLogMessage("[RunSFM] Structure from motion with outlier removal took %0.3f s (%d rounds)", (double) (stop_all - start_all) / (double) CLOCKS_PER_SEC, round);
+    wxLogMessage("[BundleAdjust] Optimizing with outlier removal took %0.3f s (%d rounds)", (double) (stop_all - start_all) / (double) CLOCKS_PER_SEC, round);
 }
 
-void MainFrame::BundleAdjustAddAllNewPoints(int num_cameras, IntVec &added_order, CamVec &cameras, PointVec &points)
+void MainFrame::AddNewPoints(IntVec &added_order, CamVec &cameras, PointVec &points)
 {
     std::vector<ImageKeyVector> new_tracks;
     IntVec                      track_idxs;
     IntVec                      tracks_seen(m_tracks.size(), -1);
 
     // Gather up the projections of all the new tracks
-    for (int i = 0; i < num_cameras; i++)
+    for (int i = 0; i < cameras.size(); i++)
     {
         int image_idx1 = added_order[i];
         int num_keys = this->GetNumKeys(image_idx1);
@@ -1204,13 +1205,13 @@ void MainFrame::BundleAdjustAddAllNewPoints(int num_cameras, IntVec &added_order
         num_added++;
     }
 
-    wxLogMessage("[AddAllNewPoints] Added %d new points",           num_added);
-    wxLogMessage("[AddAllNewPoints] Ill-conditioned tracks: %d",    num_ill_conditioned);
-    wxLogMessage("[AddAllNewPoints] Bad reprojections: %d",         num_high_reprojection);
-    wxLogMessage("[AddAllNewPoints] Failed cheirality checks: %d",  num_cheirality_failed);
+    wxLogMessage("[AddNewPoints] Added %d new points",           num_added);
+    wxLogMessage("[AddNewPoints] Ill-conditioned tracks: %d",    num_ill_conditioned);
+    wxLogMessage("[AddNewPoints] Bad reprojections: %d",         num_high_reprojection);
+    wxLogMessage("[AddNewPoints] Failed cheirality checks: %d",  num_cheirality_failed);
 }
 
-int MainFrame::RemoveBadPointsAndCameras(const IntVec &added_order, CamVec &cameras, PointVec &points)
+int MainFrame::RemoveBadPointsAndCameras(const IntVec &added_order, const CamVec &cameras, PointVec &points)
 {
     int num_pruned = 0;
 
