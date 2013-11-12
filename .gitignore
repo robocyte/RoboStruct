@@ -41,6 +41,7 @@ local.properties
 *.sln.docstates
 
 # Build results
+/unused
 
 [Dd]ebug/
 [Rr]elease/
@@ -48,6 +49,8 @@ x64/
 build/
 [Oo]bj/
 unused/
+RoboStruct.exe
+vcomp110.dll
 
 # MSTest test Results
 [Tt]est[Rr]esult*/
@@ -212,4 +215,3 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
-/unused
