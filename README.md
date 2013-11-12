@@ -15,8 +15,7 @@ of used libraries under compiling.
 Usage
 =====
 
-The program is still unfinished but a working executable (Windows, 64 bit) can be found in /bin.
-Just put the /bin folder anywhere on your harddrive. Select another folder containing .jpg files and hit the big play button, et voila.
+Select a folder containing .jpg files (sample images are provided in the Testdata folder) and hit the big play button, et voila.
 IMPORTANT: The jpg. files must contain EXIF tags with focal length!
 Depending on your computer's memory and speed, it may be advisable to resize the source images.
 For reference, on my system (Core i7 quadcore, 16 GB Ram), image sizes up to 3000 x 2000 pixels are tested and work well.
