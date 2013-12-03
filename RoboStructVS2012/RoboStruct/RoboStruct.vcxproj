@@ -211,6 +211,7 @@
     <ClInclude Include="..\..\include\Options.hpp" />
     <ClInclude Include="..\..\include\PointData.hpp" />
     <ClInclude Include="..\..\include\Poly.hpp" />
+    <ClInclude Include="..\..\include\Profiling.hpp" />
     <ClInclude Include="..\..\include\Projection.hpp" />
     <ClInclude Include="..\..\include\RoboStruct.hpp" />
     <ClInclude Include="..\..\include\Sfm.hpp" />

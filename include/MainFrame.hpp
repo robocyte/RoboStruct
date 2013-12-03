@@ -10,6 +10,7 @@
 #include "MatchData.hpp"
 #include "Options.hpp"
 #include "PointData.hpp"
+#include "Profiling.hpp"
 #include "TrackData.hpp"
 #include "TransformData.hpp"
 
@@ -29,7 +30,8 @@ enum TimerIDs
     ID_TIMER_ANIMATION
 };
 
-extern const wxEventTypeTag<wxThreadEvent> wxEVT_THREAD_UPDATE;
+extern const wxEventTypeTag<wxThreadEvent> wxEVT_SFM_THREAD_UPDATE;
+extern const wxEventTypeTag<wxThreadEvent> wxEVT_SFM_THREAD_COMPLETE;
 
 class MainFrame : public MainFrame_base, public wxThreadHelper
 {
@@ -41,6 +43,7 @@ private:
     Options         m_options;
     gly::ScenePtr   m_scene;
     gly::ClockPtr   m_clock;
+    ProfileManager  m_profile_manager;
 
     wxGLContext*    m_gl_context;
     wxTimer*        m_turntable_timer;
@@ -131,7 +134,8 @@ private:
 
 protected:
     // Handlers for MainFrame events
-    void OnThreadUpdate(wxThreadEvent& event);
+    void OnSFMThreadUpdate(wxThreadEvent& event);
+    void OnSFMThreadComplete(wxThreadEvent& event);
     void OnUpdateUI(wxUpdateUIEvent& event);
 
     void OnClose(wxCloseEvent& event);

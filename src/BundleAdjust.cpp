@@ -97,7 +97,9 @@ struct PriorError
 
 wxThread::ExitCode MainFrame::Entry()
 {
-    this->RunSFM();
+    RunSFM();
+
+    wxQueueEvent(this, new wxThreadEvent(wxEVT_SFM_THREAD_COMPLETE));
 
     return (wxThread::ExitCode)0;
 }
@@ -105,7 +107,6 @@ wxThread::ExitCode MainFrame::Entry()
 void MainFrame::RunSFM()
 {
     wxLogMessage("[RunSFM] Computing structure from motion...");
-    clock_t start = clock();
 
     // Reset track to key mappings and vice versa
     for (auto &track : m_tracks) track.m_extra = -1;
@@ -193,18 +194,11 @@ void MainFrame::RunSFM()
             for (std::size_t i = 0; i < cameras.size(); i++) m_images[added_order[i]].m_camera = cameras[i];
         }
 
-        wxQueueEvent(this, new wxThreadEvent(wxEVT_THREAD_UPDATE));
+        wxQueueEvent(this, new wxThreadEvent(wxEVT_SFM_THREAD_UPDATE));
         round++;
     }
 
-    clock_t end = clock();
-    wxLogMessage("[RunSFM] Computing structure from motion took %0.3f s", (double) (end - start) / (double) CLOCKS_PER_SEC);
-
-    SavePlyFile();
     SetMatchesFromPoints();
-
-    // Update program state
-    m_sfm_done = true;
 }
 
 IntPair MainFrame::PickInitialCameraPair()
@@ -339,6 +333,8 @@ void MainFrame::SetupInitialCameraPair(IntPair initial_pair, CamVec &cameras, Po
 
 bool MainFrame::EstimateRelativePose(int i1, int i2, Camera *camera1, Camera *camera2)
 {
+    ScopedTimer timer(m_profile_manager, "[EstimateRelativePose]");
+
     auto &matches = m_matches.GetMatchList(GetMatchIndex(i1, i2));
 
     Point2Vec projections1; projections1.reserve(matches.size());
@@ -350,12 +346,8 @@ bool MainFrame::EstimateRelativePose(int i1, int i2, Camera *camera1, Camera *ca
         projections2.push_back(m_images[i2].m_keys[match.m_idx2].m_coords);
     }
 
-    wxLogMessage("[EstimateRelativePose] EstimateRelativePose starting...");
-    clock_t start = clock();
     Mat3 R; Vec3 t;
     int num_inliers = ComputeRelativePoseRansac(projections1, projections2, camera1->GetIntrinsicMatrix(), camera2->GetIntrinsicMatrix(), m_options.ransac_threshold_five_point, m_options.ransac_rounds_five_point, &R, &t);
-    clock_t end = clock();
-    wxLogMessage("[EstimateRelativePose] EstimateRelativePose took %0.3f s", (double) (end - start) / (double) CLOCKS_PER_SEC);
     wxLogMessage("[EstimateRelativePose] Found %d / %d inliers (%0.3f%%)", num_inliers, matches.size(), 100.0 * num_inliers / matches.size());
 
     if (num_inliers == 0) return false;
@@ -400,8 +392,6 @@ void MainFrame::SetMatchesFromTracks(int img1, int img2)
 
 void MainFrame::SetMatchesFromPoints()
 {
-    wxLogMessage("[SetMatchesFromPoints] Setting up matches...");
-
     // Clear all matches
     m_matches.RemoveAll();
 
@@ -423,12 +413,12 @@ void MainFrame::SetMatchesFromPoints()
             }
         }
     }
-
-    wxLogMessage("[SetMatchesFromPoints] Done!");
 }
 
 int MainFrame::FindCameraWithMostMatches(const IntVec &added_order, int &max_matches, const PointVec &points)
 {
+    ScopedTimer timer(m_profile_manager, "[FindCameraWithMostMatches]");
+
     int i_best = -1;
     max_matches = 0;
 
@@ -465,6 +455,8 @@ int MainFrame::FindCameraWithMostMatches(const IntVec &added_order, int &max_mat
 
 IntVec MainFrame::FindCamerasWithNMatches(int n, const IntVec &added_order, const PointVec &points)
 {
+    ScopedTimer timer(m_profile_manager, "[FindCamerasWithNMatches]");
+
     IntVec found_cameras;
 
     for (int i = 0; i < GetNumImages(); i++)
@@ -497,7 +489,6 @@ IntVec MainFrame::FindCamerasWithNMatches(int n, const IntVec &added_order, cons
 
 Camera MainFrame::InitializeImage(int image_idx, int camera_idx, PointVec &points, bool &success_out)
 {
-    clock_t start = clock();
     Camera dummy;
 
     success_out = false;
@@ -592,10 +583,6 @@ Camera MainFrame::InitializeImage(int image_idx, int camera_idx, PointVec &point
         points[idxs_final[i]].m_views.push_back(ImageKey(camera_idx, keys_final[i]));
     }
 
-    clock_t end = clock();
-
-    wxLogMessage("[InitializeImage] Initializing took %0.3f s", (double) (end - start) / CLOCKS_PER_SEC);
-
     camera_new.m_adjusted = true;
 
     success_out = true;
@@ -604,6 +591,8 @@ Camera MainFrame::InitializeImage(int image_idx, int camera_idx, PointVec &point
 
 bool MainFrame::FindAndVerifyCamera(const Point3Vec &points, const Point2Vec &projections, Mat3 *K, Mat3 *R, Vec3 *t, IntVec &inliers, IntVec &inliers_weak, IntVec &outliers)
 {
+    ScopedTimer timer(m_profile_manager, "[FindAndVerifyCamera]");
+
     // First, find the projection matrix
     int r = -1;
 
@@ -663,6 +652,8 @@ bool MainFrame::FindAndVerifyCamera(const Point3Vec &points, const Point2Vec &pr
 
 void MainFrame::RefineCameraParameters(Camera *camera, const Point3Vec &points, const Point2Vec &projections, int *pt_idxs, IntVec &inliers)
 {
+    ScopedTimer timer(m_profile_manager, "[RefineCameraParameters]");
+
     Point3Vec points_curr(points);
     Point2Vec projs_curr(projections);
 
@@ -743,19 +734,15 @@ void MainFrame::BundleAdjust(CamVec &cameras, const IntVec &added_order, PointVe
     IntVec      remap(num_pts);
     Point3Vec   nz_pts(num_pts);
 
-    clock_t start_all, stop_all;
-    start_all = clock();
-
     do
     {
-        clock_t round_start, round_stop;
-        round_start = clock();
-
         if (num_pts - total_outliers < min_points)
         {
             wxLogMessage("[BundleAdjust] Too few points remaining, exiting!");
             break;
         }
+
+        ScopedTimer timer(m_profile_manager, "[BundleAdjust]");
 
         // Set up the projections
         int num_projections = 0;
@@ -882,13 +869,11 @@ void MainFrame::BundleAdjust(CamVec &cameras, const IntVec &added_order, PointVe
             problem.AddResidualBlock(prior_cost_function, nullptr, pcameras + cnp * i);
         }
 
-        clock_t start = clock();
-
         // Make call to Ceres
-        wxLogMessage("[Ceres] %d points",		num_nz_points);
-        wxLogMessage("[Ceres] %d cameras",		num_cameras);
-        wxLogMessage("[Ceres] %d params",		num_parameters);
-        wxLogMessage("[Ceres] %d projections",	num_projections);
+        wxLogMessage("[Ceres] %d points",       num_nz_points);
+        wxLogMessage("[Ceres] %d cameras",      num_cameras);
+        wxLogMessage("[Ceres] %d params",       num_parameters);
+        wxLogMessage("[Ceres] %d projections",  num_projections);
         ceres::Solve(options, &problem, &summary);
         wxLogMessage("[Ceres] %s", summary.BriefReport().c_str());
 
@@ -920,13 +905,7 @@ void MainFrame::BundleAdjust(CamVec &cameras, const IntVec &added_order, PointVe
             nz_pts[i].z() = *ptr; ptr++;
         }
 
-        clock_t end = clock();
-
-        wxLogMessage("[BundleAdjust] Bundle adjustment took %0.3fs", (double) (end - start) / (double) CLOCKS_PER_SEC);
-
         // Check for outliers
-        start = clock();
-
         IntVec outliers;
         std::vector<double>	reproj_errors;
 
@@ -1012,15 +991,11 @@ void MainFrame::BundleAdjust(CamVec &cameras, const IntVec &added_order, PointVe
         num_outliers = outliers.size();
         total_outliers += num_outliers;
 
-        end = clock();
-        wxLogMessage("[BundleAdjust] Removed %d outliers in %0.3f s", num_outliers, (double) (end - start) / (double) CLOCKS_PER_SEC);
+        wxLogMessage("[BundleAdjust] Removed %d outliers", num_outliers);
 
         RemoveBadPointsAndCameras(added_order, cameras, points);
 
         for (int i = 0; i < num_pts; i++) if (remap[i] != -1) points[i].m_pos = nz_pts[remap[i]];
-
-        round_stop = clock();
-        wxLogMessage("[BundleAdjust] Round %d took %0.3f s", round, (double) (round_stop - round_start) / (double) CLOCKS_PER_SEC);
 
         // Update points for display
         {
@@ -1041,18 +1016,17 @@ void MainFrame::BundleAdjust(CamVec &cameras, const IntVec &added_order, PointVe
             for (int i = 0; i < num_cameras; i++) m_images[added_order[i]].m_camera = cameras[i];
         }
         
-        wxQueueEvent(this, new wxThreadEvent(wxEVT_THREAD_UPDATE));
+        wxQueueEvent(this, new wxThreadEvent(wxEVT_SFM_THREAD_UPDATE));
 
         round++;
         delete[] init_x;
     } while (num_outliers > m_options.outlier_threshold_ba);
-
-    stop_all = clock();
-    wxLogMessage("[BundleAdjust] Optimizing with outlier removal took %0.3f s (%d rounds)", (double) (stop_all - start_all) / (double) CLOCKS_PER_SEC, round);
 }
 
 void MainFrame::AddNewPoints(IntVec &added_order, CamVec &cameras, PointVec &points)
 {
+    ScopedTimer timer(m_profile_manager, "[AddNewPoints]");
+
     std::vector<ImageKeyVector> new_tracks;
     IntVec                      track_idxs;
     IntVec                      tracks_seen(m_tracks.size(), -1);
@@ -1213,6 +1187,8 @@ void MainFrame::AddNewPoints(IntVec &added_order, CamVec &cameras, PointVec &poi
 
 int MainFrame::RemoveBadPointsAndCameras(const IntVec &added_order, const CamVec &cameras, PointVec &points)
 {
+    ScopedTimer timer(m_profile_manager, "[RemoveBadPointsAndCameras]");
+
     int num_pruned = 0;
 
     for (auto &point : points)

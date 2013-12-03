@@ -18,7 +18,8 @@
 #include "Eigen/Dense"
 #include "Eigen/Geometry"
 
-const wxEventTypeTag<wxThreadEvent> wxEVT_THREAD_UPDATE(wxNewEventType());
+const wxEventTypeTag<wxThreadEvent> wxEVT_SFM_THREAD_UPDATE(wxNewEventType());
+const wxEventTypeTag<wxThreadEvent> wxEVT_SFM_THREAD_COMPLETE(wxNewEventType());
 
 MainFrame::MainFrame(wxWindow* parent)
     : MainFrame_base(parent)
@@ -56,9 +57,10 @@ MainFrame::MainFrame(wxWindow* parent)
     m_img_ctrl->InsertColumn(2, "Focal (px)",   wxLIST_FORMAT_LEFT, 65);
     m_img_ctrl->InsertColumn(3, "# features",   wxLIST_FORMAT_LEFT, 65);
 
-    this->Bind(wxEVT_PG_CHANGED,    &MainFrame::OnOptionsChanged,   this);
-    this->Bind(wxEVT_TIMER,         &MainFrame::OnTimerUpdate,      this);
-    this->Bind(wxEVT_THREAD_UPDATE, &MainFrame::OnThreadUpdate,     this);
+    this->Bind(wxEVT_PG_CHANGED,            &MainFrame::OnOptionsChanged,       this);
+    this->Bind(wxEVT_TIMER,                 &MainFrame::OnTimerUpdate,          this);
+    this->Bind(wxEVT_SFM_THREAD_UPDATE,     &MainFrame::OnSFMThreadUpdate,      this);
+    this->Bind(wxEVT_SFM_THREAD_COMPLETE,   &MainFrame::OnSFMThreadComplete,    this);
 }
 
 MainFrame::~MainFrame()
@@ -67,12 +69,13 @@ MainFrame::~MainFrame()
     delete m_turntable_timer;
     delete m_reset_viewport_timer;
 
-    this->Unbind(wxEVT_PG_CHANGED,      &MainFrame::OnOptionsChanged,   this);
-    this->Unbind(wxEVT_TIMER,           &MainFrame::OnTimerUpdate,      this);
-    this->Unbind(wxEVT_THREAD_UPDATE,   &MainFrame::OnThreadUpdate,     this);
+    this->Unbind(wxEVT_PG_CHANGED,          &MainFrame::OnOptionsChanged,       this);
+    this->Unbind(wxEVT_TIMER,               &MainFrame::OnTimerUpdate,          this);
+    this->Unbind(wxEVT_SFM_THREAD_UPDATE,   &MainFrame::OnSFMThreadUpdate,      this);
+    this->Unbind(wxEVT_SFM_THREAD_COMPLETE, &MainFrame::OnSFMThreadComplete,    this);
 }
 
-void MainFrame::OnThreadUpdate(wxThreadEvent& event)
+void MainFrame::OnSFMThreadUpdate(wxThreadEvent& event)
 {
     wxCriticalSectionLocker lock(m_points_cs);
 
@@ -106,6 +109,15 @@ void MainFrame::OnThreadUpdate(wxThreadEvent& event)
     }
 
     m_gl_canvas->Refresh(false);
+}
+
+void MainFrame::OnSFMThreadComplete(wxThreadEvent& event)
+{
+    m_sfm_done = true;
+
+    SavePlyFile();
+
+    wxLogMessage("%s", m_profile_manager.Report().c_str());
 }
 
 void MainFrame::InitializeLog()
@@ -223,6 +235,8 @@ void MainFrame::DetectFeaturesAll()
 
 void MainFrame::DetectFeatures(int img_idx)
 {
+    ScopedTimer timer(m_profile_manager, "[DetectFeatures]");
+
     double time = (double)cv::getTickCount();
     m_images[img_idx].DetectFeatures(m_options);
     time = (double)cv::getTickCount() - time;
@@ -277,9 +291,10 @@ void MainFrame::MatchAll()
             cv::Mat dists(num_descriptors, 2, CV_32F);
 
             // Match!
-            double time = (double)cv::getTickCount();
-            flann_index.knnSearch(query_desc, indices, dists, 2, cv::flann::SearchParams(m_options.matching_checks));
-            time = (double)cv::getTickCount() - time;
+            {
+                ScopedTimer timer(m_profile_manager, "[MatchImagePair]");
+                flann_index.knnSearch(query_desc, indices, dists, 2, cv::flann::SearchParams(m_options.matching_checks));
+            }
 
             // Store putative matches in ptpairs
             IntPairVec tmp_matches;
@@ -295,15 +310,15 @@ void MainFrame::MatchAll()
             int num_putative = static_cast<int>(tmp_matches.size());
 
             // Find and delete double matches
-            int num_pruned = this->PruneDoubleMatches(tmp_matches);
+            int num_pruned = PruneDoubleMatches(tmp_matches);
 
             // Compute the fundamental matrix and remove outliers
-            int num_inliers = this->ComputeEpipolarGeometry(i, j, tmp_matches);
+            int num_inliers = ComputeEpipolarGeometry(i, j, tmp_matches);
 
             // Compute transforms
             TransformInfo tinfo;
             MatchIndex midx(i, j);
-            tinfo.m_inlier_ratio = this->ComputeHomography(i, j, tmp_matches);
+            tinfo.m_inlier_ratio = ComputeHomography(i, j, tmp_matches);
 
             // Store matches and transforms
             if (num_inliers > m_options.matching_min_matches)
@@ -320,8 +335,8 @@ void MainFrame::MatchAll()
                 for (const auto &match : tmp_matches) matches.push_back(KeypointMatch(match.first, match.second));
 
                 // Be verbose
-                wxLogMessage("[MatchAll]    ...with %s: %i inliers (%i putative, %i duplicates pruned), ratio = %.2f    (%.2f ms)",
-                    m_images[j].m_filename_short.c_str(), num_inliers, num_putative, num_pruned, tinfo.m_inlier_ratio, time * 1000.0 / cv::getTickFrequency());
+                wxLogMessage("[MatchAll]    ...with %s: %i inliers (%i putative, %i duplicates pruned), ratio = %.2f",
+                    m_images[j].m_filename_short.c_str(), num_inliers, num_putative, num_pruned, tinfo.m_inlier_ratio);
             } else
             {
                 // Be verbose
@@ -337,8 +352,8 @@ void MainFrame::MatchAll()
         m_images[i].ClearDescriptors();
     }
 
-    this->MakeMatchListsSymmetric();
-    this->ComputeTracks();
+    MakeMatchListsSymmetric();
+    ComputeTracks();
     m_matches.RemoveAll();
 
     m_matches_loaded = true;
@@ -381,9 +396,10 @@ void MainFrame::MatchAllAkaze()
             cv::Mat dists = cv::Mat(num_descriptors, 2, CV_32FC1);
 
             // Match!
-            double time = (double)cv::getTickCount();
-            flannIndex.knnSearch(m_images[j].m_descriptors_akaze, indices, dists, 2, cv::flann::SearchParams(m_options.matching_checks));
-            time = (double)cv::getTickCount() - time;
+            {
+                ScopedTimer timer(m_profile_manager, "[MatchImagePair]");
+                flannIndex.knnSearch(m_images[j].m_descriptors_akaze, indices, dists, 2, cv::flann::SearchParams(m_options.matching_checks));
+            }
 
             // Store putative matches in ptpairs
             IntPairVec tmp_matches;
@@ -408,15 +424,15 @@ void MainFrame::MatchAllAkaze()
             int num_putative = static_cast<int>(tmp_matches.size());
 
             // Find and delete double matches
-            int num_pruned = this->PruneDoubleMatches(tmp_matches);
+            int num_pruned = PruneDoubleMatches(tmp_matches);
 
             // Compute the fundamental matrix and remove outliers
-            int num_inliers = this->ComputeEpipolarGeometry(i, j, tmp_matches);
+            int num_inliers = ComputeEpipolarGeometry(i, j, tmp_matches);
 
             // Compute transforms
             TransformInfo tinfo;
             MatchIndex midx(i, j);
-            tinfo.m_inlier_ratio = this->ComputeHomography(i, j, tmp_matches);
+            tinfo.m_inlier_ratio = ComputeHomography(i, j, tmp_matches);
 
             // Store matches and transforms
             if (num_inliers > m_options.matching_min_matches)
@@ -433,8 +449,8 @@ void MainFrame::MatchAllAkaze()
                 for (const auto &match : tmp_matches) matches.push_back(KeypointMatch(match.first, match.second));
 
                 // Be verbose
-                wxLogMessage("[MatchAll]    ...with %s: %i inliers (%i putative, %i duplicates pruned), ratio = %.2f    (%.2f ms)",
-                    m_images[j].m_filename_short.c_str(), num_inliers, num_putative, num_pruned, tinfo.m_inlier_ratio, time * 1000.0 / cv::getTickFrequency());
+                wxLogMessage("[MatchAll]    ...with %s: %i inliers (%i putative, %i duplicates pruned), ratio = %.2f",
+                    m_images[j].m_filename_short.c_str(), num_inliers, num_putative, num_pruned, tinfo.m_inlier_ratio);
             } else
             {
                 // Be verbose
@@ -447,8 +463,8 @@ void MainFrame::MatchAllAkaze()
         }
     }
 
-    this->MakeMatchListsSymmetric();
-    this->ComputeTracks();
+    MakeMatchListsSymmetric();
+    ComputeTracks();
     m_matches.RemoveAll();
 
     m_matches_loaded = true;
@@ -456,6 +472,8 @@ void MainFrame::MatchAllAkaze()
 
 int MainFrame::PruneDoubleMatches(IntPairVec &matches)
 {
+    ScopedTimer timer(m_profile_manager, "[PruneDoubleMatches]");
+
     int num_before = matches.size();
 
     // Mark an index as duplicate if it's registered more than once
@@ -473,6 +491,8 @@ int MainFrame::PruneDoubleMatches(IntPairVec &matches)
 
 int MainFrame::ComputeEpipolarGeometry(int idx1, int idx2, IntPairVec &matches)
 {
+    ScopedTimer timer(m_profile_manager, "[ComputeEpipolarGeometry]");
+
     auto num_putative = matches.size();
     std::vector<cv::Point2f> points1, points2;
     std::vector<uchar> status;
@@ -504,6 +524,8 @@ int MainFrame::ComputeEpipolarGeometry(int idx1, int idx2, IntPairVec &matches)
 
 double MainFrame::ComputeHomography(int idx1, int idx2, const IntPairVec &matches)
 {
+    ScopedTimer timer(m_profile_manager, "[ComputeHomography]");
+
     auto num_matches = matches.size();
     std::vector<cv::Point2f> points1, points2;
     std::vector<uchar> status;
@@ -530,8 +552,8 @@ double MainFrame::ComputeHomography(int idx1, int idx2, const IntPairVec &matche
 
 void MainFrame::ComputeTracks()
 {
+    ScopedTimer timer(m_profile_manager, "[ComputeTracks]");
     wxLogMessage("[ComputeTracks] Computing tracks...");
-    double time = (double)cv::getTickCount();
 
     int num_images = this->GetNumImages();
 
@@ -670,9 +692,7 @@ void MainFrame::ComputeTracks()
     m_tracks = tracks;
     delete[] img_marked;
 
-    time = (double)cv::getTickCount() - time;
-
-    wxLogMessage("[ComputeTracks] Found %i tracks in %.2f ms", (int)m_tracks.size(), time * 1000.0 / cv::getTickFrequency());
+    wxLogMessage("[ComputeTracks] Found %i tracks", (int)m_tracks.size());
 
     // Print track stats
     IntVec stats(num_images + 1);
@@ -682,6 +702,8 @@ void MainFrame::ComputeTracks()
 
 void MainFrame::MakeMatchListsSymmetric()
 {
+    ScopedTimer timer(m_profile_manager, "[MakeMatchListsSymmetric]");
+
     unsigned int num_images = GetNumImages();
 
     std::vector<MatchIndex> matches;
