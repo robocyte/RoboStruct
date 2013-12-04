@@ -286,15 +286,15 @@ MainFrame_base::MainFrame_base( wxWindow* parent, wxWindowID id, const wxString&
 	m_img_ctrl = new wxListCtrl( m_window_image_browser, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_HRULES|wxLC_REPORT|wxLC_SINGLE_SEL|wxNO_BORDER );
 	bSizer1->Add( m_img_ctrl, 1, wxEXPAND, 5 );
 	
-	m_window_image_preview = new wxPanel( m_window_image_browser, wxID_ANY, wxDefaultPosition, wxSize( 370,200 ), wxNO_BORDER|wxTAB_TRAVERSAL );
-	m_window_image_preview->SetMinSize( wxSize( 370,200 ) );
-	
-	bSizer1->Add( m_window_image_preview, 1, wxEXPAND, 5 );
-	
-	
+
 	m_window_image_browser->SetSizer( bSizer1 );
 	m_window_image_browser->Layout();
-	m_window_options = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxSize( 370,200 ), wxNO_BORDER|wxTAB_TRAVERSAL );
+	m_window_image_preview = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxSize( 370,200 ), wxNO_BORDER|wxTAB_TRAVERSAL );
+	m_window_image_preview->SetMinSize( wxSize( 370,200 ) );
+	
+	m_mgr.AddPane( m_window_image_preview, wxAuiPaneInfo() .Name( wxT("Image preview") ).Left() .Caption( wxT("Image preview") ).MaximizeButton( true ).PaneBorder( false ).Dock().Resizable().FloatingSize( wxSize( 386,234 ) ).DockFixed( false ).Layer( 1 ) );
+
+    m_window_options = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxSize( 370,200 ), wxNO_BORDER|wxTAB_TRAVERSAL );
 	m_window_options->SetMinSize( wxSize( 370,200 ) );
 	
 	m_mgr.AddPane( m_window_options, wxAuiPaneInfo() .Name( wxT("Options") ).Left() .Caption( wxT("Options") ).MaximizeButton( true ).PaneBorder( false ).Dock().Resizable().FloatingSize( wxSize( 439,316 ) ).DockFixed( false ).Layer( 1 ) );

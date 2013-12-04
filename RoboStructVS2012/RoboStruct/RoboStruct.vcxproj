@@ -189,8 +189,10 @@
     <ClCompile Include="..\..\src\ImageData.cpp" />
     <ClCompile Include="..\..\src\MainFrame.cpp" />
     <ClCompile Include="..\..\src\MainFrameGLCanvas.cpp" />
+    <ClCompile Include="..\..\src\MainFrameImagePreview.cpp" />
     <ClCompile Include="..\..\src\MainFrameInteraction.cpp" />
     <ClCompile Include="..\..\src\MainFrameIO.cpp" />
+    <ClCompile Include="..\..\src\MainFrameMatchesView.cpp" />
     <ClCompile Include="..\..\src\MainFrameOptions.cpp" />
     <ClCompile Include="..\..\src\Poly.cpp" />
     <ClCompile Include="..\..\src\Projection.cpp" />

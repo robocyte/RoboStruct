@@ -57,6 +57,9 @@ private:
     float           m_counter;
     std::string     m_path;
 
+    wxImage         m_preview_image;
+    wxImage         m_matches_image;
+
     std::vector<CamDBEntry>     m_camDB;                // Contains the information from CamDB.txt
     std::vector<ImageData>      m_images;               // Image data
     std::vector<TrackData>      m_tracks;               // Information about the detected 3D tracks
@@ -81,6 +84,11 @@ private:
     void ResetOptions();
     void ResetGLCanvas();
     void ResetPerspectiveMatrix();
+
+    void GeneratePreviewImage(int img_idx);
+    void GenerateMatchImage();
+    void DrawImgPreview(wxDC &dc);
+    void DrawMatches(wxDC &dc);
 
     bool AddImage(const std::string filename, const std::string filename_short);            // Try to add an image to the initial list of images
     bool ReadCamDBFile(const std::string filename);
@@ -157,14 +165,14 @@ protected:
     void OnExport(wxCommandEvent& event);
 
     void OnSelectDirectory(wxFileDirPickerEvent& event);
-    //void OnSelectPreviewImage(wxListEvent& event);
-    //void OnSelectMatchImage(wxCommandEvent& event);
+    void OnSelectPreviewImage(wxListEvent& event);
+    void OnSelectMatchImage(wxCommandEvent& event);
 
-    //void OnImagePreviewMouse(wxMouseEvent& event);
-    //void OnImagePreviewPaint(wxPaintEvent& event);
-    //void OnImagePreviewResize(wxSizeEvent& event);
-    //void OnMatchesViewPaint(wxPaintEvent& event);
-    //void OnMatchesViewResize(wxSizeEvent& event);
+    void OnImagePreviewMouse(wxMouseEvent& event);
+    void OnImagePreviewPaint(wxPaintEvent& event);
+    void OnImagePreviewResize(wxSizeEvent& event);
+    void OnMatchesViewPaint(wxPaintEvent& event);
+    void OnMatchesViewResize(wxSizeEvent& event);
 
     void OnSaveLog(wxCommandEvent& event);
     void OnClearLog(wxCommandEvent& event);

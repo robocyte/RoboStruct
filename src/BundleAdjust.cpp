@@ -169,12 +169,6 @@ void MainFrame::RunSFM()
 
         RemoveBadPointsAndCameras(added_order, cameras, points);
 
-        wxLogMessage("[RunSFM] Focal lengths:");
-        for (int i = 0; i < cameras.size(); i++)
-        {
-            wxLogMessage("  [%03d] %.3f %s %d; %.3f %.3f", i, cameras[i].m_focal_length, m_images[added_order[i]].m_filename_short.c_str(), added_order[i], cameras[i].m_k[0], cameras[i].m_k[1]);
-        }
-
         // Update points and cameras for display
         {
             wxCriticalSectionLocker lock(m_points_cs);
@@ -196,6 +190,13 @@ void MainFrame::RunSFM()
 
         wxQueueEvent(this, new wxThreadEvent(wxEVT_SFM_THREAD_UPDATE));
         round++;
+    }
+
+    // Display final focal lengths
+    wxLogMessage("[RunSFM] Focal lengths:");
+    for (int i = 0; i < cameras.size(); i++)
+    {
+        wxLogMessage("  [%03d] %.3f %s %d; %.3f %.3f", i, cameras[i].m_focal_length, m_images[added_order[i]].m_filename_short.c_str(), added_order[i], cameras[i].m_k[0], cameras[i].m_k[1]);
     }
 
     SetMatchesFromPoints();
@@ -1218,8 +1219,6 @@ int MainFrame::RemoveBadPointsAndCameras(const IntVec &added_order, const CamVec
 
         if (util::rad2deg(max_angle) < 0.5 * m_options.ray_angle_threshold)
         {
-            //wxLogMessage("[RemoveBadPointsAndCamera] Removing point with angle %0.3f", util::rad2deg(max_angle));
-
             for (const auto &view : point.m_views)
             {
                 // Set extra flag back to 0
