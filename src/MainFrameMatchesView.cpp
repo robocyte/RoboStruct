@@ -17,12 +17,12 @@ void MainFrame::OnSelectMatchImage(wxCommandEvent& event)
 void MainFrame::GenerateMatchImage()
 {
     if (!m_sfm_done) return;
-    int left_idx = m_cb_matches_left->GetSelection();
+    int left_idx  = m_cb_matches_left->GetSelection();
     int right_idx = m_cb_matches_right->GetSelection();
 
     if (left_idx == -1 || right_idx == -1 || (left_idx == right_idx)) return;
 
-    auto left_img = cv::imread(m_images[left_idx].m_filename);
+    auto left_img  = cv::imread(m_images[left_idx].m_filename);
     auto right_img = cv::imread(m_images[right_idx].m_filename);
 
     cv::cvtColor(left_img, left_img, CV_BGR2RGB);
@@ -32,7 +32,7 @@ void MainFrame::GenerateMatchImage()
     std::vector<cv::DMatch> matches;
     std::vector<cv::KeyPoint> kpts1, kpts2;
 
-    const auto& left_keys = m_images[left_idx].m_keys;
+    const auto& left_keys  = m_images[left_idx].m_keys;
     const auto& right_keys = m_images[right_idx].m_keys;
 
     kpts1.reserve(left_keys.size());
@@ -63,13 +63,9 @@ void MainFrame::GenerateMatchImage()
     for (const auto &match : list) matches.push_back(cv::DMatch(match.m_idx1, match.m_idx2, 0.0f));
 
     cv::Scalar_<double> line_colour;
-    if (m_options.draw_coloured_lines)
-    {
-        line_colour = cv::Scalar_<double>::all(-1);
-    } else
-    {
-        line_colour = cv::Scalar_<double>::all(255);
-    }
+    if (m_options.draw_coloured_lines)  line_colour = cv::Scalar_<double>::all(-1);
+    else                                line_colour = cv::Scalar_<double>::all(255);
+
 
     if (m_options.draw_matches_only)
     {
@@ -95,7 +91,7 @@ void MainFrame::OnMatchesViewResize(wxSizeEvent& event)
     event.Skip();
 }
 
-void MainFrame::DrawMatches(wxDC &dc)
+void MainFrame::DrawMatches(wxDC& dc)
 {
     if (!dc.IsOk()) return;
 

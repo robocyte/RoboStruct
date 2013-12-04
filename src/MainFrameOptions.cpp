@@ -63,6 +63,7 @@ void MainFrame::ResetOptions()
 
     // Structure from motion category
     m_pg_options->Append( new wxPropertyCategory( "Structure from motion" ) );
+    m_pg_options->Append( new wxBoolProperty("Add multiple images",                 wxPG_LABEL, m_options.add_multiple_images ) );
     m_pg_options->Append( new wxFloatProperty("5point RANSAC threshold",            wxPG_LABEL, m_options.ransac_threshold_five_point ) );
     m_pg_options->Append( new wxIntProperty("5point RANSAC rounds",                 wxPG_LABEL, m_options.ransac_rounds_five_point ) );
     m_pg_options->Append( new wxIntProperty("Minimum image matches",                wxPG_LABEL, m_options.min_max_matches ) );
@@ -127,6 +128,7 @@ void MainFrame::OnOptionsChanged(wxPropertyGridEvent& event)
     m_options.ransac_threshold_fundamental      = m_pg_options->GetProperty("Fundamental RANSAC threshold")->GetValue().GetDouble();
     m_options.ransac_threshold_homography       = m_pg_options->GetProperty("Homography RANSAC threshold")->GetValue().GetDouble();
 
+    m_options.add_multiple_images               = m_pg_options->GetProperty("Add multiple images")->GetValue().GetBool();
     m_options.ransac_threshold_five_point       = m_pg_options->GetProperty("5point RANSAC threshold")->GetValue().GetDouble();
     m_options.ransac_rounds_five_point          = m_pg_options->GetProperty("5point RANSAC rounds")->GetValue().GetInteger();
     m_options.min_max_matches                   = m_pg_options->GetProperty("Minimum image matches")->GetValue().GetInteger();

@@ -45,7 +45,7 @@ void MainFrame::OnImagePreviewResize(wxSizeEvent& event)
     event.Skip();
 }
 
-void MainFrame::DrawImgPreview(wxDC &dc)
+void MainFrame::DrawImgPreview(wxDC& dc)
 {
     if (!dc.IsOk()) return;
 

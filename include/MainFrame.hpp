@@ -87,8 +87,8 @@ private:
 
     void GeneratePreviewImage(int img_idx);
     void GenerateMatchImage();
-    void DrawImgPreview(wxDC &dc);
-    void DrawMatches(wxDC &dc);
+    void DrawImgPreview(wxDC& dc);
+    void DrawMatches(wxDC& dc);
 
     bool AddImage(const std::string filename, const std::string filename_short);            // Try to add an image to the initial list of images
     bool ReadCamDBFile(const std::string filename);

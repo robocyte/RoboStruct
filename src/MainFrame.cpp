@@ -236,13 +236,8 @@ void MainFrame::DetectFeaturesAll()
 void MainFrame::DetectFeatures(int img_idx)
 {
     ScopedTimer timer(m_profile_manager, "[DetectFeatures]");
-
-    double time = (double)cv::getTickCount();
     m_images[img_idx].DetectFeatures(m_options);
-    time = (double)cv::getTickCount() - time;
-
-    wxLogMessage("[DetectFeatures] %s: found %i features in %.2f ms.",
-        m_images[img_idx].m_filename_short.c_str(), GetNumKeys(img_idx), time * 1000.0 / cv::getTickFrequency());
+    wxLogMessage("[DetectFeatures] %s: found %i features", m_images[img_idx].m_filename_short.c_str(), GetNumKeys(img_idx));
 }
 
 void MainFrame::MatchAll()

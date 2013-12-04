@@ -36,6 +36,7 @@ struct Options
         , ransac_threshold_fundamental(0.001)
         , ransac_threshold_homography(0.001)
 
+        , add_multiple_images(true)
         , ransac_threshold_five_point(2.25)
         , ransac_rounds_five_point(500)
         , min_max_matches(16)
@@ -103,6 +104,7 @@ struct Options
 
 
     // Sfm options
+    bool        add_multiple_images;
     double      ransac_threshold_five_point;
     int         ransac_rounds_five_point;
     int         min_max_matches;                        // Minimum number of matches needed to register an image

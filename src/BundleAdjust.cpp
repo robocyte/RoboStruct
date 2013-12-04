@@ -140,7 +140,11 @@ void MainFrame::RunSFM()
             break;
         }
 
-        auto image_set = FindCamerasWithNMatches(util::iround(0.75 * max_matches), added_order, points);
+        IntVec image_set;
+        
+        if (m_options.add_multiple_images)  image_set = FindCamerasWithNMatches(util::iround(0.75 * max_matches), added_order, points);
+        else                                image_set.push_back(max_cam);
+
         wxLogMessage("[RunSFM] Registering %d images", (int)image_set.size());
 
         // Now, throw the new cameras into the mix
@@ -166,8 +170,6 @@ void MainFrame::RunSFM()
         wxLogMessage("[RunSFM] Number of points = %d", points.size());
 
         BundleAdjust(cameras, added_order, points);
-
-        RemoveBadPointsAndCameras(added_order, cameras, points);
 
         // Update points and cameras for display
         {
