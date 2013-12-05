@@ -56,7 +56,7 @@ bool ImageData::GetExifInfo()
 void ImageData::DetectFeatures(const Options& opts)
 {
     // Cleanup data structures
-    this->ClearDescriptors();
+    ClearDescriptors();
     m_keys.clear();
 
     std::vector<cv::KeyPoint> keys;
@@ -144,8 +144,8 @@ void ImageData::DetectFeatures(const Options& opts)
         }
     }
 
-    this->ConvertOpenCVKeys(keys, img);
-    this->SaveDescriptors(true);
+    ConvertOpenCVKeys(keys, img);
+    SaveDescriptors(true);
 }
 
 void ImageData::SaveDescriptors(bool clear)
@@ -157,7 +157,7 @@ void ImageData::SaveDescriptors(bool clear)
 
     SaveDescriptorsToFileBinary(filename, m_descriptors);
 
-    if (clear) this->ClearDescriptors();
+    if (clear) ClearDescriptors();
 }
 
 void ImageData::LoadDescriptors()

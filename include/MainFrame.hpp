@@ -49,25 +49,25 @@ public:
     void ResetPerspectiveMatrix();
 
 private:
-    Options         m_options;
-    gly::ScenePtr   m_scene;
-    gly::ClockPtr   m_clock;
-    ProfileManager  m_profile_manager;
+    Options                 m_options;
+    gly::ScenePtr           m_scene;
+    gly::ClockPtr           m_clock;
+    ProfileManager          m_profile_manager;
 
-    wxGLContext*    m_gl_context;
-    wxTimer*        m_turntable_timer;
-    wxTimer*        m_reset_viewport_timer;
+    wxGLContext*            m_gl_context;
+    wxTimer*                m_turntable_timer;
+    wxTimer*                m_reset_viewport_timer;
 
-    wxCursor        m_rotate_cursor;
-    wxCursor        m_pan_cursor;
-    wxCursor        m_zoom_cursor;
+    wxCursor                m_rotate_cursor;
+    wxCursor                m_pan_cursor;
+    wxCursor                m_zoom_cursor;
 
-    float           m_beginx, m_beginy;             // Old mouse position
-    float           m_counter;
-    std::string     m_path;
+    float                   m_beginx, m_beginy;     // Old mouse position
+    float                   m_counter;
+    std::string             m_path;
 
-    wxImage         m_preview_image;
-    wxImage         m_matches_image;
+    wxImage                 m_preview_image;
+    wxImage                 m_matches_image;
 
     std::vector<CamDBEntry> m_camDB;                // Contains the information from CamDB.txt
     std::vector<ImageData>  m_images;               // Image data
@@ -85,15 +85,15 @@ private:
     int                     m_desc_length;
     wxCriticalSection       m_points_cs;
 
-    void GeneratePreviewImage(int img_idx);
-    void GenerateMatchImage();
-    void DrawImgPreview(wxDC& dc);
-    void DrawMatches(wxDC& dc);
+    void        GeneratePreviewImage(int img_idx);
+    void        GenerateMatchImage();
+    void        DrawImgPreview(wxDC& dc);
+    void        DrawMatches(wxDC& dc);
 
-    bool AddImage(const std::string filename, const std::string filename_short);            // Try to add an image to the initial list of images
-    bool ReadCamDBFile(const std::string filename);
-    void AddCamDBFileEntry();
-    bool FindCameraInDatabase(ImageData &img);
+    bool        AddImage(const std::string filename, const std::string filename_short);            // Try to add an image to the initial list of images
+    bool        ReadCamDBFile(const std::string filename);
+    void        AddCamDBFileEntry();
+    bool        FindCameraInDatabase(ImageData &img);
 
     void        DetectFeaturesAll();
     void        DetectFeatures(int img_idx);
@@ -116,8 +116,8 @@ private:
     int         GetNumKeys(int img)             { return (int)m_images[img].m_keys.size(); };   // Returns the number of detected features for the given image index
     int         GetNumTrackMatches(int img1, int img2);
     double      GetInlierRatio(int idx1, int idx2);                                             // Returns the inlier ratio for an image pair
+
     void        SaveMatchFile();
-    void        SaveMatchPics();
     void        SaveTrackFile();
     void        SaveProjectionMatrix(const std::string &path, int img_idx);
     void        SaveUndistortedImage(const std::string &path, int img_idx);
@@ -136,7 +136,7 @@ private:
     bool                FindAndVerifyCamera(const Point3Vec &points, const Point2Vec &projections, Mat3 *K, Mat3 *R, Vec3 *t, IntVec &inliers, IntVec &inliers_weak, IntVec &outliers);
     Camera              InitializeImage(int image_idx, int camera_idx, PointVec &points);
     void                BundleAdjust(CamVec &cameras, const IntVec &added_order, PointVec &points);
-    void                RefineCameraParameters(Camera *camera, const Point3Vec &points, const Point2Vec &projections, int *pt_idxs, IntVec &inliers);
+    void                RefineCameraParameters(Camera *camera, const Point3Vec &points, const Point2Vec &projections, IntVec &inliers);
     void                AddNewPoints(const CamVec &cameras, const IntVec &added_order, PointVec &points);
     int                 RemoveBadPointsAndCameras(const CamVec &cameras, const IntVec &added_order, PointVec &points);
     void                RadiusOutlierRemoval(double threshold, const IntVec &added_order, PointVec &points);

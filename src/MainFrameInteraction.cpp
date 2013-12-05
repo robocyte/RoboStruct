@@ -78,7 +78,7 @@ void MainFrame::OnViewWindows(wxCommandEvent& event)
 
 void MainFrame::OnResetOptions(wxCommandEvent& event)
 {
-    this->ResetOptions();
+    ResetOptions();
 }
 
 void MainFrame::OnReset3dViewport(wxCommandEvent& event)
@@ -215,32 +215,32 @@ void MainFrame::OnExport(wxCommandEvent& event)
     {
     case ID_EXPORT_TRACKS:
         {
-            this->SaveTrackFile();
+            SaveTrackFile();
             break;
         }
     case ID_EXPORT_MATCHES:
         {
-            this->SaveMatchFile();
+            SaveMatchFile();
             break;
         }
     case ID_EXPORT_CMVS:
         {
-            this->ExportToCMVS();
+            ExportToCMVS();
             break;
         }
     case ID_EXPORT_BUNDLE_FILE:
         {
-            this->SaveBundleFile(m_path);
+            SaveBundleFile(m_path);
             break;
         }
     case ID_EXPORT_PLY_FILE:
         {
-            this->SavePlyFile();
+            SavePlyFile();
             break;
         }
     case ID_EXPORT_MAYA_FILE:
         {
-            this->SaveMayaFile();
+            SaveMayaFile();
             break;
         }
     default: event.Skip();
@@ -288,7 +288,7 @@ void MainFrame::OnSelectDirectory(wxFileDirPickerEvent& event)
     while (found)
     {
         // Get focal from EXIF tags, convert to px-coordinates and add image if successful
-        if(this->AddImage(dir.FindFirst(path, filename).ToStdString(), filename.ToStdString()))
+        if(AddImage(dir.FindFirst(path, filename).ToStdString(), filename.ToStdString()))
         {
             m_img_ctrl->InsertItem(index, filename);
             m_cb_matches_left->Append(filename);
@@ -331,13 +331,13 @@ void MainFrame::OnReconstruct(wxCommandEvent& event)
     // Compute structure from motion in another thread
     if (CreateThread(wxTHREAD_DETACHED) != wxTHREAD_NO_ERROR)
     {
-        wxLogError("Could not create the worker thread!");
+        wxLogError("Error: Could not create the worker thread!");
         return;
     }
 
     if (GetThread()->Run() != wxTHREAD_NO_ERROR)
     {
-        wxLogError("Could not run the worker thread!");
+        wxLogError("Error: Could not run the worker thread!");
         return;
     }
 }

@@ -10,7 +10,7 @@
 
 void MainFrame::OnSelectPreviewImage(wxListEvent& event)
 {
-    this->GeneratePreviewImage(event.GetIndex());
+    GeneratePreviewImage(event.GetIndex());
 }
 
 void MainFrame::GeneratePreviewImage(int img_idx)
@@ -72,7 +72,7 @@ void MainFrame::DrawImgPreview(wxDC& dc)
         }
     } else
     {
-        auto *gc = wxGraphicsContext::Create(m_window_image_preview);
+        auto gc = wxGraphicsContext::Create(m_window_image_preview);
         gc->SetPen(*wxLIGHT_GREY_PEN);
 
         auto path = gc->CreatePath();

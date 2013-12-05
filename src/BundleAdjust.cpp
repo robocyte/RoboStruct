@@ -1,4 +1,3 @@
-#include <fstream>
 #include <numeric>
 
 #include "EigenTools.hpp"
@@ -115,7 +114,6 @@ void MainFrame::UpdateGeometryDisplay(const CamVec &cameras, const IntVec &added
 
     for (const auto &point : points)
     {
-        // Check if the point is visible in any view
         if (point.m_views.empty()) continue; // Invisible
 
         ImageKeyVector views;
@@ -137,17 +135,14 @@ void MainFrame::RunSFM()
     for (auto &track : m_tracks) track.m_extra = -1;
     for (auto &img : m_images) for (auto &key : img.m_keys) key.m_extra = -1;
 
-    IntVec      added_order;
-    CamVec      cameras;
-    PointVec    points;
+    CamVec   cameras;
+    IntVec   added_order;
+    PointVec points;
 
     PickInitialCameraPair(cameras, added_order);
-
-    wxLogMessage("[RunSFM] Adjusting cameras %d and %d...", added_order[0], added_order[1]);
     SetupInitialCameraPair(cameras, added_order, points);
     BundleAdjust(cameras, added_order, points);
 
-    // Main loop
     int round = 0;
     while (cameras.size() < m_images.size())
     {
@@ -160,27 +155,21 @@ void MainFrame::RunSFM()
             break;
         }
 
-        IntVec image_set;
-        if (m_options.add_multiple_images)  image_set = FindCamerasWithNMatches(util::iround(0.75 * max_matches), added_order, points);
-        else                                image_set.push_back(max_cam);
-
-        wxLogMessage("[RunSFM] Registering %d images", (int)image_set.size());
-
-        // Now, throw the new cameras into the mix
-        for (const int &image_idx : image_set)
+        IntVec next_images;
+        if (m_options.add_multiple_images)  next_images = FindCamerasWithNMatches(util::iround(0.75 * max_matches), added_order, points);
+        else                                next_images.push_back(max_cam);
+ 
+        for (const int &idx : next_images)
         {
-            wxLogMessage("[RunSFM[round %i]] Adjusting camera %d", round, image_idx);
-            added_order.push_back(image_idx);
+            added_order.push_back(idx);
 
-            auto camera_new = InitializeImage(image_idx, cameras.size(), points);
+            auto camera_new = InitializeImage(idx, cameras.size(), points);
             if (camera_new.m_adjusted)  cameras.push_back(camera_new);
-            else                        m_images[image_idx].m_ignore_in_bundle = true;
+            else                        m_images[idx].m_ignore_in_bundle = true;
         }
 
-        wxLogMessage("[RunSFM] Adding new matches");
         AddNewPoints(cameras, added_order, points);
         BundleAdjust(cameras, added_order, points);
-        wxLogMessage("[RunSFM] Number of points = %d", points.size());
 
         round++;
     }
@@ -267,6 +256,8 @@ void MainFrame::PickInitialCameraPair(CamVec &cameras, IntVec &added_order)
 
 void MainFrame::SetupInitialCameraPair(CamVec &cameras, const IntVec &added_order, PointVec &points)
 {
+    wxLogMessage("[SetupInitialCameraPair] Adjusting cameras %d and %d...", added_order[0], added_order[1]);
+
     int img_1 = added_order[0];
     int img_2 = added_order[1];
     SetMatchesFromTracks(img_1, img_2);
@@ -487,13 +478,13 @@ IntVec MainFrame::FindCamerasWithNMatches(int n, const IntVec &added_order, cons
 
 Camera MainFrame::InitializeImage(int image_idx, int camera_idx, PointVec &points)
 {
-    Camera camera_new;
+    wxLogMessage("[InitializeImage] Initializing camera %d", image_idx);
 
     auto &image = m_images[image_idx];
     image.SetTracks();
 
     // **** Connect the new camera to any existing points ****
-    wxLogMessage("[InitializeImage] Connecting existing matches...");
+    Camera      camera_new;
     Point3Vec   points_solve;
     Point2Vec   projs_solve;
     IntVec      idxs_solve;
@@ -525,8 +516,6 @@ Camera MainFrame::InitializeImage(int image_idx, int camera_idx, PointVec &point
     }
 
     // **** Solve for the camera position ****
-    wxLogMessage("[InitializeImage] Initializing camera...");
-
     Mat3 Kinit, Rinit;
     Vec3 tinit;
     IntVec inliers, inliers_weak, outliers;
@@ -540,7 +529,6 @@ Camera MainFrame::InitializeImage(int image_idx, int camera_idx, PointVec &point
 
         // Set up the new focal length
         camera_new.m_focal_length = camera_new.m_init_focal_length = image.m_init_focal;
-        wxLogMessage("[InitializeImage] Camera has initial focal length of %0.3f", camera_new.m_init_focal_length);
     } else
     {
         wxLogMessage("[InitializeImage] Couldn't initialize (couldn't solve for the camera position)");
@@ -548,7 +536,6 @@ Camera MainFrame::InitializeImage(int image_idx, int camera_idx, PointVec &point
     }
 
     // Optimize camera parameters
-    wxLogMessage("[InitializeImage] Adjusting...");
     Point3Vec   points_final;
     Point2Vec   projs_final;
     IntVec      idxs_final;
@@ -562,7 +549,7 @@ Camera MainFrame::InitializeImage(int image_idx, int camera_idx, PointVec &point
         keys_final.push_back(keys_solve[idx]);
     }
 
-    RefineCameraParameters(&camera_new, points_final, projs_final, idxs_final.data(), inliers);
+    RefineCameraParameters(&camera_new, points_final, projs_final, inliers);
 
     if ((inliers.size() < 8) || (camera_new.m_focal_length < 0.1 * image.GetWidth()))
     {
@@ -609,7 +596,6 @@ bool MainFrame::FindAndVerifyCamera(const Point3Vec &points, const Point2Vec &pr
     DecomposeProjectionMatrix(P, K, R, t);
 
     wxLogMessage("[FindAndVerifyCamera] Checking consistency...");
-
     Mat34 Rigid;
     Rigid << *R;
     Rigid.col(3) = *t;
@@ -627,7 +613,6 @@ bool MainFrame::FindAndVerifyCamera(const Point3Vec &points, const Point2Vec &pr
             inliers_weak.push_back(j);
         } else
         {
-            //wxLogMessage("[FindAndVerifyCamera] Removing point with reprojection error %0.3f", diff);
             outliers.push_back(j);
         }
 
@@ -643,7 +628,7 @@ bool MainFrame::FindAndVerifyCamera(const Point3Vec &points, const Point2Vec &pr
     return true;
 }
 
-void MainFrame::RefineCameraParameters(Camera *camera, const Point3Vec &points, const Point2Vec &projections, int *pt_idxs, IntVec &inliers)
+void MainFrame::RefineCameraParameters(Camera *camera, const Point3Vec &points, const Point2Vec &projections, IntVec &inliers)
 {
     ScopedTimer timer(m_profile_manager, "[RefineCameraParameters]");
 
@@ -687,15 +672,6 @@ void MainFrame::RefineCameraParameters(Camera *camera, const Point3Vec &points, 
 
                 points_next.push_back(points_curr[i]);
                 projs_next.push_back(projs_curr[i]);
-            } else
-            {
-                if (pt_idxs != nullptr)
-                {
-                    //wxLogMessage("[RefineCameraParameters] Removing point [%d] with reprojection error %0.3f", pt_idxs[i], errors[i]);
-                } else
-                {
-                    //wxLogMessage("[RefineCameraParameters] Removing point with reprojection error %0.3f", errors[i]);
-                }
             }
         }
 
@@ -996,7 +972,7 @@ void MainFrame::AddNewPoints(const CamVec &cameras, const IntVec &added_order, P
     for (int i = 0; i < cameras.size(); i++)
     {
         int image_idx1 = added_order[i];
-        int num_keys = this->GetNumKeys(image_idx1);
+        int num_keys = GetNumKeys(image_idx1);
 
         for (int j = 0; j < num_keys; j++)
         {
@@ -1094,11 +1070,10 @@ void MainFrame::AddNewPoints(const CamVec &cameras, const IntVec &added_order, P
         double error = 0.0;
         for (const auto &track : new_tracks[i])
         {
-            int image_idx   = added_order[track.first];
-            auto &key       = GetKey(image_idx, track.second);
+            int image_idx = added_order[track.first];
+            auto &key = GetKey(image_idx, track.second);
 
             Point2 projection = cameras[track.first].ProjectFinal(point);
-
             error += (projection - key.m_coords).squaredNorm();
         }
         error = sqrt(error / new_tracks[i].size());
@@ -1177,11 +1152,7 @@ int MainFrame::RemoveBadPointsAndCameras(const CamVec &cameras, const IntVec &ad
 
         if (util::rad2deg(max_angle) < 0.5 * m_options.ray_angle_threshold)
         {
-            for (const auto &view : point.m_views)
-            {
-                // Set extra flag back to 0
-                GetKey(added_order[view.first], view.second).m_extra = -1;
-            }
+            for (const auto &view : point.m_views) GetKey(added_order[view.first], view.second).m_extra = -1;
 
             point.m_color = Vec3(0.0, 0.0, -1.0);
             point.m_views.clear();

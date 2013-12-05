@@ -30,8 +30,6 @@ bool MainFrame::ReadCamDBFile(std::string filename)
 
             m_camDB.push_back(CamDBEntry(model, ccd_width));
         }
-
-        cam_db_file.close();
         return true;
     }
     return false;
@@ -49,8 +47,6 @@ void MainFrame::AddCamDBFileEntry()
         std::sort(m_camDB.begin(), m_camDB.end());
 
         for (const auto &entry : m_camDB) cam_db_file << entry.first << ":" << entry.second << std::endl;
-
-        cam_db_file.close();
     }
 }
 
@@ -66,7 +62,6 @@ void MainFrame::SaveMatchFile()
     {
         wxLogMessage("Writing matches to file %s...", filename.c_str());
         //TODO!!
-        match_file.close();
     }
 }
 
@@ -92,13 +87,7 @@ void MainFrame::SaveTrackFile()
             for (const auto &view : track.m_views) track_file << " " << view.first << " " << view.second;
             track_file << std::endl;
         }
-
-        track_file.close();
     }
-}
-
-void MainFrame::SaveMatchPics()
-{
 }
 
 void MainFrame::SaveProjectionMatrix(const std::string &path, int img_idx)
@@ -120,8 +109,8 @@ void MainFrame::SaveProjectionMatrix(const std::string &path, int img_idx)
         const auto &R = m_images[img_idx].m_camera.m_R;
 
         Mat3 K;
-        K << -focal,   0.0,   0.5 * this->GetImageWidth(img_idx) - 0.5,
-                0.0, focal,   0.5 * this->GetImageHeight(img_idx) - 0.5,
+        K << -focal,   0.0,   0.5 * GetImageWidth(img_idx) - 0.5,
+                0.0, focal,   0.5 * GetImageHeight(img_idx) - 0.5,
                 0.0,   0.0,   1.0;
 
         Mat34 Rigid;
@@ -134,8 +123,6 @@ void MainFrame::SaveProjectionMatrix(const std::string &path, int img_idx)
         txt_file << P(0, 0) << " " << P(0, 1) << " " << P(0, 2) << " " << P(0, 3) << std::endl;
         txt_file << P(1, 0) << " " << P(1, 1) << " " << P(1, 2) << " " << P(1, 3) << std::endl;
         txt_file << P(2, 0) << " " << P(2, 1) << " " << P(2, 2) << " " << P(2, 3) << std::endl;
-
-        txt_file.close();
     }
 }
 
@@ -180,17 +167,17 @@ void MainFrame::ExportToCMVS()
     }
 
     // Save bundle file
-    this->SaveBundleFile( ((m_dir_picker->GetPath()).append("\\pmvs")).ToStdString() );
+    SaveBundleFile( ((m_dir_picker->GetPath()).append("\\pmvs")).ToStdString() );
 
-    for (int i = 0; i < this->GetNumImages(); i++)
+    for (int i = 0; i < GetNumImages(); i++)
     {
         // Output projection matrices
         wxLogMessage("Generating txt file for image %i...", i);
-        this->SaveProjectionMatrix(((m_dir_picker->GetPath()).append("\\pmvs\\txt")).ToStdString(), i);
+        SaveProjectionMatrix(((m_dir_picker->GetPath()).append("\\pmvs\\txt")).ToStdString(), i);
 
         // Output undistorted images
         wxLogMessage("Generating undistorted image (%i)...", i);
-        this->SaveUndistortedImage(((m_dir_picker->GetPath()).append("\\pmvs\\visualize")).ToStdString(), i);
+        SaveUndistortedImage(((m_dir_picker->GetPath()).append("\\pmvs\\visualize")).ToStdString(), i);
     }
 
     wxLogMessage("Export to CMVS complete!");
@@ -265,7 +252,6 @@ void MainFrame::SaveBundleFile(const std::string &path)
                 bundle_file << std::endl;
             }
         }
-        bundle_file.close();
     }
 }
 
@@ -279,7 +265,7 @@ void MainFrame::SavePlyFile()
         wxLogMessage("Error: couldn't open file %s for writing", filename.c_str());
     } else
     {
-        wxLogMessage("Writing geometry and cameras to file %s...", filename.c_str());
+        wxLogMessage("Writing points and cameras to file %s...", filename.c_str());
 
         int num_cameras = std::count_if(m_images.begin(), m_images.end(), [](const ImageData &img) { return img.m_camera.m_adjusted; });
         int num_points = (int)m_points.size();
@@ -324,15 +310,13 @@ void MainFrame::SavePlyFile()
             ply_file << p.x() << " " << p.y() << " " << p.z() << " ";
             ply_file << 0 << " " << 255 << " " << 0 << std::endl;
         }
-
-        ply_file.close();
     }
 }
 
 void MainFrame::SaveMayaFile()
 {
     // Export to CMVS first in order to get undistorted images
-    this->ExportToCMVS();
+    ExportToCMVS();
 
     std::string filename = m_path + "\\Result.ma";
     std::ofstream maya_file(filename);
@@ -528,6 +512,5 @@ void MainFrame::SaveMayaFile()
         maya_file << "\tsetAttr -k on \".normalDir\";\n";
 
         maya_file << "// End of Result.ma\n";
-        maya_file.close();
     }
 }

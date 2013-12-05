@@ -42,9 +42,7 @@ void MainFrame::InitializeScene()
     m_scene->SetCamera(gly::CameraPtr(new gly::Camera(50, width, height, 1.0f, 1000.0f)));
     m_scene->GetCamera()->SetType(gly::Camera::CAM_TRACKBALL);
 
-    gly::Meshdata data;
-
-    m_scene->AddMesh("points_mesh",             std::unique_ptr<gly::Mesh>(new gly::Mesh(gly::Meshdescription(GL_POINTS, 0), data)));
+    m_scene->AddMesh("points_mesh",             std::unique_ptr<gly::Mesh>(new gly::Mesh(gly::Meshdescription(GL_POINTS, 0), gly::Meshdata())));
     m_scene->AddMesh("dslr_mesh",               gly::LoadMesh("meshes\\DSLR.ctm"));
     m_scene->AddMesh("grid_mesh",               gly::CreateGrid(21));
     m_scene->AddMesh("trackball_x_mesh",        gly::CreateCircle(100, glm::vec4(0.6f, 0.0f, 0.0f, 1.0f)));
@@ -91,7 +89,7 @@ void MainFrame::ResetGLCanvas()
 
     m_beginx = m_beginy = 0.0f;
 
-    this->ResetPerspectiveMatrix();
+    ResetPerspectiveMatrix();
 }
 
 void MainFrame::ResetPerspectiveMatrix()
@@ -206,7 +204,7 @@ void MainFrame::OnGLCanvasSize(wxSizeEvent& event)
     m_gl_canvas->OnSize(event);
 
     // Reset the OpenGL view aspect
-    this->ResetPerspectiveMatrix();
+    ResetPerspectiveMatrix();
 }
 
 void MainFrame::OnGLCanvasEraseBackground(wxEraseEvent& event)

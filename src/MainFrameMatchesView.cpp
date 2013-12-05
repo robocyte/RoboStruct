@@ -82,7 +82,7 @@ void MainFrame::GenerateMatchImage()
 void MainFrame::OnMatchesViewPaint(wxPaintEvent& event)
 {
     wxPaintDC dc(m_pane_matches_view);
-    this->DrawMatches(dc);
+    DrawMatches(dc);
 }
 
 void MainFrame::OnMatchesViewResize(wxSizeEvent& event)
@@ -121,7 +121,7 @@ void MainFrame::DrawMatches(wxDC& dc)
         }
     } else
     {
-        auto *gc = wxGraphicsContext::Create(m_pane_matches_view);
+        auto gc = wxGraphicsContext::Create(m_pane_matches_view);
         gc->SetPen(*wxLIGHT_GREY_PEN);
 
         auto path = gc->CreatePath();

@@ -138,6 +138,7 @@ void MainFrame::InitializeLog()
     // Redirect log messages
     wxLog::SetActiveTarget(new wxLogTextCtrl(m_tc_log));
     wxLogMessage("Log initialized");
+    wxLogMessage("OS: %s", wxPlatformInfo::Get().GetOperatingSystemDescription());
 
     auto font = new wxFont(9, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, "consolas");
     m_tc_log->SetFont(*font);
@@ -160,7 +161,7 @@ bool MainFrame::AddImage(const std::string filename, const std::string filename_
         return false;
     } else
     {
-        if (this->FindCameraInDatabase(img))
+        if (FindCameraInDatabase(img))
         {
             std::ostringstream node_name;
             node_name << "camera " << m_images.size();
@@ -369,7 +370,7 @@ void MainFrame::MatchAll()
 
 void MainFrame::MatchAllAkaze()
 {
-    int num_images = this->GetNumImages();
+    int num_images = GetNumImages();
     int num_pairs = (num_images * (num_images - 1)) / 2;
     int progress_idx = 0;
 
@@ -448,7 +449,7 @@ void MainFrame::MatchAllAkaze()
                 TransformsEntry trans_entry(midx, tinfo);
                 m_transforms.insert(trans_entry);
 
-                this->SetMatch(i, j);
+                SetMatch(i, j);
                 auto &matches = m_matches.GetMatchList(GetMatchIndex(i, j));
 
                 matches.clear();
@@ -561,9 +562,8 @@ double MainFrame::ComputeHomography(int idx1, int idx2, const IntPairVec &matche
 void MainFrame::ComputeTracks()
 {
     ScopedTimer timer(m_profile_manager, "[ComputeTracks]");
-    wxLogMessage("[ComputeTracks] Computing tracks...");
 
-    int num_images = this->GetNumImages();
+    int num_images = GetNumImages();
 
     // Clear all marks for new images
     for (int i = 0; i < num_images; i++)
@@ -678,12 +678,8 @@ void MainFrame::ComputeTracks()
 
     if (pt_idx != (int)tracks.size()) wxLogMessage("[ComputeTracks] Error: point count inconsistent!");
 
-    // Clear match lists
-    wxLogMessage("[ComputeTracks] Clearing match lists...");
-    m_matches.RemoveAll();
-
     // Create the new consistent match lists
-    wxLogMessage("[ComputeTracks] Creating consistent match lists...");
+    m_matches.RemoveAll();
 
     int num_pts = pt_idx;
 
@@ -699,8 +695,6 @@ void MainFrame::ComputeTracks()
     // Save the tracks
     m_tracks = tracks;
     delete[] img_marked;
-
-    wxLogMessage("[ComputeTracks] Found %i tracks", (int)m_tracks.size());
 
     // Print track stats
     IntVec stats(num_images + 1);
@@ -747,7 +741,7 @@ void MainFrame::MakeMatchListsSymmetric()
         }
     }
 
-    for (auto match : matches) this->SetMatch(static_cast<int>(match.second), static_cast<int>(match.first));
+    for (auto match : matches) SetMatch(static_cast<int>(match.second), static_cast<int>(match.first));
 
     matches.clear();
 }
