@@ -8,8 +8,14 @@ bool MyApp::OnInit()
     wxImage::AddHandler(new wxPNGHandler());
     wxImage::AddHandler(new wxJPEGHandler());
 
-    MainFrame* frame = new MainFrame();
+    auto frame = new MainFrame();
 
+    frame->InitializeLog();
+    frame->InitializeOpenGL();
+    frame->InitializeScene();
+    frame->InitializeCameraDatabase();
+    frame->ResetGLCanvas();
+    frame->ResetOptions();
     frame->SetIcon(wxICON(aaaamain));
     frame->Maximize();
     frame->Show();

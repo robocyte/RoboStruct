@@ -1049,7 +1049,7 @@
                     <event name="OnUpdateUI"></event>
                 </object>
             </object>
-            <object class="wxAuiNotebook" expanded="1">
+            <object class="wxAuiNotebook" expanded="0">
                 <property name="BottomDockable">0</property>
                 <property name="LeftDockable">0</property>
                 <property name="RightDockable">0</property>
@@ -1134,11 +1134,11 @@
                 <event name="OnSetFocus"></event>
                 <event name="OnSize"></event>
                 <event name="OnUpdateUI"></event>
-                <object class="auinotebookpage" expanded="1">
+                <object class="auinotebookpage" expanded="0">
                     <property name="bitmap"></property>
                     <property name="label">3d view</property>
                     <property name="select">1</property>
-                    <object class="wxPanel" expanded="1">
+                    <object class="wxPanel" expanded="0">
                         <property name="BottomDockable">1</property>
                         <property name="LeftDockable">1</property>
                         <property name="RightDockable">1</property>
@@ -1212,7 +1212,7 @@
                         <event name="OnSetFocus"></event>
                         <event name="OnSize"></event>
                         <event name="OnUpdateUI"></event>
-                        <object class="wxBoxSizer" expanded="1">
+                        <object class="wxBoxSizer" expanded="0">
                             <property name="minimum_size"></property>
                             <property name="name">bSizer8</property>
                             <property name="orient">wxVERTICAL</property>
@@ -1305,11 +1305,11 @@
                         </object>
                     </object>
                 </object>
-                <object class="auinotebookpage" expanded="1">
+                <object class="auinotebookpage" expanded="0">
                     <property name="bitmap"></property>
                     <property name="label">Matches</property>
                     <property name="select">0</property>
-                    <object class="wxPanel" expanded="1">
+                    <object class="wxPanel" expanded="0">
                         <property name="BottomDockable">1</property>
                         <property name="LeftDockable">1</property>
                         <property name="RightDockable">1</property>
@@ -1383,7 +1383,7 @@
                         <event name="OnSetFocus"></event>
                         <event name="OnSize"></event>
                         <event name="OnUpdateUI"></event>
-                        <object class="wxBoxSizer" expanded="1">
+                        <object class="wxBoxSizer" expanded="0">
                             <property name="minimum_size"></property>
                             <property name="name">bSizer5</property>
                             <property name="orient">wxVERTICAL</property>
@@ -1468,11 +1468,11 @@
                                     <event name="OnUpdateUI"></event>
                                 </object>
                             </object>
-                            <object class="sizeritem" expanded="1">
+                            <object class="sizeritem" expanded="0">
                                 <property name="border">5</property>
                                 <property name="flag">wxEXPAND</property>
                                 <property name="proportion">0</property>
-                                <object class="wxBoxSizer" expanded="1">
+                                <object class="wxBoxSizer" expanded="0">
                                     <property name="minimum_size"></property>
                                     <property name="name">bSizer6</property>
                                     <property name="orient">wxHORIZONTAL</property>

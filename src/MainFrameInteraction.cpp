@@ -1,8 +1,5 @@
 #include <numeric>
 
-#include "opencv2/core.hpp"
-#include "opencv2/core/utility.hpp"
-
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/compatibility.hpp"
 #include "glm/gtx/epsilon.hpp"
@@ -263,8 +260,10 @@ void MainFrame::OnClearLog(wxCommandEvent& event)
 
 void MainFrame::OnSelectDirectory(wxFileDirPickerEvent& event)
 {
-    wxDir dir(m_dir_picker->GetPath());
-    wxString filename, focalPx, res;
+    wxString filename, focalPx, res, path;
+    path = m_dir_picker->GetPath();
+    m_path = (path).ToStdString();
+    wxDir dir(path);
 
     m_images.clear();
 
@@ -273,13 +272,14 @@ void MainFrame::OnSelectDirectory(wxFileDirPickerEvent& event)
     m_window_image_preview->Refresh(true);
     m_pane_matches_view->Refresh(true);
 
-    m_path = (m_dir_picker->GetPath()).ToStdString();
 
     m_img_ctrl->ClearAll();
     m_img_ctrl->InsertColumn(0, "Name",			wxLIST_FORMAT_LEFT, 60);
-    m_img_ctrl->InsertColumn(1, "Resolution",	wxLIST_FORMAT_LEFT, 80);
-    m_img_ctrl->InsertColumn(2, "Focal (px)",	wxLIST_FORMAT_LEFT, 65);
-    m_img_ctrl->InsertColumn(3, "# features",	wxLIST_FORMAT_LEFT, 65);
+    m_img_ctrl->InsertColumn(1, "Resolution",	wxLIST_FORMAT_LEFT, 75);
+    m_img_ctrl->InsertColumn(2, "Focal",	    wxLIST_FORMAT_LEFT, 50);
+    m_img_ctrl->InsertColumn(3, "Features",	    wxLIST_FORMAT_LEFT, 60);
+    m_img_ctrl->InsertColumn(4, "k1",	        wxLIST_FORMAT_LEFT, 40);
+    m_img_ctrl->InsertColumn(5, "k2",       	wxLIST_FORMAT_LEFT, 40);
 
     // Parse directory and process jpg images
     bool found = dir.GetFirst(&filename, "*.jpg", wxDIR_FILES);
@@ -288,7 +288,7 @@ void MainFrame::OnSelectDirectory(wxFileDirPickerEvent& event)
     while (found)
     {
         // Get focal from EXIF tags, convert to px-coordinates and add image if successful
-        if(this->AddImage(dir.FindFirst(m_dir_picker->GetPath(), filename).ToStdString(), filename.ToStdString()))
+        if(this->AddImage(dir.FindFirst(path, filename).ToStdString(), filename.ToStdString()))
         {
             m_img_ctrl->InsertItem(index, filename);
             m_cb_matches_left->Append(filename);
@@ -305,41 +305,28 @@ void MainFrame::OnSelectDirectory(wxFileDirPickerEvent& event)
     {
         for (int i = 0; i < (int)m_images.size(); i++)
         {
-            res.Printf("%i x %i", this->GetImageWidth(i), this->GetImageHeight(i));
-            focalPx.Printf("%.2f", this->GetFocalLength(i));
+            res.Printf("%i x %i", GetImageWidth(i), GetImageHeight(i));
+            focalPx.Printf("%.2f", GetFocalLength(i));
             m_img_ctrl->SetItem(i, 1, res, -1);
             m_img_ctrl->SetItem(i, 2, focalPx, -1);
         }
 
         m_has_images = true;
-        wxLogMessage("%s: %i images ready for reconstruction", (m_dir_picker->GetPath()).mb_str(), m_images.size());
+        wxLogMessage("%s: %i images ready for reconstruction", path, m_images.size());
     } else
     {
-        wxLogMessage("No suitable images found in %s", (m_dir_picker->GetPath()).mb_str());
+        wxLogMessage("No suitable images found in %s", path);
     }
 }
 
 void MainFrame::OnReconstruct(wxCommandEvent& event)
 {
     // Detect features
-    wxLogMessage("Detecting features...");
-    double time = (double)cv::getTickCount();
-    this->DetectFeaturesAll();
-    time = (double)cv::getTickCount() - time;
-    wxLogMessage("Feature detection took %.2f s", time / cv::getTickFrequency());
+    DetectFeaturesAll();
 
     // Match features
-    wxLogMessage("Matching images...");
-    time = (double)cv::getTickCount();
-    if (m_options.feature_type != 2)
-    {
-        MatchAll();
-    } else
-    {
-        MatchAllAkaze();
-    }
-    time = (double)cv::getTickCount() - time;
-    wxLogMessage("Matching all images took %.2f s", time / cv::getTickFrequency());
+    if (m_options.feature_type != 2)    MatchAll();
+    else                                MatchAllAkaze();
 
     // Compute structure from motion in another thread
     if (CreateThread(wxTHREAD_DETACHED) != wxTHREAD_NO_ERROR)

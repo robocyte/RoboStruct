@@ -39,6 +39,15 @@ public:
     MainFrame(wxWindow* parent = nullptr);
     ~MainFrame();
 
+    void InitializeLog();
+    void InitializeOpenGL();
+    void InitializeScene();
+    void InitializeCameraDatabase();
+
+    void ResetOptions();
+    void ResetGLCanvas();
+    void ResetPerspectiveMatrix();
+
 private:
     Options         m_options;
     gly::ScenePtr   m_scene;
@@ -75,15 +84,6 @@ private:
 
     int                     m_desc_length;
     wxCriticalSection       m_points_cs;
-
-    void InitializeLog();
-    void InitializeOpenGL();
-    void InitializeScene();
-    void InitializeCameraDatabase();
-
-    void ResetOptions();
-    void ResetGLCanvas();
-    void ResetPerspectiveMatrix();
 
     void GeneratePreviewImage(int img_idx);
     void GenerateMatchImage();

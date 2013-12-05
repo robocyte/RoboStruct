@@ -33,29 +33,20 @@ MainFrame::MainFrame(wxWindow* parent)
     , m_sfm_done(false)
     , m_desc_length(0)
 {
-    // Set default path
-    m_path = (m_dir_picker->GetPath()).mb_str();
-
     m_turntable_timer       = new wxTimer(this, ID_TIMER_TURNTABLE);
     m_reset_viewport_timer  = new wxTimer(this, ID_TIMER_RESET_VIEWPORT);
-
-    wxStreamToTextRedirector redirect(m_tc_log, &std::cerr);
-    this->InitializeLog();
-    this->InitializeOpenGL();
-    this->InitializeScene();
-    this->InitializeCameraDatabase();
-    this->ResetGLCanvas();
-    this->ResetOptions();
 
     m_rotate_cursor = wxCursor("rotate_cursor");
     m_pan_cursor    = wxCursor("pan_cursor");
     m_zoom_cursor   = wxCursor("zoom_cursor");
 
     // Setup the image list
-    m_img_ctrl->InsertColumn(0, "Name",         wxLIST_FORMAT_LEFT, 60);
-    m_img_ctrl->InsertColumn(1, "Resolution",   wxLIST_FORMAT_LEFT, 80);
-    m_img_ctrl->InsertColumn(2, "Focal (px)",   wxLIST_FORMAT_LEFT, 65);
-    m_img_ctrl->InsertColumn(3, "# features",   wxLIST_FORMAT_LEFT, 65);
+    m_img_ctrl->InsertColumn(0, "Name",			wxLIST_FORMAT_LEFT, 60);
+    m_img_ctrl->InsertColumn(1, "Resolution",	wxLIST_FORMAT_LEFT, 75);
+    m_img_ctrl->InsertColumn(2, "Focal",    	wxLIST_FORMAT_LEFT, 50);
+    m_img_ctrl->InsertColumn(3, "Features",	    wxLIST_FORMAT_LEFT, 60);
+    m_img_ctrl->InsertColumn(4, "k1",	        wxLIST_FORMAT_LEFT, 40);
+    m_img_ctrl->InsertColumn(5, "k2",       	wxLIST_FORMAT_LEFT, 40);
 
     this->Bind(wxEVT_PG_CHANGED,            &MainFrame::OnOptionsChanged,       this);
     this->Bind(wxEVT_TIMER,                 &MainFrame::OnTimerUpdate,          this);
@@ -65,10 +56,6 @@ MainFrame::MainFrame(wxWindow* parent)
 
 MainFrame::~MainFrame()
 {
-    delete m_gl_context;
-    delete m_turntable_timer;
-    delete m_reset_viewport_timer;
-
     this->Unbind(wxEVT_PG_CHANGED,          &MainFrame::OnOptionsChanged,       this);
     this->Unbind(wxEVT_TIMER,               &MainFrame::OnTimerUpdate,          this);
     this->Unbind(wxEVT_SFM_THREAD_UPDATE,   &MainFrame::OnSFMThreadUpdate,      this);
@@ -108,6 +95,21 @@ void MainFrame::OnSFMThreadUpdate(wxThreadEvent& event)
         image.m_camera_mesh->GetTransform().Scale(glm::vec3(0.02f, 0.02f, 0.02f));
     }
 
+    for (int i = 0; i < (int)m_images.size(); i++)
+    {
+        const auto& cam = m_images[i].m_camera;
+        if (!cam.m_adjusted) continue;
+
+        wxString focal, k1, k2;
+        focal.Printf("%.1f", cam.m_focal_length);
+        k1.Printf("%.2f", cam.m_k(0));
+        k2.Printf("%.2f", cam.m_k(1));
+
+        m_img_ctrl->SetItem(i, 2, focal, -1);
+        m_img_ctrl->SetItem(i, 4, k1, -1);
+        m_img_ctrl->SetItem(i, 5, k2, -1);
+    }
+
     m_gl_canvas->Refresh(false);
 }
 
@@ -115,9 +117,20 @@ void MainFrame::OnSFMThreadComplete(wxThreadEvent& event)
 {
     m_sfm_done = true;
 
-    SavePlyFile();
+    for (int i = 0; i < (int)m_images.size(); i++)
+    {
+        const auto& cam = m_images[i].m_camera;
+        if (!cam.m_adjusted) continue;
 
-    wxLogMessage("%s", m_profile_manager.Report().c_str());
+        wxString focal, k1, k2;
+        focal.Printf("%.1f", cam.m_focal_length);
+        k1.Printf("%.2f", cam.m_k(0));
+        k2.Printf("%.2f", cam.m_k(1));
+
+        m_img_ctrl->SetItem(i, 2, focal, -1);
+        m_img_ctrl->SetItem(i, 4, k1, -1);
+        m_img_ctrl->SetItem(i, 5, k2, -1);
+    }
 }
 
 void MainFrame::InitializeLog()

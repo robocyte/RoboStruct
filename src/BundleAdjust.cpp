@@ -161,7 +161,6 @@ void MainFrame::RunSFM()
         }
 
         IntVec image_set;
-        
         if (m_options.add_multiple_images)  image_set = FindCamerasWithNMatches(util::iround(0.75 * max_matches), added_order, points);
         else                                image_set.push_back(max_cam);
 
@@ -189,14 +188,10 @@ void MainFrame::RunSFM()
     RadiusOutlierRemoval(m_options.outlier_threshold_radius, added_order, points);
     BundleAdjust(cameras, added_order, points);
 
-    // Display final focal lengths
-    wxLogMessage("[RunSFM] Focal lengths:");
-    for (int i = 0; i < cameras.size(); i++)
-    {
-        wxLogMessage("  [%03d] %.3f %s %d; %.3f %.3f", i, cameras[i].m_focal_length, m_images[added_order[i]].m_filename_short.c_str(), added_order[i], cameras[i].m_k[0], cameras[i].m_k[1]);
-    }
-
     SetMatchesFromPoints();
+    SavePlyFile();
+
+    wxLogMessage("%s", m_profile_manager.Report().c_str());
 }
 
 void MainFrame::PickInitialCameraPair(CamVec &cameras, IntVec &added_order)
@@ -729,7 +724,7 @@ void MainFrame::BundleAdjust(CamVec &cameras, const IntVec &added_order, PointVe
 
     int num_cameras = cameras.size();
     int num_pts     = points.size();
-    IntVec      remap(num_pts);
+    IntVec      remap(num_pts, -1);
     Point3Vec   nz_pts(num_pts);
 
     do
@@ -769,9 +764,6 @@ void MainFrame::BundleAdjust(CamVec &cameras, const IntVec &added_order, PointVe
                 remap[i] = nz_count;
                 nz_pts[nz_count] = points[i].m_pos;
                 nz_count++;
-            } else
-            {
-                remap[i] = -1;
             }
         }
         
