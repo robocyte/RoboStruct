@@ -27,8 +27,8 @@ struct Camera
     Mat3    GetIntrinsicMatrix() const;
     Mat34   GetProjectionMatrix() const;
 
-    Point2  ProjectFinal(const Point3 &point);
-    Point2  ProjectRD(const Point3 &point);
+    Point2  ProjectFinal(const Point3 &point) const;
+    Point2  ProjectRD(const Point3 &point) const;
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 };

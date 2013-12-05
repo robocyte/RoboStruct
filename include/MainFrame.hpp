@@ -53,28 +53,28 @@ private:
     wxCursor        m_pan_cursor;
     wxCursor        m_zoom_cursor;
 
-    float           m_beginx, m_beginy;                 // Old mouse position
+    float           m_beginx, m_beginy;             // Old mouse position
     float           m_counter;
     std::string     m_path;
 
     wxImage         m_preview_image;
     wxImage         m_matches_image;
 
-    std::vector<CamDBEntry>     m_camDB;                // Contains the information from CamDB.txt
-    std::vector<ImageData>      m_images;               // Image data
-    std::vector<TrackData>      m_tracks;               // Information about the detected 3D tracks
-    MatchTable                  m_matches;              // Holds the matches
-    TransformData               m_transforms;           // Holds transform info
-    PointVec                    m_points;               // Holds reconstructed points
+    std::vector<CamDBEntry> m_camDB;                // Contains the information from CamDB.txt
+    std::vector<ImageData>  m_images;               // Image data
+    std::vector<TrackData>  m_tracks;               // Information about the detected 3D tracks
+    MatchTable              m_matches;              // Holds the matches
+    TransformData           m_transforms;           // Holds transform info
+    PointVec                m_points;               // Holds reconstructed points
 
-    bool                        m_has_images;
-    bool                        m_features_detected;    // Have features been detected?
-    bool                        m_matches_loaded;       // Have the matches been loaded?
-    bool                        m_matches_refined;      // Have the matches been refined?
-    bool                        m_sfm_done;
+    bool                    m_has_images;
+    bool                    m_features_detected;    // Have features been detected?
+    bool                    m_matches_loaded;       // Have the matches been loaded?
+    bool                    m_matches_refined;      // Have the matches been refined?
+    bool                    m_sfm_done;
 
-    int                         m_desc_length;
-    wxCriticalSection           m_points_cs;
+    int                     m_desc_length;
+    wxCriticalSection       m_points_cs;
 
     void InitializeLog();
     void InitializeOpenGL();
@@ -109,36 +109,38 @@ private:
     void        SetMatchesFromTracks(int img1, int img2);
     void        SetMatchesFromPoints();
 
-    int     GetImageWidth(int img_index)    { return m_images[img_index].GetWidth(); };     // Returns the image width
-    int     GetImageHeight(int img_index)   { return m_images[img_index].GetHeight(); };    // Returns the image height
-    double  GetFocalLength(int img_index)   { return m_images[img_index].GetInitFocal(); }; // Returns the focal length
-    int     GetNumImages()                  { return (int)m_images.size(); };               // Returns the number of successfully added images
-    int     GetNumKeys(int img)             { return (int)m_images[img].m_keys.size(); };   // Returns the number of detected features for the given image index
-    int     GetNumTrackMatches(int img1, int img2);
-    double  GetInlierRatio(int idx1, int idx2);                                             // Returns the inlier ratio for an image pair
-    void    SaveMatchFile();
-    void    SaveMatchPics();
-    void    SaveTrackFile();
-    void    SaveProjectionMatrix(const std::string &path, int img_idx);
-    void    SaveUndistortedImage(const std::string &path, int img_idx);
-    void    ExportToCMVS();
-    void    SaveBundleFile(const std::string &path);
-    void    SavePlyFile();
-    void    SaveMayaFile();
+    int         GetImageWidth(int img_index)    { return m_images[img_index].GetWidth(); };     // Returns the image width
+    int         GetImageHeight(int img_index)   { return m_images[img_index].GetHeight(); };    // Returns the image height
+    double      GetFocalLength(int img_index)   { return m_images[img_index].GetInitFocal(); }; // Returns the focal length
+    int         GetNumImages()                  { return (int)m_images.size(); };               // Returns the number of successfully added images
+    int         GetNumKeys(int img)             { return (int)m_images[img].m_keys.size(); };   // Returns the number of detected features for the given image index
+    int         GetNumTrackMatches(int img1, int img2);
+    double      GetInlierRatio(int idx1, int idx2);                                             // Returns the inlier ratio for an image pair
+    void        SaveMatchFile();
+    void        SaveMatchPics();
+    void        SaveTrackFile();
+    void        SaveProjectionMatrix(const std::string &path, int img_idx);
+    void        SaveUndistortedImage(const std::string &path, int img_idx);
+    void        ExportToCMVS();
+    void        SaveBundleFile(const std::string &path);
+    void        SavePlyFile();
+    void        SaveMayaFile();
 
     wxThread::ExitCode  Entry();
     void                RunSFM();
-    IntPair             PickInitialCameraPair();
-    void                SetupInitialCameraPair(IntPair initial_pair, CamVec &cameras, PointVec &points);
+    void                PickInitialCameraPair(CamVec &cameras, IntVec &added_order);
+    void                SetupInitialCameraPair(CamVec &cameras, const IntVec &added_order, PointVec &points);
     bool                EstimateRelativePose(int i1, int i2, Camera *camera1, Camera *camera2);
     int                 FindCameraWithMostMatches(const IntVec &added_order, int &max_matches, const PointVec &points);
     IntVec              FindCamerasWithNMatches(int n, const IntVec &added_order, const PointVec &points);
     bool                FindAndVerifyCamera(const Point3Vec &points, const Point2Vec &projections, Mat3 *K, Mat3 *R, Vec3 *t, IntVec &inliers, IntVec &inliers_weak, IntVec &outliers);
-    Camera              InitializeImage(int image_idx, int camera_idx, PointVec &points, bool &success_out);
+    Camera              InitializeImage(int image_idx, int camera_idx, PointVec &points);
     void                BundleAdjust(CamVec &cameras, const IntVec &added_order, PointVec &points);
     void                RefineCameraParameters(Camera *camera, const Point3Vec &points, const Point2Vec &projections, int *pt_idxs, IntVec &inliers);
-    void                AddNewPoints(IntVec &added_order, CamVec &cameras, PointVec &points);
-    int                 RemoveBadPointsAndCameras(const IntVec &added_order, const CamVec &cameras, PointVec &points);
+    void                AddNewPoints(const CamVec &cameras, const IntVec &added_order, PointVec &points);
+    int                 RemoveBadPointsAndCameras(const CamVec &cameras, const IntVec &added_order, PointVec &points);
+    void                RadiusOutlierRemoval(double threshold, const IntVec &added_order, PointVec &points);
+    void                UpdateGeometryDisplay(const CamVec &cameras, const IntVec &added_order, const PointVec &points);
 
 protected:
     // Handlers for MainFrame events

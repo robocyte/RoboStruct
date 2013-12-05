@@ -75,6 +75,7 @@ void MainFrame::ResetOptions()
     m_pg_options->Append( new wxFloatProperty("Max reprojection error threshold",   wxPG_LABEL, m_options.max_reprojection_error_threshold ) );
     m_pg_options->Append( new wxFloatProperty("Ray angle threshold",                wxPG_LABEL, m_options.ray_angle_threshold ) );
     m_pg_options->Append( new wxIntProperty("Outlier threshold BA",                 wxPG_LABEL, m_options.outlier_threshold_ba ) );
+    m_pg_options->Append( new wxFloatProperty("Outlier threshold radius",           wxPG_LABEL, m_options.outlier_threshold_radius ) );
 
     // Ceres category
     wxPGChoices choices;
@@ -140,6 +141,7 @@ void MainFrame::OnOptionsChanged(wxPropertyGridEvent& event)
     m_options.max_reprojection_error_threshold  = m_pg_options->GetProperty("Max reprojection error threshold")->GetValue().GetDouble();
     m_options.ray_angle_threshold               = m_pg_options->GetProperty("Ray angle threshold")->GetValue().GetDouble();
     m_options.outlier_threshold_ba              = m_pg_options->GetProperty("Outlier threshold BA")->GetValue().GetInteger();
+    m_options.outlier_threshold_radius          = m_pg_options->GetProperty("Outlier threshold radius")->GetValue().GetDouble();
     int sel                                     = m_pg_options->GetProperty("Loss function")->GetValue().GetInteger();
     switch (sel)
     {

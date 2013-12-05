@@ -48,6 +48,7 @@ struct Options
         , max_reprojection_error_threshold(8.0)
         , ray_angle_threshold(2.0)
         , outlier_threshold_ba(0.0)
+        , outlier_threshold_radius(0.98)
 
         , selected_loss(loss_function::squared)
         , loss_function_scale(0.5)
@@ -116,6 +117,7 @@ struct Options
     double      max_reprojection_error_threshold;
     double      ray_angle_threshold;
     int         outlier_threshold_ba;
+    double      outlier_threshold_radius;
 
     // Ceres options
     enum class loss_function

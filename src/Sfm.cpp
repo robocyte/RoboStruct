@@ -90,7 +90,7 @@ Mat34 Camera::GetProjectionMatrix() const
     return GetIntrinsicMatrix() * P;
 }
 
-Point2 Camera::ProjectFinal(const Point3 &point)
+Point2 Camera::ProjectFinal(const Point3 &point) const
 {
     // HZ p. 153f
     Point3 tmp = m_R * (point - m_t);
@@ -103,7 +103,7 @@ Point2 Camera::ProjectFinal(const Point3 &point)
     return projected * factor * m_focal_length;
 }
 
-Point2 Camera::ProjectRD(const Point3 &point)
+Point2 Camera::ProjectRD(const Point3 &point) const
 {
     // HZ p. 153f
     Point3 tmp = m_R * (point - m_t);

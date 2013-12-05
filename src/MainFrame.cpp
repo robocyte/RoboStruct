@@ -181,8 +181,8 @@ bool MainFrame::AddImage(const std::string filename, const std::string filename_
             cam.first = img.m_camera_make + img.m_camera_model;
             m_camDB.push_back(cam);
 
-            this->FindCameraInDatabase(img);
-            this->AddCamDBFileEntry();
+            FindCameraInDatabase(img);
+            AddCamDBFileEntry();
 
             m_images.push_back(img);
             return true;
@@ -210,7 +210,7 @@ bool MainFrame::FindCameraInDatabase(ImageData &img)
 
 void MainFrame::DetectFeaturesAll()
 {
-    int num_images = this->GetNumImages();
+    int num_images = GetNumImages();
 
     // Show progress dialog
     wxProgressDialog dialog("Progress", "Detecting features...", num_images, this,
@@ -220,10 +220,10 @@ void MainFrame::DetectFeaturesAll()
     // Detect features
     for (int i = 0; i < num_images; i++)
     {
-        this->DetectFeatures(i);
+        DetectFeatures(i);
 
         wxString numfeat;
-        numfeat << this->GetNumKeys(i);
+        numfeat << GetNumKeys(i);
         m_img_ctrl->SetItem(i, 3, numfeat);
         dialog.Update(i + 1);
         wxSafeYield();
@@ -242,7 +242,7 @@ void MainFrame::DetectFeatures(int img_idx)
 
 void MainFrame::MatchAll()
 {
-    int num_images = this->GetNumImages();
+    int num_images = GetNumImages();
     int num_pairs = (num_images * (num_images - 1)) / 2;
     int progress_idx = 0;
 
@@ -321,7 +321,7 @@ void MainFrame::MatchAll()
                 TransformsEntry trans_entry(midx, tinfo);
                 m_transforms.insert(trans_entry);
 
-                this->SetMatch(i, j);
+                SetMatch(i, j);
                 auto &matches = m_matches.GetMatchList(GetMatchIndex(i, j));
 
                 matches.clear();
