@@ -6,29 +6,23 @@
 
 struct KeypointMatch
 {
-    KeypointMatch()
-        : m_idx1(0)
-        , m_idx2(0)
-    {}
+    KeypointMatch() = default;
 
     KeypointMatch(int idx1, int idx2)
         : m_idx1(idx1)
         , m_idx2(idx2)
     {}
 
-    int m_idx1, m_idx2;
+    int m_idx1 = 0, m_idx2 = 0;
 };
 
 struct AdjListElem
 {
-    AdjListElem()
-        : m_index(0)
-        , m_match_list()
-    {}
+    AdjListElem() = default;
 
     bool operator< (const AdjListElem &other) const { return m_index < other.m_index; }
 
-    unsigned int                m_index;
+    unsigned int                m_index = 0;
     std::vector<KeypointMatch>  m_match_list;
 };
 

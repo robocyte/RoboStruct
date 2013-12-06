@@ -59,25 +59,25 @@ public:
 
     ~ExifReader();
 
-    int             m_height;           // Image height from EXIF
-    int             m_width;            // Image width from EXIF
-    double          m_focal;            // Focal length in mm from EXIF
+    int             m_height = 0;           // Image height from EXIF
+    int             m_width = 0;            // Image width from EXIF
+    double          m_focal = 0.0;          // Focal length in mm from EXIF
     double          m_focal_plane_x_res;
     double          m_focal_plane_units;
     double          m_ccd_width;
-    std::string     m_camera_model;     // Model name
-    std::string     m_camera_make;      // Maker name
+    std::string     m_camera_model;         // Model name
+    std::string     m_camera_make;          // Maker name
 
     bool ReadExifInfo();
 
 private:
     const char* m_filename;
-    Section*    m_sections;
-    int         m_sectionsAllocated;
-    int         m_sectionsRead;
-    int         m_motorolaOrder;
-    int         m_process;
-    unsigned    m_largest_exif_offset;
+    Section*    m_sections = nullptr;
+    int         m_sectionsAllocated = 5;
+    int         m_sectionsRead = 0;
+    int         m_motorolaOrder = 0;
+    int         m_process = 0;
+    unsigned    m_largest_exif_offset = 0;
 
     bool        ReadJpgSections(FILE *infile);
     void        ProcessExif(unsigned char *CharBuf, unsigned int length);       // Process an EXIF marker; Describes all the drivel that most digital cameras include...

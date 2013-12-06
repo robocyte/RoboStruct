@@ -20,20 +20,6 @@
 ImageData::ImageData(const std::string &filename, const std::string &filename_short)
     : m_filename(filename)
     , m_filename_short(filename_short)
-    , m_camera()
-    , m_keys()
-    , m_key_flags()
-    , m_visible_keys()
-    , m_visible_points()
-    , m_descriptors()
-    , m_ccd_width(0.0)
-    , m_init_focal(0.0)
-    , m_init_focal_mm(0.0)
-    , m_desc_size(0)
-    , m_ignore_in_bundle(false)
-    , m_descriptors_loaded(false)
-    , m_width(0)
-    , m_height(0)
 {
 }
 

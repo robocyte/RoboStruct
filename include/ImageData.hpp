@@ -33,14 +33,14 @@ public:
     std::vector<float>      m_descriptors;
     cv::Mat                 m_descriptors_akaze;
 
-    double                  m_ccd_width;            // CCD width (mm)
-    double                  m_init_focal;           // Initial focal length estimate (px)
-    double                  m_init_focal_mm;        // Focal length in mm from exif tag
+    double                  m_ccd_width = 0.0;       // CCD width (mm)
+    double                  m_init_focal = 0.0;      // Initial focal length estimate (px)
+    double                  m_init_focal_mm = 0.0;   // Focal length in mm from exif tag
 
-    int                     m_desc_size;
+    int                     m_desc_size = 0;
 
-    bool                    m_ignore_in_bundle;
-    bool                    m_descriptors_loaded;
+    bool                    m_ignore_in_bundle = false;
+    bool                    m_descriptors_loaded = false;
 
     bool    GetExifInfo();                              // Get focal length (mm) and other info from EXIF tags
     double  GetInitFocal()  { return m_init_focal; }    // Returns the initial focal length in px
@@ -55,8 +55,8 @@ public:
     void    SetTracks();
 
 private:
-    int     m_width;                                // Width from exif tags
-    int     m_height;                               // Height from exif tags
+    int     m_width = 0;                                // Width from exif tags
+    int     m_height = 0;                               // Height from exif tags
 
     void    ConvertOpenCVKeys(const std::vector<cv::KeyPoint>& keys, const cv::Mat& image);
 };

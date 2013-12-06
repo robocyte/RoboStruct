@@ -3,18 +3,7 @@
 #include "ExifReader.hpp"
 
 ExifReader::ExifReader(const char* filename)
-    : m_height(0)
-    , m_width(0)
-    , m_focal(0.0)
-    , m_camera_model()
-    , m_camera_make()
-    , m_filename(filename)
-    , m_sections(nullptr)
-    , m_sectionsAllocated(5)
-    , m_sectionsRead(0)
-    , m_motorolaOrder(0)
-    , m_process(0)
-    , m_largest_exif_offset(0)
+    : m_filename(filename)
 {
     m_sections = (Section*)malloc(sizeof(Section) * 5);
 }

@@ -62,8 +62,8 @@ private:
     wxCursor                m_pan_cursor;
     wxCursor                m_zoom_cursor;
 
-    float                   m_beginx, m_beginy;     // Old mouse position
-    float                   m_counter;
+    float                   m_beginx = 0.0f, m_beginy = 0.0f;     // Old mouse position
+    float                   m_counter = 0.0f;
     std::string             m_path;
 
     wxImage                 m_preview_image;
@@ -76,13 +76,13 @@ private:
     TransformData           m_transforms;           // Holds transform info
     PointVec                m_points;               // Holds reconstructed points
 
-    bool                    m_has_images;
-    bool                    m_features_detected;    // Have features been detected?
-    bool                    m_matches_loaded;       // Have the matches been loaded?
-    bool                    m_matches_refined;      // Have the matches been refined?
-    bool                    m_sfm_done;
+    bool                    m_has_images = false;
+    bool                    m_features_detected = false;    // Have features been detected?
+    bool                    m_matches_loaded = false;       // Have the matches been loaded?
+    bool                    m_matches_refined = false;      // Have the matches been refined?
+    bool                    m_sfm_done = false;
 
-    int                     m_desc_length;
+    int                     m_desc_length = 0;
     wxCriticalSection       m_points_cs;
 
     void        GeneratePreviewImage(int img_idx);

@@ -23,15 +23,6 @@ const wxEventTypeTag<wxThreadEvent> wxEVT_SFM_THREAD_COMPLETE(wxNewEventType());
 
 MainFrame::MainFrame(wxWindow* parent)
     : MainFrame_base(parent)
-    , m_options()
-    , m_beginx(0.0f)
-    , m_beginy(0.0f)
-    , m_counter(0.0f)
-    , m_has_images(false)
-    , m_features_detected(false)
-    , m_matches_loaded(false)
-    , m_sfm_done(false)
-    , m_desc_length(0)
 {
     m_turntable_timer       = new wxTimer(this, ID_TIMER_TURNTABLE);
     m_reset_viewport_timer  = new wxTimer(this, ID_TIMER_RESET_VIEWPORT);

@@ -4,120 +4,60 @@
 
 struct Options
 {
-    Options()
-        : feature_type(0)
-        , save_keys(true)
-
-        , yape_radius(7)
-        , yape_threshold(20)
-        , yape_octaves(3)
-        , yape_views(1000)
-        , yape_base_feature_size(32.0)
-        , yape_clustering_distance(2.0)
-
-        , daisy_radius(15)
-        , daisy_radius_quantization(3)
-        , daisy_angular_quantization(8)
-        , daisy_histogram_quantization(8)
-
-        , surf_det_hessian_threshold(400.0)
-        , surf_common_octaves(4)
-        , surf_common_octave_layers(2)
-        , surf_desc_extended(false)
-        , surf_desc_upright(false)
-
-        , akaze_threshold(0.0007)
-        , akaze_descriptor_size(0)
-
-        , matching_trees(4)
-        , matching_checks(32)
-        , matching_distance_ratio(0.6)
-        , matching_min_matches(20)
-        , ransac_threshold_fundamental(0.001)
-        , ransac_threshold_homography(0.001)
-
-        , add_multiple_images(true)
-        , ransac_threshold_five_point(2.25)
-        , ransac_rounds_five_point(500)
-        , min_max_matches(16)
-        , ransac_rounds_projection(1000)
-        , focal_length_constrain_weight(0.0001)
-        , distortion_constrain_weight(100.0)
-        , projection_estimation_threshold(4.0)
-        , min_reprojection_error_threshold(4.0)
-        , max_reprojection_error_threshold(8.0)
-        , ray_angle_threshold(2.0)
-        , outlier_threshold_ba(0.0)
-        , outlier_threshold_radius(0.98)
-
-        , selected_loss(loss_function::squared)
-        , loss_function_scale(0.5)
-
-        , viewport_top_color(77, 77, 77)
-        , viewport_bottom_color(204, 204, 204)
-        , trackball_visibility(true)
-        , grid_visibility(true)
-        , points_visibility(true)
-        , cameras_visibility(true)
-        , frustrum_visibility(true)
-        , draw_matches_only(true)
-        , draw_coloured_lines(true)
-        , point_size(0.2f)
-        , camera_size(0.1f)
-    {}
+    Options() = default;
 
     // Feature detectors/descriptors
-    int         feature_type;
-    bool        save_keys;
+    int         feature_type = 0;
+    bool        save_keys = true;
 
     // YAPE
-    int         yape_radius;
-    int         yape_threshold;
-    int         yape_octaves;
-    int         yape_views;
-    double      yape_base_feature_size;
-    double      yape_clustering_distance;
+    int         yape_radius = 7;
+    int         yape_threshold = 20;
+    int         yape_octaves = 3;
+    int         yape_views = 1000;
+    double      yape_base_feature_size = 32;
+    double      yape_clustering_distance = 2;
 
     // Daisy
-    int         daisy_radius;
-    int         daisy_radius_quantization;
-    int         daisy_angular_quantization;
-    int         daisy_histogram_quantization;
+    int         daisy_radius = 15;
+    int         daisy_radius_quantization = 3;
+    int         daisy_angular_quantization = 8;
+    int         daisy_histogram_quantization = 8;
 
     // SURF
-    int         surf_common_octaves;
-    int         surf_common_octave_layers;
-    double      surf_det_hessian_threshold;
-    bool        surf_desc_extended;
-    bool        surf_desc_upright;
+    int         surf_common_octaves = 4;
+    int         surf_common_octave_layers = 2;
+    double      surf_det_hessian_threshold = 400.0;
+    bool        surf_desc_extended = false;
+    bool        surf_desc_upright = false;
 
     // AKAZE
-    double      akaze_threshold;
-    int         akaze_descriptor_size;
+    double      akaze_threshold = 0.0007;
+    int         akaze_descriptor_size = 0;
 
     // Feature matching
-    int         matching_trees;
-    int         matching_checks;
-    double      matching_distance_ratio;                // Ratio threshold for Lowe's test
-    int         matching_min_matches;
-    double      ransac_threshold_fundamental;
-    double      ransac_threshold_homography;
+    int         matching_trees = 4;
+    int         matching_checks = 32;
+    double      matching_distance_ratio = 0.6;              // Ratio threshold for Lowe's test
+    int         matching_min_matches = 20;
+    double      ransac_threshold_fundamental = 0.001;
+    double      ransac_threshold_homography = 0.001;
 
 
     // Sfm options
-    bool        add_multiple_images;
-    double      ransac_threshold_five_point;
-    int         ransac_rounds_five_point;
-    int         min_max_matches;                        // Minimum number of matches needed to register an image
-    int         ransac_rounds_projection;
-    double      focal_length_constrain_weight;          // Weight on focal length constraint
-    double      distortion_constrain_weight;            // Weight on distortion parameter constraint
-    double      projection_estimation_threshold;        // RANSAC threshold for estimating projection matrix
-    double      min_reprojection_error_threshold;
-    double      max_reprojection_error_threshold;
-    double      ray_angle_threshold;
-    int         outlier_threshold_ba;
-    double      outlier_threshold_radius;
+    bool        add_multiple_images = true;
+    double      ransac_threshold_five_point = 2.25;
+    int         ransac_rounds_five_point = 500;
+    int         min_max_matches = 16;                       // Minimum number of matches needed to register an image
+    int         ransac_rounds_projection = 1000;
+    double      focal_length_constrain_weight = 0.0001;          // Weight on focal length constraint
+    double      distortion_constrain_weight = 100;          // Weight on distortion parameter constraint
+    double      projection_estimation_threshold = 4.0;      // RANSAC threshold for estimating projection matrix
+    double      min_reprojection_error_threshold = 4.0;
+    double      max_reprojection_error_threshold = 8.0;
+    double      ray_angle_threshold = 2.0;
+    int         outlier_threshold_ba = 0.0;
+    double      outlier_threshold_radius = 0.98;
 
     // Ceres options
     enum class loss_function
@@ -129,19 +69,19 @@ struct Options
         arctan      = 5
     };
 
-    loss_function   selected_loss;
-    double          loss_function_scale;
+    loss_function   selected_loss = loss_function::squared;
+    double          loss_function_scale = 0.5;
 
     // Display options
-    wxColour    viewport_top_color;
-    wxColour    viewport_bottom_color;
-    bool        trackball_visibility;
-    bool        grid_visibility;
-    bool        points_visibility;
-    bool        cameras_visibility;
-    bool        frustrum_visibility;
-    bool        draw_matches_only;
-    bool        draw_coloured_lines;
-    float       point_size;
-    float       camera_size;
+    wxColour    viewport_top_color = { 77, 77, 77 };
+    wxColour    viewport_bottom_color = { 204, 204, 204 };
+    bool        trackball_visibility = true;
+    bool        grid_visibility = true;
+    bool        points_visibility = true;
+    bool        cameras_visibility = true;
+    bool        frustrum_visibility = true;
+    bool        draw_matches_only = true;
+    bool        draw_coloured_lines = true;
+    float       point_size = 0.2f;
+    float       camera_size = 0.1f;
 };
