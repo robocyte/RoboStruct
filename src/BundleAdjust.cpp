@@ -159,13 +159,13 @@ void MainFrame::RunSFM()
         if (m_options.add_multiple_images)  next_images = FindCamerasWithNMatches(util::iround(0.75 * max_matches), added_order, points);
         else                                next_images.push_back(max_cam);
  
-        for (const int &idx : next_images)
+        for (const int &next : next_images)
         {
-            added_order.push_back(idx);
+            added_order.push_back(next);
 
-            auto camera_new = InitializeImage(idx, cameras.size(), points);
+            auto camera_new = InitializeImage(next, cameras.size(), points);
             if (camera_new.m_adjusted)  cameras.push_back(camera_new);
-            else                        m_images[idx].m_ignore_in_bundle = true;
+            else                        m_images[next].m_ignore_in_bundle = true;
         }
 
         AddNewPoints(cameras, added_order, points);

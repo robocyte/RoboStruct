@@ -305,7 +305,7 @@ void MainFrame::SavePlyFile()
             ply_file << t.x() << " " << t.y() << " " << t.z() << " ";
             ply_file << 255 << " " << 0 << " " << 0 << std::endl;
 
-            Point3 p = R.inverse() * Point3(0.0, 0.0, -0.05) + t;
+            Point3 p = R.transpose() * Point3(0.0, 0.0, -0.05) + t;
 
             ply_file << p.x() << " " << p.y() << " " << p.z() << " ";
             ply_file << 0 << " " << 255 << " " << 0 << std::endl;
