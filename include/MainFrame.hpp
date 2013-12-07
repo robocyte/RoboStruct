@@ -121,7 +121,7 @@ private:
     void        SaveTrackFile();
     void        SaveProjectionMatrix(const std::string &path, int img_idx);
     void        SaveUndistortedImage(const std::string &path, int img_idx);
-    void        ExportToCMVS();
+    void        ExportToCMVS(const std::string &path);
     void        SaveBundleFile(const std::string &path);
     void        SavePlyFile();
     void        SaveMayaFile();

@@ -225,7 +225,7 @@ void MainFrame::OnExport(wxCommandEvent& event)
         }
     case ID_EXPORT_CMVS:
         {
-            ExportToCMVS();
+            ExportToCMVS(m_path);
             break;
         }
     case ID_EXPORT_BUNDLE_FILE:
