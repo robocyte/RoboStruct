@@ -62,24 +62,24 @@ private:
     wxCursor                m_pan_cursor;
     wxCursor                m_zoom_cursor;
 
-    float                   m_beginx = 0.0f, m_beginy = 0.0f;     // Old mouse position
+    float                   m_beginx = 0.0f, m_beginy = 0.0f;   // Old mouse position
     float                   m_counter = 0.0f;
     std::string             m_path;
 
     wxImage                 m_preview_image;
     wxImage                 m_matches_image;
 
-    std::vector<CamDBEntry> m_camDB;                // Contains the information from CamDB.txt
-    std::vector<ImageData>  m_images;               // Image data
-    std::vector<TrackData>  m_tracks;               // Information about the detected 3D tracks
-    MatchTable              m_matches;              // Holds the matches
-    TransformData           m_transforms;           // Holds transform info
-    PointVec                m_points;               // Holds reconstructed points
+    std::vector<CamDBEntry> m_camDB;                            // Contains the information from CamDB.txt
+    std::vector<ImageData>  m_images;                           // Image data
+    std::vector<TrackData>  m_tracks;                           // Information about the detected 3D tracks
+    MatchTable              m_matches;                          // Holds the matches
+    TransformData           m_transforms;                       // Holds transform info
+    PointVec                m_points;                           // Holds reconstructed points
 
     bool                    m_has_images = false;
-    bool                    m_features_detected = false;    // Have features been detected?
-    bool                    m_matches_loaded = false;       // Have the matches been loaded?
-    bool                    m_matches_refined = false;      // Have the matches been refined?
+    bool                    m_features_detected = false;        // Have features been detected?
+    bool                    m_matches_loaded = false;           // Have the matches been loaded?
+    bool                    m_matches_refined = false;          // Have the matches been refined?
     bool                    m_sfm_done = false;
 
     int                     m_desc_length = 0;
@@ -90,7 +90,7 @@ private:
     void        DrawImgPreview(wxDC& dc);
     void        DrawMatches(wxDC& dc);
 
-    bool        AddImage(const std::string filename, const std::string filename_short);            // Try to add an image to the initial list of images
+    bool        AddImage(const std::string filename, const std::string filename_short);         // Try to add an image to the initial list of images
     bool        ReadCamDBFile(const std::string filename);
     void        AddCamDBFileEntry();
     bool        FindCameraInDatabase(ImageData &img);
@@ -102,10 +102,10 @@ private:
     KeyPoint&   GetKey(int img, int key)    { return m_images[img].m_keys[key]; };
     void        SetMatch(int i1, int i2)    { m_matches.SetMatch(GetMatchIndex(i1, i2)); };
     int         PruneDoubleMatches(IntPairVec &matches);
-    int         ComputeEpipolarGeometry(int idx1, int idx2, IntPairVec &matches);           // Computes the fundamental matrix F and removes outliers
-    double      ComputeHomography(int idx1, int idx2, const IntPairVec &matches);           // Computes the homography H and returns the inlier ratio
+    int         ComputeEpipolarGeometry(int idx1, int idx2, IntPairVec &matches);               // Computes the fundamental matrix F and removes outliers
+    double      ComputeHomography(int idx1, int idx2, const IntPairVec &matches);               // Computes the homography H and returns the inlier ratio
     void        MakeMatchListsSymmetric();
-    void        ComputeTracks();                                                            // Organize the matches into tracks, where a track is a connected set of matching keypoints across multiple images
+    void        ComputeTracks();                                                                // Organize the matches into tracks, where a track is a connected set of matching keypoints across multiple images
     void        SetMatchesFromTracks(int img1, int img2);
     void        SetMatchesFromPoints();
 
