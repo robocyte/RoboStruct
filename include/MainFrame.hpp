@@ -52,7 +52,6 @@ private:
     Options                 m_options;
     gly::ScenePtr           m_scene;
     gly::ClockPtr           m_clock;
-    ProfileManager          m_profile_manager;
 
     wxGLContext*            m_gl_context;
     wxTimer*                m_turntable_timer;
@@ -62,12 +61,14 @@ private:
     wxCursor                m_pan_cursor;
     wxCursor                m_zoom_cursor;
 
+    wxImage                 m_preview_image;
+    wxImage                 m_matches_image;
+
+    wxCriticalSection       m_points_cs;
+
     float                   m_beginx = 0.0f, m_beginy = 0.0f;   // Old mouse position
     float                   m_counter = 0.0f;
     std::string             m_path;
-
-    wxImage                 m_preview_image;
-    wxImage                 m_matches_image;
 
     std::vector<CamDBEntry> m_camDB;                            // Contains the information from CamDB.txt
     std::vector<ImageData>  m_images;                           // Image data
@@ -76,38 +77,36 @@ private:
     TransformData           m_transforms;                       // Holds transform info
     PointVec                m_points;                           // Holds reconstructed points
 
+    ProfileManager          m_profile_manager;
+
     bool                    m_has_images = false;
-    bool                    m_features_detected = false;        // Have features been detected?
-    bool                    m_matches_loaded = false;           // Have the matches been loaded?
-    bool                    m_matches_refined = false;          // Have the matches been refined?
+    bool                    m_features_detected = false;
+    bool                    m_matches_loaded = false;
+    bool                    m_matches_refined = false;
     bool                    m_sfm_done = false;
 
     int                     m_desc_length = 0;
-    wxCriticalSection       m_points_cs;
 
     void        GeneratePreviewImage(int img_idx);
     void        GenerateMatchImage();
     void        DrawImgPreview(wxDC& dc);
     void        DrawMatches(wxDC& dc);
 
-    bool        AddImage(const std::string filename, const std::string filename_short);         // Try to add an image to the initial list of images
-    bool        ReadCamDBFile(const std::string filename);
+    bool        AddImage(const std::string &filename, const std::string &filename_short);       // Try to add an image to the initial list of images
+    bool        ReadCamDBFile(const std::string &filename);
     void        AddCamDBFileEntry();
     bool        FindCameraInDatabase(ImageData &img);
 
     void        DetectFeaturesAll();
     void        DetectFeatures(int img_idx);
+
     void        MatchAll();
     void        MatchAllAkaze();
-    KeyPoint&   GetKey(int img, int key)    { return m_images[img].m_keys[key]; };
-    void        SetMatch(int i1, int i2)    { m_matches.SetMatch(GetMatchIndex(i1, i2)); };
     int         PruneDoubleMatches(IntPairVec &matches);
     int         ComputeEpipolarGeometry(int idx1, int idx2, IntPairVec &matches);               // Computes the fundamental matrix F and removes outliers
     double      ComputeHomography(int idx1, int idx2, const IntPairVec &matches);               // Computes the homography H and returns the inlier ratio
     void        MakeMatchListsSymmetric();
     void        ComputeTracks();                                                                // Organize the matches into tracks, where a track is a connected set of matching keypoints across multiple images
-    void        SetMatchesFromTracks(int img1, int img2);
-    void        SetMatchesFromPoints();
 
     int         GetImageWidth(int img_index)    { return m_images[img_index].GetWidth(); };     // Returns the image width
     int         GetImageHeight(int img_index)   { return m_images[img_index].GetHeight(); };    // Returns the image height
@@ -116,6 +115,11 @@ private:
     int         GetNumKeys(int img)             { return (int)m_images[img].m_keys.size(); };   // Returns the number of detected features for the given image index
     int         GetNumTrackMatches(int img1, int img2);
     double      GetInlierRatio(int idx1, int idx2);                                             // Returns the inlier ratio for an image pair
+    KeyPoint&   GetKey(int img, int key)        { return m_images[img].m_keys[key]; };
+
+    void        SetMatch(int i1, int i2)        { m_matches.SetMatch(GetMatchIndex(i1, i2)); };
+    void        SetMatchesFromTracks(int img1, int img2);
+    void        SetMatchesFromPoints();
 
     void        SaveMatchFile();
     void        SaveTrackFile();

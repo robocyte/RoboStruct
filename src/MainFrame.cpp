@@ -142,7 +142,7 @@ void MainFrame::InitializeCameraDatabase()
     else                            wxLogMessage("Error: Camera database not found!");
 }
 
-bool MainFrame::AddImage(const std::string filename, const std::string filename_short)
+bool MainFrame::AddImage(const std::string &filename, const std::string &filename_short)
 {
     ImageData img(filename, filename_short);
 

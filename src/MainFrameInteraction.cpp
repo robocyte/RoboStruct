@@ -249,7 +249,7 @@ void MainFrame::OnExport(wxCommandEvent& event)
 
 void MainFrame::OnSaveLog(wxCommandEvent& event)
 {
-    auto target = m_path + "\\Log.txt";
+    auto target = m_path + R"(\Log.txt)";
     if (m_tc_log->SaveFile(target)) wxLogMessage("Log saved to %s", target);
 }
 

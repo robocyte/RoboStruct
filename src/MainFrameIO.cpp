@@ -8,7 +8,7 @@
 #include "MainFrame.hpp"
 #include "Utilities.hpp"
 
-bool MainFrame::ReadCamDBFile(std::string filename)
+bool MainFrame::ReadCamDBFile(const std::string &filename)
 {
     m_camDB.clear();
 
