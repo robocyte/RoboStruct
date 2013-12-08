@@ -50,4 +50,4 @@ As for the rest of the dependencies, here is the list:
   * [GLEW](http://glew.sourceforge.net/)
   * glocyte (coming soon...)
 
-The program is currently being developed for Windows, a Visual Studio 2012 solution is provided.
+The program is currently being developed for Windows, a Visual Studio 2013 solution is provided.
