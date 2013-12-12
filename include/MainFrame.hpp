@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "gly_scene.hpp"
-#include "wx/msw/winundef.h"
+
 #include "wx/glcanvas.h"
 #include "wx/timer.h"
 

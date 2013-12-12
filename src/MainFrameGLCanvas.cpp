@@ -1,4 +1,4 @@
-#include "GL\glew.h"
+#include "GL/glew.h"
 
 #include "glm/gtx/quaternion.hpp"
 #include "wx/dcclient.h"

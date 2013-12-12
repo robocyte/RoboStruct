@@ -1,6 +1,6 @@
 #pragma once
 
-#include <wx/colour.h>
+#include "wx/colour.h"
 
 struct Options
 {

@@ -1,5 +1,3 @@
-#include <math.h>
-
 #include "EigenTools.hpp"
 
 Vec6 InvertDistortion(double r0, double r1, const Vec6 &k_in)

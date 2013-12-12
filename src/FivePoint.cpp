@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "FivePoint.hpp"
 #include "Poly.hpp"
 #include "Triangulation.hpp"
