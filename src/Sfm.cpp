@@ -90,30 +90,17 @@ Mat34 Camera::GetProjectionMatrix() const
     return GetIntrinsicMatrix() * P;
 }
 
-Point2 Camera::ProjectFinal(const Point3 &point) const
+Point2 Camera::Project(const Point3 &point) const
 {
     // HZ p. 153f
     Point3 tmp = m_R * (point - m_t);
     Point2 projected = tmp.head<2>() / -tmp.z();
 
     // Compute radial distortion
-    double r2 = projected.squaredNorm() / (m_focal_length * m_focal_length);
+    double r2 = projected.squaredNorm();
     double factor = 1.0 + m_k[0] * r2 + m_k[1] * r2 * r2;   // Taylor expansion for L(r)
 
     return projected * factor * m_focal_length;
-}
-
-Point2 Camera::ProjectRD(const Point3 &point) const
-{
-    // HZ p. 153f
-    Point3 tmp = m_R * (point - m_t);
-    Point2 projected = tmp.head<2>() * m_focal_length / -tmp.z();
-
-    // Compute radial distortion
-    double r2 = projected.squaredNorm() / (m_focal_length * m_focal_length);
-    double factor = 1.0 + m_k[0] * r2 + m_k[1] * r2 * r2;   // Taylor expansion for L(r)
-
-    return projected * factor;
 }
 
 void RefineCamera(Camera *camera, const Point3Vec &points, const Point2Vec &projections, bool adjust_focal)

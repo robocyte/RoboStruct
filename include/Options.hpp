@@ -50,8 +50,8 @@ struct Options
     int         ransac_rounds_five_point = 500;
     int         min_max_matches = 16;                       // Minimum number of matches needed to register an image
     int         ransac_rounds_projection = 1000;
-    double      focal_length_constrain_weight = 0.0001;          // Weight on focal length constraint
-    double      distortion_constrain_weight = 100;          // Weight on distortion parameter constraint
+    double      focal_length_constrain_weight = 0.0001;     // Weight on focal length constraint
+    double      distortion_constrain_weight = 0.0001;       // Weight on distortion parameter constraint
     double      projection_estimation_threshold = 4.0;      // RANSAC threshold for estimating projection matrix
     double      min_reprojection_error_threshold = 4.0;
     double      max_reprojection_error_threshold = 8.0;

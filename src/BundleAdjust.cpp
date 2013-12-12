@@ -4,6 +4,7 @@
 
 #include "ceres/ceres.h"
 #include "ceres/rotation.h"
+#include "snavely_reprojection_error.h"
 
 #include "opencv2/core.hpp"
 #include "opencv2/core/utility.hpp"
@@ -18,83 +19,35 @@
 namespace
 {
 
-// Templated pinhole camera model for use with Ceres. The camera is
-// parameterized using 9 parameters: 3 for rotation, 3 for translation, 1 for
-// focal length and 2 for radial distortion. The principal point is not modeled
-// (i.e. it is assumed be located at the image center).
-struct SnavelyReprojectionError
-{
-    SnavelyReprojectionError(double observed_x, double observed_y)
-        : observed_x(observed_x), observed_y(observed_y)
-    {}
-
-    template <typename T>
-    bool operator()(const T* const camera, const T* const point, T* residuals) const
-    {
-        // Camera[0, 1, 2] are the angle-axis rotation
-        T p[3];
-        ceres::AngleAxisRotatePoint(camera, point, p);
-
-        // camera[3,4,5] are the translation.
-        p[0] += camera[3];
-        p[1] += camera[4];
-        p[2] += camera[5];
-
-        // Compute the center of distortion. The sign change comes from
-        // the camera model that Noah Snavely's Bundler assumes, whereby
-        // the camera coordinate system has a negative z axis.
-        const T& focal = camera[6];
-        T xp = -p[0] * focal / p[2];
-        T yp = -p[1] * focal / p[2];
-
-        // Apply second and fourth order radial distortion
-        const T& l1 = camera[7];
-        const T& l2 = camera[8];
-        T r2 = xp * xp + yp * yp;
-        T distortion = T(1.0) + r2  * (l1 + l2  * r2);
-
-        // Compute final projected point position
-        T predicted_x = /*focal **/ distortion * xp;
-        T predicted_y = /*focal **/ distortion * yp;
-
-        // The error is the difference between the predicted and observed position
-        residuals[0] = predicted_x - T(observed_x);
-        residuals[1] = predicted_y - T(observed_y);
-
-        return true;
-    }
+    using namespace ceres::examples;
 
     // Factory to hide the construction of the CostFunction object from the client code
-    static ceres::CostFunction* Create(const double observed_x, const double observed_y)
+    ceres::CostFunction* CreateBundlerCostFunction(const double observed_x, const double observed_y)
     {
         return (new ceres::AutoDiffCostFunction<SnavelyReprojectionError, 2, 9, 3>(
                     new SnavelyReprojectionError(observed_x, observed_y)));
     }
 
-    double observed_x;
-    double observed_y;
-};
-
-// Penalize a camera variable for deviating from a given prior value
-struct PriorError
-{
-    PriorError(int prior_index, double prior_value, double prior_scale)
-        : prior_index(prior_index)
-        , prior_value(prior_value)
-        , prior_scale(prior_scale)
-    {}
-
-    template <typename T>
-    bool operator()(const T* const x, T* residual) const
+    // Penalize a camera variable for deviating from a given prior value
+    struct PriorError
     {
-        residual[0] = prior_scale * (prior_value - x[prior_index]);
-        return true;
-    }
+        PriorError(int prior_index, double prior_value, double prior_scale)
+            : prior_index(prior_index)
+            , prior_value(prior_value)
+            , prior_scale(prior_scale)
+        {}
 
-    int prior_index;
-    double prior_value;
-    double prior_scale;
-};
+        template <typename T>
+        bool operator()(const T* const x, T* residual) const
+        {
+            residual[0] = prior_scale * (prior_value - x[prior_index]);
+            return true;
+        }
+
+        int prior_index;
+        double prior_value;
+        double prior_scale;
+    };
 
 }
 
@@ -650,7 +603,7 @@ void MainFrame::RefineCameraParameters(Camera *camera, const Point3Vec &points, 
         std::vector<double> errors;
         for (int i = 0; i < points_curr.size(); i++)
         {
-            Point2 projection = camera->ProjectFinal(points_curr[i]);
+            Point2 projection = camera->Project(points_curr[i]);
             errors.push_back((projection - projs_curr[i]).norm());
         }
 
@@ -781,8 +734,8 @@ void MainFrame::BundleAdjust(CamVec &cameras, const IntVec &added_order, PointVe
             ptr[idx] = t[1]; idx++;
             ptr[idx] = t[2]; idx++;
             ptr[idx] = f; idx++;
-            ptr[idx] = k1 / (f * f); idx++;
-            ptr[idx] = k2 / (f * f * f * f); idx++;
+            ptr[idx] = k1; idx++;
+            ptr[idx] = k2; idx++;
         }
 
         // Insert point parameters
@@ -799,7 +752,7 @@ void MainFrame::BundleAdjust(CamVec &cameras, const IntVec &added_order, PointVe
         for (int i = 0; i < num_projections; ++i)
         {
             // Each Residual block takes a point and a camera as input and outputs a 2 dimensional residual
-            ceres::CostFunction *cost_function = SnavelyReprojectionError::Create(projections[2 * i + 0], projections[2 * i + 1]);
+            ceres::CostFunction *cost_function = CreateBundlerCostFunction(projections[2 * i + 0], projections[2 * i + 1]);
 
             ceres::LossFunction *loss_function = nullptr;
             switch (m_options.selected_loss)
@@ -859,8 +812,8 @@ void MainFrame::BundleAdjust(CamVec &cameras, const IntVec &added_order, PointVe
             camera.m_R = AngleAxisToRotationMatrix(axis);
             camera.m_t = -(camera.m_R.transpose() * t);
             double f = camera.m_focal_length = *ptr; ptr++;
-            camera.m_k[0] = *ptr * (f * f); ptr++;
-            camera.m_k[1] = *ptr * (f * f * f * f); ptr++;
+            camera.m_k[0] = *ptr; ptr++;
+            camera.m_k[1] = *ptr; ptr++;
         }
 
         // Insert point parameters
@@ -890,7 +843,7 @@ void MainFrame::BundleAdjust(CamVec &cameras, const IntVec &added_order, PointVe
                 if (key.m_extra >= 0)
                 {
                     int pt_idx = key.m_extra;
-                    Point2 projection = cameras[i].ProjectRD(nz_pts[remap[pt_idx]]);
+                    Point2 projection = cameras[i].Project(nz_pts[remap[pt_idx]]);
 
                     dists.push_back((projection - key.m_coords).norm());
                 }
@@ -1073,7 +1026,7 @@ void MainFrame::AddNewPoints(const CamVec &cameras, const IntVec &added_order, P
             int image_idx = added_order[track.first];
             auto &key = GetKey(image_idx, track.second);
 
-            Point2 projection = cameras[track.first].ProjectFinal(point);
+            Point2 projection = cameras[track.first].Project(point);
             error += (projection - key.m_coords).squaredNorm();
         }
         error = sqrt(error / new_tracks[i].size());
