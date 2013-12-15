@@ -272,7 +272,6 @@ void MainFrame::OnSelectDirectory(wxFileDirPickerEvent& event)
     m_window_image_preview->Refresh(true);
     m_pane_matches_view->Refresh(true);
 
-
     m_img_ctrl->ClearAll();
     m_img_ctrl->InsertColumn(0, "Name",			wxLIST_FORMAT_LEFT, 60);
     m_img_ctrl->InsertColumn(1, "Resolution",	wxLIST_FORMAT_LEFT, 75);
