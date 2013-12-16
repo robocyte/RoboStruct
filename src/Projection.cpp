@@ -209,8 +209,6 @@ int ComputeProjectionMatrixRansac(const Point3Vec &points, const Point2Vec &proj
         return -1;
     }
 
-    // Re-estimate P from all correspondences classified as inliers and refine the result
-    //*P = ComputeProjectionMatrix(final_pts, final_projs, true);
 
     return max_inliers;
 }
@@ -296,7 +294,7 @@ void DecomposeProjectionMatrix(const Mat &P, Mat3 *K, Mat3 *R, Vec3 *t)
     }
 
     // Compute translation.
-    Vec3 tp = Kp.fullPivLu().solve(P.col(3));
+    Vec3 tp = Kp.colPivHouseholderQr().solve(P.col(3));
 
     if(Rp.determinant() < 0)
     {
