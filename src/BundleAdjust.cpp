@@ -1009,8 +1009,8 @@ void MainFrame::AddNewPoints(const CamVec &cameras, const IntVec &added_order, P
         {
             auto cam = cameras[track.first];
 
-            int image_idx   = added_order[track.first];
-            auto &key       = GetKey(image_idx, track.second);
+            int image_idx = added_order[track.first];
+            auto &key     = GetKey(image_idx, track.second);
 
             Point3 pn = cam.GetIntrinsicMatrix().inverse() * EuclideanToHomogenous(key.m_coords);
             Point2 pu = UndistortNormalizedPoint(-pn.head<2>(), cam.m_k_inv);
