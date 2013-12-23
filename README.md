@@ -26,8 +26,8 @@ optimal candidates for reconstruction.
 
 In order to see something in the 3d viewport, a graphics card capable of OpenGL 3.3 and above is needed.
 
-Results will be automatically saved as a .ply file in the directory of the source images,
-exporting the solution to Autodesk Maya, .out files (bundler) and [CMVS](http://www.di.ens.fr/cmvs/) is also possible.
+Results will be automatically saved to a .ply file in the directory of the source images.
+Exporting the solution to [MeshLab](http://meshlab.sourceforge.net/), Autodesk Maya, .out files (bundler) and [CMVS](http://www.di.ens.fr/cmvs/) is possible.
 [Blender](http://www.blender.org/) export is planned for the future.
 
 
