@@ -43,9 +43,9 @@ public:
     bool                    m_descriptors_loaded = false;
 
     bool    GetExifInfo();                              // Get focal length (mm) and other info from EXIF tags
-    double  GetInitFocal()  { return m_init_focal; }    // Returns the initial focal length in px
-    int     GetWidth()      { return m_width; }         // Returns the image width in px
-    int     GetHeight()     { return m_height; }        // Returns the image height in px
+    double  GetInitFocal()    { return m_init_focal; }  // Returns the initial focal length in px
+    int     GetWidth() const  { return m_width; }       // Returns the image width in px
+    int     GetHeight() const { return m_height; }      // Returns the image height in px
 
     void    DetectFeatures(const Options& opts);        // Detects features and returns the descriptor length
 

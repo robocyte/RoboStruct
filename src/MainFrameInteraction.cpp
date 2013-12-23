@@ -22,6 +22,7 @@ void MainFrame::OnUpdateUI(wxUpdateUIEvent& event)
     case ID_EXPORT_CMVS:                    event.Enable(m_sfm_done);           break;
     case ID_EXPORT_BUNDLE_FILE:             event.Enable(m_sfm_done);           break;
     case ID_EXPORT_PLY_FILE:                event.Enable(m_sfm_done);           break;
+    case ID_EXPORT_MESHLAB_FILE:            event.Enable(m_sfm_done);           break;
     case ID_EXPORT_MAYA_FILE:               event.Enable(m_sfm_done);           break;
 
     case ID_TOGGLE_FRUSTRUM_VISIBILITY:     event.Enable(m_sfm_done);           break;
@@ -236,6 +237,11 @@ void MainFrame::OnExport(wxCommandEvent& event)
     case ID_EXPORT_PLY_FILE:
         {
             SavePlyFile();
+            break;
+        }
+    case ID_EXPORT_MESHLAB_FILE:
+        {
+            SaveMeshLabFile();
             break;
         }
     case ID_EXPORT_MAYA_FILE:

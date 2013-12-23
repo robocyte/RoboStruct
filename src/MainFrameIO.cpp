@@ -109,6 +109,7 @@ void MainFrame::SaveProjectionMatrix(const std::string &path, int img_idx)
 
         double focal = m_images[img_idx].m_camera.m_focal_length;
         const auto &R = m_images[img_idx].m_camera.m_R;
+        const auto &t = m_images[img_idx].m_camera.m_t;
 
         Mat3 K;
         K << -focal,   0.0,   0.5 * GetImageWidth(img_idx) - 0.5,
@@ -117,7 +118,7 @@ void MainFrame::SaveProjectionMatrix(const std::string &path, int img_idx)
 
         Mat34 Rigid;
         Rigid << R;
-        Rigid.col(3) = -(R * m_images[img_idx].m_camera.m_t);
+        Rigid.col(3) = -(R * t);
 
         Mat34 P = -(K * Rigid);
 
@@ -288,7 +289,7 @@ void MainFrame::SavePlyFile()
         for (const auto &point : m_points)
         {
             // Point positions
-            ply_file    << point.m_pos[0] << " " << point.m_pos[1] << " " << point.m_pos[2] << " ";
+            ply_file    << point.m_pos.x() << " " << point.m_pos.y() << " " << point.m_pos.z() << " ";
 
             // Point colors
             ply_file    << util::iround(point.m_color[0] * 255) << " "
@@ -315,9 +316,69 @@ void MainFrame::SavePlyFile()
     }
 }
 
+void MainFrame::SaveMeshLabFile()
+{
+    // Export to CMVS first to get undistorted images
+    ExportToCMVS(m_path);
+
+    std::string filename = m_path + R"(\Result.mlp)";
+    std::ofstream mlp_file(filename);
+
+    if (!mlp_file)
+    {
+        wxLogMessage("Error: couldn't open file %s for writing", filename.c_str());
+    } else
+    {
+        wxLogMessage("Writing points and cameras to %s...", filename.c_str());
+
+        // Write header and output mesh location
+        mlp_file << R"(<!DOCTYPE MeshLabDocument>)" << std::endl;
+        mlp_file << R"(<MeshLabProject>)" << std::endl;
+        mlp_file << R"( <MeshGroup>)" << std::endl;
+        mlp_file << R"(  <MLMesh label="Result" filename="Result.ply">)" << std::endl;
+        mlp_file << R"(   <MLMatrix44>)" << std::endl;
+        mlp_file << R"(1 0 0 0 )" << std::endl;
+        mlp_file << R"(0 1 0 0 )" << std::endl;
+        mlp_file << R"(0 0 1 0 )" << std::endl;
+        mlp_file << R"(0 0 0 1 )" << std::endl;
+        mlp_file << R"(</MLMatrix44>)" << std::endl;
+        mlp_file << R"(  </MLMesh>)" << std::endl;
+        mlp_file << R"( </MeshGroup>)" << std::endl;
+
+        // Write cameras as raster layers
+        mlp_file << R"( <RasterGroup>)" << std::endl;
+
+        for (const auto &img : m_images)
+        {
+            if (!img.m_camera.m_adjusted) continue;
+
+            auto Rot = img.m_camera.m_R;
+            auto t = -img.m_camera.m_t;
+
+            mlp_file << R"(  <MLRaster label=")" << img.m_filename_short << R"(">)" << std::endl;
+            mlp_file << R"(   <VCGCamera TranslationVector=")" << t.x() << " " << t.y() << " " << t.z() << " " << 1 << R"(" )";
+            mlp_file <<           R"(LensDistortion="0 0" )";
+            mlp_file <<           R"(ViewportPx=")" << img.GetWidth() << " " << img.GetHeight() << R"(" )";
+            mlp_file <<           R"(PixelSizeMm="1 1" )";
+            mlp_file <<           R"(CenterPx=")" << (int)std::floor(img.GetWidth()) << " " << (int)std::floor(img.GetHeight()) << R"(" )";
+            mlp_file <<           R"(FocalMm=")" << img.m_camera.m_focal_length << R"(" )";
+            mlp_file <<           R"(RotationMatrix=")";
+            mlp_file <<             Rot(0, 0) << " " << Rot(0, 1) << " " << Rot(0, 2) << " " << "0 ";
+            mlp_file <<             Rot(1, 0) << " " << Rot(1, 1) << " " << Rot(1, 2) << " " << "0 ";
+            mlp_file <<             Rot(2, 0) << " " << Rot(2, 1) << " " << Rot(2, 2) << " " << "0 ";
+            mlp_file <<             R"(0 0 0 1 "/>)" << std::endl;
+            mlp_file << R"(   <Plane semantic="" fileName="pmvs/visualize/)" << img.m_filename_short << R"("/>)" << std::endl;
+            mlp_file << R"(  </MLRaster>)" << std::endl;
+        }
+
+        mlp_file << R"( </RasterGroup>)" << std::endl;
+        mlp_file << R"(</MeshLabProject>)" << std::endl;
+    }
+}
+
 void MainFrame::SaveMayaFile()
 {
-    // Export to CMVS first in order to get undistorted images
+    // Export to CMVS first to get undistorted images
     ExportToCMVS(m_path);
 
     std::string filename = m_path + R"(\Result.ma)";

@@ -1,5 +1,5 @@
 ﻿///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Apr 10 2012)
+// C++ code generated with wxFormBuilder (version Nov  6 2013)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO "NOT" EDIT THIS FILE!
@@ -165,8 +165,12 @@ MainFrame_base::MainFrame_base( wxWindow* parent, wxWindowID id, const wxString&
 	m_menu_export_ply_file = new wxMenuItem( m_export_menu, ID_EXPORT_PLY_FILE, wxString( wxT("Ply file") ) , wxT("Export reconstruction as .ply file"), wxITEM_NORMAL );
 	m_export_menu->Append( m_menu_export_ply_file );
 	
+	wxMenuItem* m_menu_export_meshlab_file;
+	m_menu_export_meshlab_file = new wxMenuItem( m_export_menu, ID_EXPORT_MESHLAB_FILE, wxString( wxT("Meshlab file") ) , wxT("Export reconstruction as .mlp file"), wxITEM_NORMAL );
+	m_export_menu->Append( m_menu_export_meshlab_file );
+	
 	wxMenuItem* m_menu_export_maya;
-	m_menu_export_maya = new wxMenuItem( m_export_menu, ID_EXPORT_MAYA_FILE, wxString( wxT("Maya") ) , wxT("Export reconstruction as .ma file"), wxITEM_NORMAL );
+	m_menu_export_maya = new wxMenuItem( m_export_menu, ID_EXPORT_MAYA_FILE, wxString( wxT("Maya file") ) , wxT("Export reconstruction as .ma file"), wxITEM_NORMAL );
 	m_export_menu->Append( m_menu_export_maya );
 	
 	m_menubar->Append( m_export_menu, wxT("&Export") ); 
@@ -286,15 +290,15 @@ MainFrame_base::MainFrame_base( wxWindow* parent, wxWindowID id, const wxString&
 	m_img_ctrl = new wxListCtrl( m_window_image_browser, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_HRULES|wxLC_REPORT|wxLC_SINGLE_SEL|wxNO_BORDER );
 	bSizer1->Add( m_img_ctrl, 1, wxEXPAND, 5 );
 	
-
+	
 	m_window_image_browser->SetSizer( bSizer1 );
 	m_window_image_browser->Layout();
 	m_window_image_preview = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxSize( 370,200 ), wxNO_BORDER|wxTAB_TRAVERSAL );
 	m_window_image_preview->SetMinSize( wxSize( 370,200 ) );
 	
 	m_mgr.AddPane( m_window_image_preview, wxAuiPaneInfo() .Name( wxT("Image preview") ).Left() .Caption( wxT("Image preview") ).MaximizeButton( true ).PaneBorder( false ).Dock().Resizable().FloatingSize( wxSize( 386,234 ) ).DockFixed( false ).Layer( 1 ) );
-
-    m_window_options = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxSize( 370,200 ), wxNO_BORDER|wxTAB_TRAVERSAL );
+	
+	m_window_options = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxSize( 370,200 ), wxNO_BORDER|wxTAB_TRAVERSAL );
 	m_window_options->SetMinSize( wxSize( 370,200 ) );
 	
 	m_mgr.AddPane( m_window_options, wxAuiPaneInfo() .Name( wxT("Options") ).Left() .Caption( wxT("Options") ).MaximizeButton( true ).PaneBorder( false ).Dock().Resizable().FloatingSize( wxSize( 439,316 ) ).DockFixed( false ).Layer( 1 ) );
@@ -317,17 +321,19 @@ MainFrame_base::MainFrame_base( wxWindow* parent, wxWindowID id, const wxString&
 	
 	m_mgr.AddPane( m_window_log, wxAuiPaneInfo() .Name( wxT("Log") ).Bottom() .Caption( wxT("Log") ).MaximizeButton( true ).PaneBorder( false ).Dock().Resizable().FloatingSize( wxSize( 596,244 ) ).DockFixed( false ).Row( 0 ).Layer( 0 ) );
 	
-	wxBoxSizer* bSizer3 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* bSizer3;
+	bSizer3 = new wxBoxSizer( wxHORIZONTAL );
 	
-	m_tc_log = new wxTextCtrl(m_window_log, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_DONTWRAP | wxTE_MULTILINE | wxTE_READONLY |wxNO_BORDER);
-	bSizer3->Add(m_tc_log, 1, wxEXPAND, 5);
+	m_tc_log = new wxTextCtrl( m_window_log, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_DONTWRAP|wxTE_MULTILINE|wxTE_READONLY|wxNO_BORDER );
+	m_tc_log->SetMaxLength( 0 ); 
+	bSizer3->Add( m_tc_log, 1, wxEXPAND, 5 );
 	
-	m_toolbar_log = new wxAuiToolBar(m_window_log, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_VERTICAL);
-	m_toolbar_log->SetToolBitmapSize(wxSize(24, 24));
-	m_toolbar_log->SetToolPacking(2);
-
-	m_toolbar_log->AddTool(ID_SAVE_LOG,		"Save Log",		wxIcon("save_icon", wxBITMAP_TYPE_ICO_RESOURCE, 22, 22),	wxNullBitmap, wxITEM_NORMAL, "Save the log to a .txt file", "Save the log to a .txt file", NULL);
-	m_toolbar_log->AddTool(ID_CLEAR_LOG,	"Clear log",	wxIcon("delete_icon", wxBITMAP_TYPE_ICO_RESOURCE, 22, 22),	wxNullBitmap, wxITEM_NORMAL, "Clear the log window", "Clear the log window", NULL);
+	m_toolbar_log = new wxAuiToolBar( m_window_log, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_DEFAULT_STYLE|wxAUI_TB_OVERFLOW|wxAUI_TB_VERTICAL );
+	m_toolbar_log->SetToolBitmapSize( wxSize( 24,24 ) );
+	m_toolbar_log->SetToolPacking( 2 );
+	m_toolbar_log->AddTool( ID_SAVE_LOG, wxT("Save Log"), wxICON( save_icon ), wxNullBitmap, wxITEM_NORMAL, wxT("Save the log to a .txt file"), wxT("Save the log to a .txt file"), NULL ); 
+	
+	m_toolbar_log->AddTool( ID_CLEAR_LOG, wxT("Clear log"), wxICON( delete_icon ), wxNullBitmap, wxITEM_NORMAL, wxT("Clear the log window"), wxT("Clear the log window"), NULL ); 
 	
 	m_toolbar_log->Realize(); 
 	
@@ -343,6 +349,7 @@ MainFrame_base::MainFrame_base( wxWindow* parent, wxWindowID id, const wxString&
 	bSizer7 = new wxBoxSizer( wxVERTICAL );
 	
 	m_tc_about = new wxTextCtrl( m_window_about, wxID_ANY, wxT("This is awesome!\nLicense(s)\nIcons (Tango, Crystal project...)\nGLocyte"), wxDefaultPosition, wxDefaultSize, wxTE_CENTRE|wxTE_MULTILINE|wxTE_NO_VSCROLL|wxTE_READONLY|wxNO_BORDER );
+	m_tc_about->SetMaxLength( 0 ); 
 	bSizer7->Add( m_tc_about, 1, wxEXPAND, 5 );
 	
 	
@@ -373,6 +380,7 @@ MainFrame_base::MainFrame_base( wxWindow* parent, wxWindowID id, const wxString&
 	this->Connect( m_menu_export_cmvs->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame_base::OnExport ) );
 	this->Connect( m_menu_export_bundle_file->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame_base::OnExport ) );
 	this->Connect( m_menu_export_ply_file->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame_base::OnExport ) );
+	this->Connect( m_menu_export_meshlab_file->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame_base::OnExport ) );
 	this->Connect( m_menu_export_maya->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame_base::OnExport ) );
 	this->Connect( m_menu_about->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame_base::OnViewWindows ) );
 	this->Connect( ID_RECONSTRUCT, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnReconstruct ) );
@@ -451,6 +459,7 @@ MainFrame_base::~MainFrame_base()
 	this->Disconnect( ID_EXPORT_CMVS, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame_base::OnExport ) );
 	this->Disconnect( ID_EXPORT_BUNDLE_FILE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame_base::OnExport ) );
 	this->Disconnect( ID_EXPORT_PLY_FILE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame_base::OnExport ) );
+	this->Disconnect( ID_EXPORT_MESHLAB_FILE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame_base::OnExport ) );
 	this->Disconnect( ID_EXPORT_MAYA_FILE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame_base::OnExport ) );
 	this->Disconnect( ID_VIEW_ABOUT, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame_base::OnViewWindows ) );
 	this->Disconnect( ID_RECONSTRUCT, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnReconstruct ) );

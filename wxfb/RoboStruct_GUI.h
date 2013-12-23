@@ -1,5 +1,5 @@
 ﻿///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Apr 10 2012)
+// C++ code generated with wxFormBuilder (version Nov  6 2013)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO "NOT" EDIT THIS FILE!
@@ -67,6 +67,7 @@ class MainFrame_base : public wxFrame
 			ID_EXPORT_CMVS,
 			ID_EXPORT_BUNDLE_FILE,
 			ID_EXPORT_PLY_FILE,
+			ID_EXPORT_MESHLAB_FILE,
 			ID_EXPORT_MAYA_FILE,
 			ID_VIEW_ABOUT,
 			ID_TURNTABLE_SPEED_SLIDER,

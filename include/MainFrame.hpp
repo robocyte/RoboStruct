@@ -128,6 +128,7 @@ private:
     void        ExportToCMVS(const std::string &path);
     void        SaveBundleFile(const std::string &path);
     void        SavePlyFile();
+    void        SaveMeshLabFile();
     void        SaveMayaFile();
 
     wxThread::ExitCode  Entry();

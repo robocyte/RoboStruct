@@ -397,7 +397,7 @@
                         <event name="OnUpdateUI"></event>
                     </object>
                 </object>
-                <object class="wxMenu" expanded="0">
+                <object class="wxMenu" expanded="1">
                     <property name="label">&amp;Export</property>
                     <property name="name">m_export_menu</property>
                     <property name="permission">protected</property>
@@ -480,6 +480,21 @@
                         <event name="OnMenuSelection">OnExport</event>
                         <event name="OnUpdateUI"></event>
                     </object>
+                    <object class="wxMenuItem" expanded="1">
+                        <property name="bitmap"></property>
+                        <property name="checked">0</property>
+                        <property name="enabled">1</property>
+                        <property name="help">Export reconstruction as .mlp file</property>
+                        <property name="id">ID_EXPORT_MESHLAB_FILE</property>
+                        <property name="kind">wxITEM_NORMAL</property>
+                        <property name="label">Meshlab file</property>
+                        <property name="name">m_menu_export_meshlab_file</property>
+                        <property name="permission">none</property>
+                        <property name="shortcut"></property>
+                        <property name="unchecked_bitmap"></property>
+                        <event name="OnMenuSelection">OnExport</event>
+                        <event name="OnUpdateUI"></event>
+                    </object>
                     <object class="wxMenuItem" expanded="0">
                         <property name="bitmap"></property>
                         <property name="checked">0</property>
@@ -487,7 +502,7 @@
                         <property name="help">Export reconstruction as .ma file</property>
                         <property name="id">ID_EXPORT_MAYA_FILE</property>
                         <property name="kind">wxITEM_NORMAL</property>
-                        <property name="label">Maya</property>
+                        <property name="label">Maya file</property>
                         <property name="name">m_menu_export_maya</property>
                         <property name="permission">none</property>
                         <property name="shortcut"></property>
