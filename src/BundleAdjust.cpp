@@ -608,10 +608,10 @@ void MainFrame::RefineCameraParameters(Camera *camera, const Point3Vec &points, 
         }
 
         // Sort and histogram errors
-        double median       = util::GetNthElement(util::iround(0.95 * points_curr.size()), errors);
+        double median       = util::GetNthElement(util::iround(0.90 * points_curr.size()), errors);
         double threshold    = util::clamp(2.4 * median, m_options.min_reprojection_error_threshold, m_options.max_reprojection_error_threshold);
         double avg          = std::accumulate(errors.begin(), errors.end(), 0.0) / errors.size();
-        wxLogMessage("[RefineCameraParameters] Mean error [%d pts]: %.3f [med: %.3f, outlier threshold: = %.3f]", points_curr.size(), avg, median, threshold);
+        wxLogMessage("[RefineCameraParameters] Mean error [%d pts]: %.3f [med: %.3f, outlier threshold: %.3f]", points_curr.size(), avg, median, threshold);
 
         Point3Vec   points_next;
         Point2Vec   projs_next;

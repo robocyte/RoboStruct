@@ -578,8 +578,7 @@ void MainFrame::ComputeTracks()
         });
     }
 
-    bool *img_marked = new bool[num_images];
-    memset(img_marked, 0, num_images * sizeof(bool));
+    std::vector<bool> img_marked(num_images, false);
 
     IntVec touched(num_images);
     std::vector<TrackData> tracks;
@@ -685,7 +684,6 @@ void MainFrame::ComputeTracks()
 
     // Save the tracks
     m_tracks = tracks;
-    delete[] img_marked;
 
     // Print track stats
     IntVec stats(num_images + 1);

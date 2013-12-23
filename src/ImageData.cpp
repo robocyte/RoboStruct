@@ -116,7 +116,6 @@ void ImageData::DetectFeatures(const Options& opts)
             options.descriptor_channels     = DEFAULT_LDB_CHANNELS;
             options.descriptor_pattern_size = DEFAULT_LDB_PATTERN_SIZE;
             options.sderivatives            = DEFAULT_SIGMA_SMOOTHING_DERIVATIVES;
-            options.upright                 = DEFAULT_UPRIGHT;
             options.save_scale_space        = DEFAULT_SAVE_SCALE_SPACE;
             options.save_keypoints          = DEFAULT_SAVE_KEYPOINTS;
             options.verbosity               = DEFAULT_VERBOSITY;

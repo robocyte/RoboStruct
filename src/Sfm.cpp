@@ -52,8 +52,8 @@ namespace
             if (m_adjust_focal)
             {
                 // Apply radial distortion
-                double r = projection.squaredNorm() / (focal_length * focal_length);
-                double factor = 1.0 + x(7) * r + x(8) * r * r;
+                double r2 = projection.squaredNorm();
+                double factor = 1.0 + x(7) * r2 + x(8) * r2 * r2;   // Taylor expansion for L(r)
 
                 projection *= factor;
             }

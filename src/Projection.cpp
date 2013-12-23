@@ -126,7 +126,16 @@ Mat34 ComputeProjectionMatrix(const Point3Vec &points, const Point2Vec &projecti
     {
         ProjectionResidual functor(points, projections);
         Eigen::DenseIndex nfev;
-        Eigen::LevenbergMarquardt<ProjectionResidual>::lmdif1(functor, x, &nfev, 1.0e-5);
+        Eigen::LevenbergMarquardt<ProjectionResidual>::lmdif1(functor, x, &nfev, 1.0e-10);
+
+        //Eigen::NumericalDiff<ProjectionResidual> num_diff(functor);
+        //Eigen::LevenbergMarquardt<Eigen::NumericalDiff<ProjectionResidual>> lm(num_diff);
+
+        //lm.resetParameters();
+        //lm.parameters.ftol = 1.0e-10;
+        //lm.parameters.xtol = 1.0e-10;
+        //lm.parameters.maxfev = 500;
+        //lm.minimize(x);
     }
 
     Mat34 P;

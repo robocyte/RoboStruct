@@ -33,8 +33,7 @@ namespace
 
 struct ProfileManager
 {
-    ProfileManager()
-    {}
+    ProfileManager() = default;
 
     void Add(const std::string &name, milliseconds duration)
     {

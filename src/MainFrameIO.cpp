@@ -235,9 +235,9 @@ void MainFrame::SaveBundleFile(const std::string &path)
                             << point.m_pos[1] << " "
                             << point.m_pos[2] << std::endl;
 
-                bundle_file << util::iround(point.m_color[0]) << " "
-                            << util::iround(point.m_color[1]) << " "
-                            << util::iround(point.m_color[2]) << std::endl;
+                bundle_file << util::iround(point.m_color[0] * 255) << " "
+                            << util::iround(point.m_color[1] * 255) << " "
+                            << util::iround(point.m_color[2] * 255) << std::endl;
 
                 // View data
                 bundle_file << point.m_views.size();
