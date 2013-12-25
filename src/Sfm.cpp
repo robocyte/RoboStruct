@@ -2,6 +2,7 @@
 
 namespace
 {
+
     struct CameraResidual : LMFunctor<double>
     {
         CameraResidual(const Camera &camera, const Point3Vec &points, const Point2Vec &projections, bool adjust_focal)
@@ -70,6 +71,7 @@ namespace
         double      m_constrain_focal_weight;
         double      m_constrain_distortion_weight;
     };
+
 }
 
 Mat3 Camera::GetIntrinsicMatrix() const

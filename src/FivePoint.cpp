@@ -5,9 +5,10 @@
 
 namespace
 {
+
     typedef std::vector<Poly3> PolyVec;
 
-    Mat     ComputeNullspaceBasis(const Point2Vec &pts1, const Point2Vec &pts2)
+    Mat ComputeNullspaceBasis(const Point2Vec &pts1, const Point2Vec &pts2)
     {
         // Generate the epipolar constraint matrix
         Eigen::Matrix<double, 5, 9> A;
@@ -103,7 +104,7 @@ namespace
         return constraints;
     }
 
-    Mat     ComputeGroebnerBasis(const PolyVec &constraints) 
+    Mat ComputeGroebnerBasis(const PolyVec &constraints) 
     {
         Eigen::Matrix<double, 10, 20> A;
 
@@ -147,7 +148,7 @@ namespace
         return A.topRightCorner<10, 10>();
     }
 
-    Mat     ComputeActionMatrix(const Mat &gbasis) 
+    Mat ComputeActionMatrix(const Mat &gbasis) 
     {
         Eigen::Matrix<double, 10, 10> action;
         action.setZero();
@@ -207,7 +208,7 @@ namespace
         return              ComputeEssentialMatricesGroebner(action, basis);
     }
 
-    double  FundamentalMatrixComputeResidual(const Mat3 &F, const Point3 &pt1, const Point3 &pt2)
+    double FundamentalMatrixComputeResidual(const Mat3 &F, const Point3 &pt1, const Point3 &pt2)
     {
         Point3 Fl = F * pt2;
         Point3 Fr = F * pt1;
@@ -217,11 +218,11 @@ namespace
         return (1.0 / (Fl(0) * Fl(0) + Fl(1) * Fl(1)) + 1.0 / (Fr(0) * Fr(0) + Fr(1) * Fr(1))) * (pt * pt);
     }
 
-    int     EvaluateFundamentalMatrix(const Mat3 &F, const Point2Vec &pts1, const Point2Vec &pts2, double thresh_norm, double *score)
+    int EvaluateFundamentalMatrix(const Mat3 &F, const Point2Vec &pts1, const Point2Vec &pts2, double thresh_norm, double *score)
     {
-        int num_inliers		= 0;
-        double min_resid	= 1.0e20;
-        double likelihood	= 0.0;
+        int num_inliers   = 0;
+        double min_resid  = 1.0e20;
+        double likelihood = 0.0;
 
         for (int i = 0; i < pts1.size(); i++)
         {
@@ -240,12 +241,11 @@ namespace
 
         return num_inliers;
     }
+
 }
 
-int ComputeRelativePoseRansac(  const Point2Vec &pts1, const Point2Vec &pts2,
-                                const Mat &K1, const Mat &K2,
-                                double ransac_threshold, int ransac_rounds,
-                                Mat3 *R, Vec3 *t)
+int ComputeRelativePoseRansac(  const Point2Vec &pts1, const Point2Vec &pts2, const Mat &K1, const Mat &K2,
+                                double ransac_threshold, int ransac_rounds, Mat3 *R, Vec3 *t)
 {
     int num_matches = static_cast<int>(pts1.size());
 

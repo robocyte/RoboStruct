@@ -5,6 +5,7 @@
 
 namespace
 {
+
     struct ProjectionResidual : LMFunctor<double>
     {
         ProjectionResidual(const Point3Vec &points, const Point2Vec &projections)
@@ -37,19 +38,19 @@ namespace
 
         int operator()(const Mat34 &P, Vec &fvec) const
         {
-	        int position = 0;
-	        for (int i = 0; i < m_points.size(); ++i)
-	        {
-		        Point3 projection = P * EuclideanToHomogenous(m_points[i]);
-		        projection /= -projection.z();
+            int position = 0;
+            for (int i = 0; i < m_points.size(); ++i)
+            {
+                Point3 projection = P * EuclideanToHomogenous(m_points[i]);
+                projection /= -projection.z();
 
-		        fvec(position + 0) = projection.x() - m_projections[i].x();
-		        fvec(position + 1) = projection.y() - m_projections[i].y();
+                fvec(position + 0) = projection.x() - m_projections[i].x();
+                fvec(position + 1) = projection.y() - m_projections[i].y();
 
-		        position += 2;
-	        }
+                position += 2;
+            }
 
-	        return 0;
+            return 0;
         }
 
         Point3Vec m_points;
@@ -97,6 +98,7 @@ namespace
 
         return P_refined;
     }
+
 }
 
 Mat34 ComputeProjectionMatrix(const Point3Vec &points, const Point2Vec &projections, bool optimize)
@@ -232,7 +234,7 @@ void DecomposeProjectionMatrix(const Mat &P, Mat3 *K, Mat3 *R, Vec3 *t)
     if (Kp(2, 1) != 0)
     {
         double c = -Kp(2, 2);
-        double s = Kp(2, 1);
+        double s =  Kp(2, 1);
         double l = sqrt(c * c + s * s);
         c /= l; s /= l;
         Mat3 Qx;
@@ -262,7 +264,7 @@ void DecomposeProjectionMatrix(const Mat &P, Mat3 *K, Mat3 *R, Vec3 *t)
     if (Kp(1, 0) != 0)
     {
         double c = -Kp(1, 1);
-        double s = Kp(1, 0);
+        double s =  Kp(1, 0);
         double l = sqrt(c * c + s * s);
         c /= l; s /= l;
         Mat3 Qz;

@@ -155,8 +155,8 @@ void MainFrame::OnTimerUpdate(wxTimerEvent& event)
     {
     case ID_TIMER_TURNTABLE:
         {
-            auto camera     = m_scene->GetCamera();
-            auto rotation   = camera->GetTrackballOrientation();
+            auto camera   = m_scene->GetCamera();
+            auto rotation = camera->GetTrackballOrientation();
 
             camera->RotateTrackball(glm::vec2(0.0f, 0.0f), glm::vec2(-0.0002f * m_tb_turntable_speed_slider->GetValue(), 0.0f));
 
@@ -174,7 +174,7 @@ void MainFrame::OnTimerUpdate(wxTimerEvent& event)
             auto camera = m_scene->GetCamera();
             auto quat_x = glm::angleAxis(15.0f, glm::vec3(1, 0, 0));
             auto quat_y = glm::angleAxis(45.0f, glm::vec3(0, 1, 0));
-            auto quat_z = glm::angleAxis(0.0f, glm::vec3(0, 0, 1));
+            auto quat_z = glm::angleAxis(0.0f,  glm::vec3(0, 0, 1));
 
             auto orientation_start  = camera->GetTrackballOrientation();
             auto orientation_target = quat_x * quat_y * quat_z;
@@ -267,7 +267,7 @@ void MainFrame::OnClearLog(wxCommandEvent& event)
 void MainFrame::OnSelectDirectory(wxFileDirPickerEvent& event)
 {
     wxString filename, focalPx, res, path;
-    path = m_dir_picker->GetPath();
+    path   = m_dir_picker->GetPath();
     m_path = (path).ToStdString();
     wxDir dir(path);
 
@@ -279,12 +279,12 @@ void MainFrame::OnSelectDirectory(wxFileDirPickerEvent& event)
     m_pane_matches_view->Refresh(true);
 
     m_img_ctrl->ClearAll();
-    m_img_ctrl->InsertColumn(0, "Name",			wxLIST_FORMAT_LEFT, 60);
-    m_img_ctrl->InsertColumn(1, "Resolution",	wxLIST_FORMAT_LEFT, 75);
-    m_img_ctrl->InsertColumn(2, "Focal",	    wxLIST_FORMAT_LEFT, 50);
-    m_img_ctrl->InsertColumn(3, "Features",	    wxLIST_FORMAT_LEFT, 60);
-    m_img_ctrl->InsertColumn(4, "k1",	        wxLIST_FORMAT_LEFT, 40);
-    m_img_ctrl->InsertColumn(5, "k2",       	wxLIST_FORMAT_LEFT, 40);
+    m_img_ctrl->InsertColumn(0, "Name",         wxLIST_FORMAT_LEFT, 60);
+    m_img_ctrl->InsertColumn(1, "Resolution",   wxLIST_FORMAT_LEFT, 75);
+    m_img_ctrl->InsertColumn(2, "Focal",        wxLIST_FORMAT_LEFT, 50);
+    m_img_ctrl->InsertColumn(3, "Features",     wxLIST_FORMAT_LEFT, 60);
+    m_img_ctrl->InsertColumn(4, "k1",           wxLIST_FORMAT_LEFT, 40);
+    m_img_ctrl->InsertColumn(5, "k2",           wxLIST_FORMAT_LEFT, 40);
 
     // Parse directory and process jpg images
     bool found = dir.GetFirst(&filename, "*.jpg", wxDIR_FILES);

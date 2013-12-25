@@ -34,7 +34,7 @@ Vec3 RotationMatrixToAngleAxis(const Mat3 &R)
     double costheta = std::min(std::max((R.trace() - 1.0) / 2.0, -1.0), 1.0);
     double sintheta = std::min(angle_axis.norm() / 2.0, 1.0);
 
-    double theta = atan2(sintheta, costheta);
+    double theta     = atan2(sintheta, costheta);
     double threshold = 1e-12;
 
     // Case 1: sin(theta) is large

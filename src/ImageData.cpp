@@ -64,7 +64,7 @@ void ImageData::DetectFeatures(const Options& opts)
 
             daisy DaisyDesc = daisy();
             DaisyDesc.set_image(grey_img.data, m_height, m_width);
-            DaisyDesc.set_parameters(	opts.daisy_radius,
+            DaisyDesc.set_parameters(   opts.daisy_radius,
                                         opts.daisy_radius_quantization,
                                         opts.daisy_angular_quantization,
                                         opts.daisy_histogram_quantization);

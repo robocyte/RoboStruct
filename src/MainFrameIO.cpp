@@ -20,8 +20,8 @@ bool MainFrame::ReadCamDBFile(const std::string &filename)
         return false;
     } else
     {
-        std::string	model;
-        double		ccd_width;
+        std::string model;
+        double      ccd_width;
 
         while (std::getline(cam_db_file, model, ':'))
         {
@@ -107,12 +107,12 @@ void MainFrame::SaveProjectionMatrix(const std::string &path, int img_idx)
     {
         wxLogMessage("Writing projection matrix to %s...", filename.c_str());
 
-        double focal = m_images[img_idx].m_camera.m_focal_length;
+        double focal  = m_images[img_idx].m_camera.m_focal_length;
         const auto &R = m_images[img_idx].m_camera.m_R;
         const auto &t = m_images[img_idx].m_camera.m_t;
 
         Mat3 K;
-        K << -focal,   0.0,   0.5 * GetImageWidth(img_idx) - 0.5,
+        K << -focal,   0.0,   0.5 * GetImageWidth(img_idx)  - 0.5,
                 0.0, focal,   0.5 * GetImageHeight(img_idx) - 0.5,
                 0.0,   0.0,   1.0;
 
@@ -139,8 +139,8 @@ void MainFrame::SaveUndistortedImage(const std::string &path, int img_idx)
     // Fill camera matrix
     double focal = m_images[img_idx].m_camera.m_focal_length;
     cv::Mat_<double> camMat(3, 3);
-    camMat <<   focal,  0.0,    0.5 * img.cols - 0.5,
-                0.0,    focal,  0.5 * img.rows - 0.5,
+    camMat << focal,    0.0,    0.5 * img.cols - 0.5,
+                0.0,  focal,    0.5 * img.rows - 0.5,
                 0.0,    0.0,    1.0;
 
     // Distortion coefficients
@@ -179,7 +179,7 @@ void MainFrame::ExportToCMVS(const std::string &path)
 
     for (int i = 0; i < GetNumImages(); i++)
     {
-        SaveProjectionMatrix(txt_dir, i);
+        SaveProjectionMatrix(txt_dir,   i);
         SaveUndistortedImage(image_dir, i);
     }
 
@@ -306,12 +306,12 @@ void MainFrame::SavePlyFile()
             const auto &t = img.m_camera.m_t;
 
             ply_file << t.x() << " " << t.y() << " " << t.z() << " ";
-            ply_file << 255 << " " << 0 << " " << 0 << std::endl;
+            ply_file << 255   << " " << 0     << " " << 0     << std::endl;
 
             Point3 p = R.transpose() * Point3(0.0, 0.0, -0.05) + t;
 
             ply_file << p.x() << " " << p.y() << " " << p.z() << " ";
-            ply_file << 0 << " " << 255 << " " << 0 << std::endl;
+            ply_file << 0     << " " << 255   << " " << 0     << std::endl;
         }
     }
 }
@@ -421,21 +421,21 @@ void MainFrame::SaveMayaFile()
             if (width >= height)
             {
                 focalmm = (focalpx * ccd_width) / width;
-                cap_w = ccd_width / 25.4;     // mm to inches
-                cap_h = ccd_height / 25.4;    // mm to inches
+                cap_w   = ccd_width  / 25.4;    // mm to inches
+                cap_h   = ccd_height / 25.4;    // mm to inches
             }
             else
             {
                 focalmm = (focalpx * ccd_width) / height;
-                cap_w = ccd_height / 25.4;    // mm to inches
-                cap_h = ccd_width / 25.4;     // mm to inches
+                cap_w   = ccd_height / 25.4;    // mm to inches
+                cap_h   = ccd_width  / 25.4;    // mm to inches
             }
 
             maya_file << R"(createNode transform -s -n "Cam)" << std::setw(4) << std::setfill('0') << i << R"(";)" << std::endl;
             maya_file << R"(    setAttr -type "matrix" ".xformMatrix" )" << R(0, 0) << " " << R(0, 1) << " " << R(0, 2) << " " << 0.0 << " "
                                                                          << R(1, 0) << " " << R(1, 1) << " " << R(1, 2) << " " << 0.0 << " "
                                                                          << R(2, 0) << " " << R(2, 1) << " " << R(2, 2) << " " << 0.0 << " "
-                                                                         << t.x() << " " << t.y() << " " << t.z() << " " << 1.0 << ";" << std::endl;
+                                                                         << t.x()   << " " << t.y()   << " " << t.z()   << " " << 1.0 << ";" << std::endl;
             maya_file << R"(    setAttr -l on ".tx";)" << std::endl;
             maya_file << R"(    setAttr -l on ".ty";)" << std::endl;
             maya_file << R"(    setAttr -l on ".tz";)" << std::endl;

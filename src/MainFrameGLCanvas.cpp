@@ -134,8 +134,8 @@ void MainFrame::OnGLCanvasMouse(wxMouseEvent& event)
     if (event.m_leftDown)
     {
         m_gl_canvas->SetCursor(m_rotate_cursor);
-        camera->RotateTrackball(    glm::vec2(0.8f * (2.0f * m_beginx - sz.x)		/ sz.y, 0.8f * (sz.y - 2.0f * m_beginy)     / sz.y),
-                                    glm::vec2(0.8f * (2.0f * event.GetX() - sz.x)	/ sz.y, 0.8f * (sz.y - 2.0f * event.GetY()) / sz.y));
+        camera->RotateTrackball(    glm::vec2(0.8f * (2.0f * m_beginx - sz.x)     / sz.y, 0.8f * (sz.y - 2.0f * m_beginy)     / sz.y),
+                                    glm::vec2(0.8f * (2.0f * event.GetX() - sz.x) / sz.y, 0.8f * (sz.y - 2.0f * event.GetY()) / sz.y));
     }
 
     // Pan
@@ -152,12 +152,12 @@ void MainFrame::OnGLCanvasMouse(wxMouseEvent& event)
         {
             m_options.point_size += disty * 0.03f;
             if (m_options.point_size < 0.01f) m_options.point_size = 0.01f;
-            if (m_options.point_size > 4.0f) m_options.point_size = 4.0f;
+            if (m_options.point_size > 4.0f)  m_options.point_size = 4.0f;
         } else if (event.ShiftDown())
         {
             m_options.camera_size += disty * 0.001f;
             if (m_options.camera_size < 0.01f) m_options.camera_size = 0.01f;
-            if (m_options.camera_size > 1.0f) m_options.camera_size = 1.0f;
+            if (m_options.camera_size > 1.0f)  m_options.camera_size = 1.0f;
         } else
         {
             m_gl_canvas->SetCursor(m_zoom_cursor);
@@ -172,12 +172,12 @@ void MainFrame::OnGLCanvasMouse(wxMouseEvent& event)
         {
             m_options.point_size += event.m_wheelRotation * 0.008f;
             if (m_options.point_size < 0.01f) m_options.point_size = 0.01f;
-            if (m_options.point_size > 4.0f) m_options.point_size = 4.0f;
+            if (m_options.point_size > 4.0f)  m_options.point_size = 4.0f;
         } else if (event.ShiftDown())
         {
             m_options.camera_size += event.m_wheelRotation * 0.00025f;
             if (m_options.camera_size < 0.01f) m_options.camera_size = 0.01f;
-            if (m_options.camera_size > 1.0f) m_options.camera_size = 1.0f;
+            if (m_options.camera_size > 1.0f)  m_options.camera_size = 1.0f;
         } else
         {
             camera->ZoomTrackball(event.m_wheelRotation * 0.4f / sz.y);

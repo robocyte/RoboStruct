@@ -32,12 +32,12 @@ MainFrame::MainFrame(wxWindow* parent)
     m_zoom_cursor   = wxCursor("zoom_cursor");
 
     // Setup the image list
-    m_img_ctrl->InsertColumn(0, "Name",			wxLIST_FORMAT_LEFT, 60);
-    m_img_ctrl->InsertColumn(1, "Resolution",	wxLIST_FORMAT_LEFT, 75);
-    m_img_ctrl->InsertColumn(2, "Focal",    	wxLIST_FORMAT_LEFT, 50);
-    m_img_ctrl->InsertColumn(3, "Features",	    wxLIST_FORMAT_LEFT, 60);
-    m_img_ctrl->InsertColumn(4, "k1",	        wxLIST_FORMAT_LEFT, 40);
-    m_img_ctrl->InsertColumn(5, "k2",       	wxLIST_FORMAT_LEFT, 40);
+    m_img_ctrl->InsertColumn(0, "Name",         wxLIST_FORMAT_LEFT, 60);
+    m_img_ctrl->InsertColumn(1, "Resolution",   wxLIST_FORMAT_LEFT, 75);
+    m_img_ctrl->InsertColumn(2, "Focal",        wxLIST_FORMAT_LEFT, 50);
+    m_img_ctrl->InsertColumn(3, "Features",     wxLIST_FORMAT_LEFT, 60);
+    m_img_ctrl->InsertColumn(4, "k1",           wxLIST_FORMAT_LEFT, 40);
+    m_img_ctrl->InsertColumn(5, "k2",           wxLIST_FORMAT_LEFT, 40);
 
     this->Bind(wxEVT_PG_CHANGED,            &MainFrame::OnOptionsChanged,       this);
     this->Bind(wxEVT_TIMER,                 &MainFrame::OnTimerUpdate,          this);
@@ -205,7 +205,7 @@ bool MainFrame::FindCameraInDatabase(ImageData &img)
     if (found != m_camDB.end())
     {
         img.m_ccd_width = found->second;
-        if (img.GetWidth() > img.GetHeight())   img.m_init_focal = img.GetWidth() * (img.m_init_focal_mm / img.m_ccd_width);
+        if (img.GetWidth() > img.GetHeight())   img.m_init_focal = img.GetWidth()  * (img.m_init_focal_mm / img.m_ccd_width);
         else                                    img.m_init_focal = img.GetHeight() * (img.m_init_focal_mm / img.m_ccd_width);
         return true;
     }
@@ -265,9 +265,7 @@ void MainFrame::MatchAll()
     m_transforms.clear();
 
     // Show progress dialog
-    wxProgressDialog dialog("Progress", "Matching images...", num_pairs, this,
-                            wxPD_APP_MODAL | wxPD_AUTO_HIDE | wxPD_ELAPSED_TIME |
-                            wxPD_ESTIMATED_TIME | wxPD_REMAINING_TIME);
+    wxProgressDialog dialog("Progress", "Matching images...", num_pairs, this, wxPD_APP_MODAL | wxPD_AUTO_HIDE | wxPD_ELAPSED_TIME | wxPD_ESTIMATED_TIME | wxPD_REMAINING_TIME);
 
     for (int i = 1; i < num_images; i++)
     {
@@ -301,8 +299,10 @@ void MainFrame::MatchAll()
             int *indices_ptr = indices.ptr<int>(0);
             float *dists_ptr = dists.ptr<float>(0);
 
-            for (int k = 0; k < indices.rows; ++k) {
-                if (dists_ptr[2 * k] < (m_options.matching_distance_ratio * dists_ptr[2 * k + 1])) {
+            for (int k = 0; k < indices.rows; ++k)
+            {
+                if (dists_ptr[2 * k] < (m_options.matching_distance_ratio * dists_ptr[2 * k + 1]))
+                {
                     tmp_matches.push_back(IntPair(indices_ptr[2 * k], k));
                 }
             }
@@ -379,9 +379,7 @@ void MainFrame::MatchAllAkaze()
     m_transforms.clear();
 
     // Show progress dialog
-    wxProgressDialog dialog("Progress", "Matching images...", num_pairs, this,
-                            wxPD_APP_MODAL | wxPD_AUTO_HIDE | wxPD_ELAPSED_TIME |
-                            wxPD_ESTIMATED_TIME | wxPD_REMAINING_TIME);
+    wxProgressDialog dialog("Progress", "Matching images...", num_pairs, this, wxPD_APP_MODAL | wxPD_AUTO_HIDE | wxPD_ELAPSED_TIME | wxPD_ESTIMATED_TIME | wxPD_REMAINING_TIME);
 
     for (int i = 1; i < num_images; i++)
     {
@@ -406,8 +404,10 @@ void MainFrame::MatchAllAkaze()
             int *indices_ptr = indices.ptr<int>(0);
             float *dists_ptr = dists.ptr<float>(0);
 
-            for (int k = 0; k < indices.rows; ++k) {
-                if (dists_ptr[2 * k] < (m_options.matching_distance_ratio * dists_ptr[2 * k + 1])) {
+            for (int k = 0; k < indices.rows; ++k)
+            {
+                if (dists_ptr[2 * k] < (m_options.matching_distance_ratio * dists_ptr[2 * k + 1]))
+                {
                     tmp_matches.push_back(IntPair(indices_ptr[2 * k], k));
                 }
             }
@@ -639,7 +639,7 @@ void MainFrame::ComputeTracks()
                     // Do a binary search for the feature
                     auto p = std::equal_range(list.begin(), list.end(), dummy, [](KeypointMatch k1, KeypointMatch k2) { return k1.m_idx1 < k2.m_idx1; });
 
-                    if (p.first == p.second) continue;	// not found
+                    if (p.first == p.second) continue;  // not found
 
                     int idx2 = (p.first)->m_idx2;
 

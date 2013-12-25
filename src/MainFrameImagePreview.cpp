@@ -15,7 +15,7 @@ void MainFrame::OnSelectPreviewImage(wxListEvent& event)
 
 void MainFrame::GeneratePreviewImage(int img_idx)
 {
-    int width =  GetImageWidth(img_idx);
+    int width  = GetImageWidth(img_idx);
     int height = GetImageHeight(img_idx);
 
     auto image = cv::imread(m_images[img_idx].m_filename);
@@ -55,7 +55,7 @@ void MainFrame::DrawImgPreview(wxDC& dc)
 
     if (m_img_ctrl->GetSelectedItemCount())
     {
-        int img_width = m_preview_image.GetWidth();
+        int img_width  = m_preview_image.GetWidth();
         int img_height = m_preview_image.GetHeight();
 
         int new_img_width  = (img_width  * win_height)     / img_height;

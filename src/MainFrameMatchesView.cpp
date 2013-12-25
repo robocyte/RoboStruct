@@ -39,7 +39,7 @@ void MainFrame::GenerateMatchImage()
     kpts2.reserve(right_keys.size());
 
     float left_x_correction_factor  = 0.5 * m_images[left_idx].GetWidth();
-    float left_y_correction_factor  = 0.5 * m_images[left_idx].GetHeight() - 1.0;
+    float left_y_correction_factor  = 0.5 * m_images[left_idx].GetHeight()  - 1.0;
     float right_x_correction_factor = 0.5 * m_images[right_idx].GetWidth();
     float right_y_correction_factor = 0.5 * m_images[right_idx].GetHeight() - 1.0;
 
@@ -99,8 +99,8 @@ void MainFrame::DrawMatches(wxDC& dc)
     int win_width  = m_pane_matches_view->GetClientSize().GetX();
     int win_height = m_pane_matches_view->GetClientSize().GetY();
 
-    int left_idx  = m_cb_matches_left->GetSelection();
-    int right_idx = m_cb_matches_right->GetSelection();
+    int left_idx   = m_cb_matches_left->GetSelection();
+    int right_idx  = m_cb_matches_right->GetSelection();
 
     if (left_idx != -1 && right_idx != -1 && (left_idx != right_idx))
     {
