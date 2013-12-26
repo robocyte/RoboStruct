@@ -3,34 +3,6 @@
 #include <fstream>
 #include <string>
 
-class DescriptorBase
-{
-public:
-    virtual ~DescriptorBase() {};
-};
-
-template <typename T>
-class Descriptor : public DescriptorBase
-{
-public:
-    Descriptor() = default;
-    Descriptor(const std::vector<T>& data)
-        : m_data(data)
-    {}
-
-    ~Descriptor() {}
-
-    inline std::size_t Size() const          { return m_data.size(); }
-
-    inline T& operator[](std::size_t i)      { return m_data[i]; }
-    inline T operator[](std::size_t i) const { return m_data[i]; }
-
-    inline T* GetData() const                { return m_data.data(); }
-
-private:
-    std::vector<T> m_data;
-};
-
 template<typename T>
 bool SaveDescriptorsToFileBinary(const std::string &filename, const T &descriptors)
 {

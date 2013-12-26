@@ -1,6 +1,6 @@
 #include "GL/glew.h"
 
-#include "glm/gtx/quaternion.hpp"
+#include "glm/fwd.hpp"
 #include "wx/dcclient.h"
 
 #include "MainFrame.hpp"
