@@ -169,10 +169,10 @@ void MainFrame::ExportToCMVS(const std::string &path)
     // Create directory structure
     if (!wxDirExists(pmvs_dir))
     {
-        wxMkdir(pmvs_dir);
-        wxMkdir(image_dir);
-        wxMkdir(txt_dir);
-        wxMkdir(models_dir);
+        wxMkdir(pmvs_dir.c_str());
+        wxMkdir(image_dir.c_str());
+        wxMkdir(txt_dir.c_str());
+        wxMkdir(models_dir.c_str());
     }
 
     SaveBundleFile(pmvs_dir);
