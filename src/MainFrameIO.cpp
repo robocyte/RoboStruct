@@ -161,10 +161,10 @@ void MainFrame::SaveUndistortedImage(const std::string &path, int img_idx)
 
 void MainFrame::ExportToCMVS(const std::string &path)
 {
-    std::string pmvs_dir   = path + R"(\pmvs)";
-    std::string image_dir  = path + R"(\pmvs\visualize)";
-    std::string txt_dir    = path + R"(\pmvs\txt)";
-    std::string models_dir = path + R"(\pmvs\models)";
+    std::string pmvs_dir   = path + R"(\cmvs)";
+    std::string image_dir  = path + R"(\cmvs\visualize)";
+    std::string txt_dir    = path + R"(\cmvs\txt)";
+    std::string models_dir = path + R"(\cmvs\models)";
 
     // Create directory structure
     if (!wxDirExists(pmvs_dir))
