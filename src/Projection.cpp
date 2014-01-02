@@ -88,8 +88,14 @@ namespace
         x.segment(8, 3) = P.block<1, 3>(2, 0);
 
         ProjectionResidual functor(points, projections);
-        Eigen::DenseIndex nfev;
-        Eigen::LevenbergMarquardt<ProjectionResidual>::lmdif1(functor, x, &nfev, 1.0e-5);
+        Eigen::NumericalDiff<ProjectionResidual> numDiff(functor);
+        Eigen::LevenbergMarquardt<Eigen::NumericalDiff<ProjectionResidual>> lm(numDiff);
+
+        lm.parameters.ftol   = 1.0e-5;
+        lm.parameters.xtol   = 1.0e-5;
+        lm.parameters.maxfev = 200;
+
+        auto status = lm.minimize(x);
 
         Mat34 P_refined;
         P_refined.row(0) = x.segment(0, 4);

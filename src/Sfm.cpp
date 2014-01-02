@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "Sfm.hpp"
 
 namespace
@@ -112,8 +114,15 @@ void RefineCamera(Camera *camera, const Point3Vec &points, const Point2Vec &proj
     else                x << camera->m_t.x(), camera->m_t.y(), camera->m_t.z(), 0.0, 0.0, 0.0;
 
     CameraResidual functor(*camera, points, projections, adjust_focal);
-    Eigen::DenseIndex nfev;
-    Eigen::LevenbergMarquardt<CameraResidual>::lmdif1(functor, x, &nfev, 1.0e-12);
+
+    Eigen::NumericalDiff<CameraResidual> numDiff(functor);
+    Eigen::LevenbergMarquardt<Eigen::NumericalDiff<CameraResidual>> lm(numDiff);
+
+    lm.parameters.ftol   = 1.0e-12;
+    lm.parameters.xtol   = 1.0e-12;
+    lm.parameters.maxfev = 200;
+
+    auto status = lm.minimize(x);
 
     // Copy out the parameters
     camera->m_t = x.head<3>();

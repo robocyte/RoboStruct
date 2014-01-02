@@ -92,8 +92,14 @@ Point3 Triangulate(const Observations &observations, double *error, bool optimiz
     // Run a non-linear optimization to refine the result
     if (optimize)
     {
-        Eigen::DenseIndex nfev;
-        Eigen::LevenbergMarquardt<TriangulationResidual>::lmdif1(functor, x, &nfev, 1.0e-10);
+        Eigen::NumericalDiff<TriangulationResidual> numDiff(functor);
+        Eigen::LevenbergMarquardt<Eigen::NumericalDiff<TriangulationResidual>> lm(numDiff);
+
+        lm.parameters.ftol   = 1.0e-5;
+        lm.parameters.xtol   = 1.0e-5;
+        lm.parameters.maxfev = 200;
+
+        auto status = lm.minimize(x);
     }
 
     if (error != nullptr)
