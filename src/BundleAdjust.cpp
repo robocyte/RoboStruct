@@ -699,7 +699,9 @@ void MainFrame::BundleAdjust(CamVec &cameras, const IntVec &added_order, PointVe
         ceres::Problem problem;
         ceres::Solver::Options options;
         ceres::Solver::Summary summary;
-        options.linear_solver_type = ceres::DENSE_SCHUR;
+        options.linear_solver_type        = ceres::DENSE_SCHUR;
+        options.num_threads               = omp_get_max_threads();
+        options.num_linear_solver_threads = omp_get_max_threads();
 
         // Set up initial parameters
         int num_nz_points = nz_count;
