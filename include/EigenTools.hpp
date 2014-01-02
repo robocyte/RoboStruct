@@ -37,8 +37,8 @@ struct LMFunctor
         ValuesAtCompileTime = NY
     };
 
-    typedef Eigen::Matrix<Scalar, InputsAtCompileTime,1> InputType;
-    typedef Eigen::Matrix<Scalar, ValuesAtCompileTime,1> ValueType;
+    typedef Eigen::Matrix<Scalar, InputsAtCompileTime, 1> InputType;
+    typedef Eigen::Matrix<Scalar, ValuesAtCompileTime, 1> ValueType;
     typedef Eigen::Matrix<Scalar, ValuesAtCompileTime, InputsAtCompileTime> JacobianType;
 
     const int m_inputs, m_values;
