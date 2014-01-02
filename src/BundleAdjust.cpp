@@ -646,13 +646,13 @@ void MainFrame::BundleAdjust(CamVec &cameras, const IntVec &added_order, PointVe
 {
     wxLogMessage("[BundleAdjust] Optimizing...");
 
+    const int   num_cameras     = static_cast<int>(cameras.size());
+    const int   num_pts         = static_cast<int>(points.size());
     const int   min_points      = 20;
     int         round           = 0;
     int         num_outliers    = 0;
     int         total_outliers  = 0;
 
-    int num_cameras = cameras.size();
-    int num_pts     = points.size();
     IntVec      remap(num_pts, -1);
     Point3Vec   nz_pts(num_pts);
 
