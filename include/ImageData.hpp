@@ -42,12 +42,12 @@ public:
     bool                    m_ignore_in_bundle = false;
     bool                    m_descriptors_loaded = false;
 
-    bool    GetExifInfo();                              // Get focal length (mm) and other info from EXIF tags
-    double  GetInitFocal()    { return m_init_focal; }  // Returns the initial focal length in px
-    int     GetWidth() const  { return m_width; }       // Returns the image width in px
-    int     GetHeight() const { return m_height; }      // Returns the image height in px
+    bool    GetExifInfo();                                  // Get focal length (mm) and other info from EXIF tags
+    double  GetInitFocal() const { return m_init_focal; }   // Returns the initial focal length in px
+    int     GetWidth()     const { return m_width; }        // Returns the image width in px
+    int     GetHeight()    const { return m_height; }       // Returns the image height in px
 
-    void    DetectFeatures(const Options& opts);        // Detects features and returns the descriptor length
+    void    DetectFeatures(const Options& opts);            // Detects features and returns the descriptor length
 
     void    ClearDescriptors();
     void    SaveDescriptors(bool clear = true);

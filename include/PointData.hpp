@@ -16,4 +16,6 @@ struct PointData
     Point3          m_pos;      // 3D position of the point
     Vec3            m_color;    // Color of the point
     ImageKeyVector  m_views;    // Views/keys corresponding to this point
+
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 };

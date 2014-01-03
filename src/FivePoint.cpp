@@ -48,7 +48,7 @@ namespace
         poly_term1 = Poly3Mult21(Poly3Sub(Poly3Mult11(polys[1], polys[5]), Poly3Mult11(polys[2], polys[4])), polys[6]);
         poly_term2 = Poly3Mult21(Poly3Sub(Poly3Mult11(polys[2], polys[3]), Poly3Mult11(polys[0], polys[5])), polys[7]);
         poly_term3 = Poly3Mult21(Poly3Sub(Poly3Mult11(polys[0], polys[4]), Poly3Mult11(polys[1], polys[3])), polys[8]);
-        poly_det = Poly3Add(poly_term1, Poly3Add(poly_term2, poly_term3));
+        poly_det   = Poly3Add(poly_term1, Poly3Add(poly_term2, poly_term3));
 
         // Create polynomials for the singular value constraint
         for (int i = 0; i < 6; i++)
@@ -159,10 +159,10 @@ namespace
         action.row(3) = -gbasis.row(4);
         action.row(4) = -gbasis.row(5);
         action.row(5) = -gbasis.row(7);
-        action(6, 0) = 1.0;
-        action(7, 1) = 1.0;
-        action(8, 3) = 1.0;
-        action(9, 6) = 1.0;
+        action(6, 0)  = 1.0;
+        action(7, 1)  = 1.0;
+        action(8, 3)  = 1.0;
+        action(9, 6)  = 1.0;
 
         return action;
     }
@@ -193,7 +193,7 @@ namespace
                 E.row(2) = res.segment(6, 3);
 
                 solutions.push_back(E);
-            } else continue;
+            }
         }
 
         return solutions;
@@ -205,7 +205,7 @@ namespace
         auto constraints    = ComputeConstraintMatrix(basis);
         auto gbasis         = ComputeGroebnerBasis(constraints);
         auto action         = ComputeActionMatrix(gbasis);
-        return              ComputeEssentialMatricesGroebner(action, basis);
+        return                ComputeEssentialMatricesGroebner(action, basis);
     }
 
     double FundamentalMatrixComputeResidual(const Mat3 &F, const Point3 &pt1, const Point3 &pt2)
@@ -220,9 +220,9 @@ namespace
 
     int EvaluateFundamentalMatrix(const Mat3 &F, const Point2Vec &pts1, const Point2Vec &pts2, double thresh_norm, double *score)
     {
-        int num_inliers   = 0;
-        double min_resid  = 1.0e20;
-        double likelihood = 0.0;
+        int    num_inliers = 0;
+        double min_resid   = std::numeric_limits<double>::min();
+        double likelihood  = 0.0;
 
         for (int i = 0; i < pts1.size(); i++)
         {
@@ -244,8 +244,8 @@ namespace
 
 }
 
-int ComputeRelativePoseRansac(  const Point2Vec &pts1, const Point2Vec &pts2, const Mat &K1, const Mat &K2,
-                                double ransac_threshold, int ransac_rounds, Mat3 *R, Vec3 *t)
+int ComputeRelativePoseRansac(const Point2Vec &pts1, const Point2Vec &pts2, const Mat &K1, const Mat &K2,
+                              double ransac_threshold, int ransac_rounds, Mat3 *R, Vec3 *t)
 {
     int num_matches = static_cast<int>(pts1.size());
 

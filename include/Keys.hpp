@@ -12,7 +12,9 @@ struct KeyPoint
     {}
 
     Point2 m_coords = Point2::Zero();   // Subpixel location
-    Vec3 m_color = Vec3::Zero();        // Color of this key
-    int m_extra = -1;                   // 4 bytes of extra storage
-    int m_track = -1;                   // Track index this point corresponds to
+    Vec3   m_color  = Vec3::Zero();     // Color of this key
+    int    m_extra  = -1;               // 4 bytes of extra storage
+    int    m_track  = -1;               // Track index this point corresponds to
+
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 };

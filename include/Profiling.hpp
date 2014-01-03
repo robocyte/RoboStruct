@@ -40,7 +40,7 @@ struct ProfileManager
         m_entries[name].push_back(duration);
     }
 
-    std::string Report()
+    std::string Report() const
     {
         std::stringstream report; report.setf(std::ios::left, std::ios::adjustfield);
         report << "Runtime statistics:" << std::endl;
