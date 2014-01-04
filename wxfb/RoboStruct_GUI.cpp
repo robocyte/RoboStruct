@@ -321,19 +321,17 @@ MainFrame_base::MainFrame_base( wxWindow* parent, wxWindowID id, const wxString&
 	
 	m_mgr.AddPane( m_window_log, wxAuiPaneInfo() .Name( wxT("Log") ).Bottom() .Caption( wxT("Log") ).MaximizeButton( true ).PaneBorder( false ).Dock().Resizable().FloatingSize( wxSize( 596,244 ) ).DockFixed( false ).Row( 0 ).Layer( 0 ) );
 	
-	wxBoxSizer* bSizer3;
-	bSizer3 = new wxBoxSizer( wxHORIZONTAL );
+	wxBoxSizer* bSizer3 = new wxBoxSizer(wxHORIZONTAL);
 	
-	m_tc_log = new wxTextCtrl( m_window_log, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_DONTWRAP|wxTE_MULTILINE|wxTE_READONLY|wxNO_BORDER );
-	m_tc_log->SetMaxLength( 0 ); 
-	bSizer3->Add( m_tc_log, 1, wxEXPAND, 5 );
+	m_tc_log = new wxTextCtrl(m_window_log, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_DONTWRAP | wxTE_MULTILINE | wxTE_READONLY |wxNO_BORDER);
+	bSizer3->Add(m_tc_log, 1, wxEXPAND, 5);
 	
-	m_toolbar_log = new wxAuiToolBar( m_window_log, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_DEFAULT_STYLE|wxAUI_TB_OVERFLOW|wxAUI_TB_VERTICAL );
-	m_toolbar_log->SetToolBitmapSize( wxSize( 24,24 ) );
-	m_toolbar_log->SetToolPacking( 2 );
-	m_toolbar_log->AddTool( ID_SAVE_LOG, wxT("Save Log"), wxICON( save_icon ), wxNullBitmap, wxITEM_NORMAL, wxT("Save the log to a .txt file"), wxT("Save the log to a .txt file"), NULL ); 
-	
-	m_toolbar_log->AddTool( ID_CLEAR_LOG, wxT("Clear log"), wxICON( delete_icon ), wxNullBitmap, wxITEM_NORMAL, wxT("Clear the log window"), wxT("Clear the log window"), NULL ); 
+	m_toolbar_log = new wxAuiToolBar(m_window_log, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_VERTICAL);
+	m_toolbar_log->SetToolBitmapSize(wxSize(24, 24));
+	m_toolbar_log->SetToolPacking(2);
+
+	m_toolbar_log->AddTool(ID_SAVE_LOG,	 "Save Log",  wxIcon("save_icon", wxBITMAP_TYPE_ICO_RESOURCE, 22, 22),	 wxNullBitmap, wxITEM_NORMAL, "Save the log to a .txt file", "Save the log to a .txt file", NULL);
+	m_toolbar_log->AddTool(ID_CLEAR_LOG, "Clear log", wxIcon("delete_icon", wxBITMAP_TYPE_ICO_RESOURCE, 22, 22), wxNullBitmap, wxITEM_NORMAL, "Clear the log window", "Clear the log window", NULL);
 	
 	m_toolbar_log->Realize(); 
 	
