@@ -69,19 +69,19 @@ void MainFrame::GenerateMatchImage()
 
     if (m_options.draw_matches_only)
     {
-        cv::drawMatches(left_img, kpts1, right_img, kpts2, matches, matches_img, line_colour, cv::Scalar_<double>::all(80.0), cv::Mat(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
+        cv::drawMatches(left_img, kpts1, right_img, kpts2, matches, matches_img, line_colour, cv::Scalar_<double>::all(80.0), cv::Mat{}, cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
     } else
     {
         cv::drawMatches(left_img, kpts1, right_img, kpts2, matches, matches_img, line_colour, cv::Scalar_<double>::all(80.0));
     }
 
     m_matches_image.Destroy();
-    m_matches_image = wxImage(matches_img.cols, matches_img.rows, matches_img.data, true).Copy();
+    m_matches_image = wxImage{matches_img.cols, matches_img.rows, matches_img.data, true}.Copy();
 }
 
 void MainFrame::OnMatchesViewPaint(wxPaintEvent& event)
 {
-    wxPaintDC dc(m_pane_matches_view);
+    wxPaintDC dc{m_pane_matches_view};
     DrawMatches(dc);
 }
 
@@ -114,10 +114,10 @@ void MainFrame::DrawMatches(wxDC& dc)
 
         if (height_diff >= 0)
         {
-            dc.DrawBitmap(wxBitmap(m_matches_image.Scale(win_width, new_img_height, wxIMAGE_QUALITY_HIGH)), 0, height_diff);
+            dc.DrawBitmap(wxBitmap{m_matches_image.Scale(win_width, new_img_height, wxIMAGE_QUALITY_HIGH)}, 0, height_diff);
         } else
         {
-            dc.DrawBitmap(wxBitmap(m_matches_image.Scale(new_img_width, win_height, wxIMAGE_QUALITY_HIGH)), width_diff, 0);
+            dc.DrawBitmap(wxBitmap{m_matches_image.Scale(new_img_width, win_height, wxIMAGE_QUALITY_HIGH)}, width_diff, 0);
         }
     } else
     {
@@ -133,7 +133,7 @@ void MainFrame::DrawMatches(wxDC& dc)
         gc->StrokePath(path);
 
         double txt_width;
-        gc->SetFont(wxFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT)), *wxBLACK);
+        gc->SetFont(wxFont{wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT)}, *wxBLACK);
         gc->GetTextExtent("Select two different images", &txt_width, nullptr);
         double offset = (win_width - (int)txt_width) / 2.0;
         gc->DrawText("Select two different images", offset, 5.0);

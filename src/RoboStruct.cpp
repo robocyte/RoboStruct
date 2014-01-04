@@ -5,10 +5,10 @@ IMPLEMENT_APP(MyApp);
 
 bool MyApp::OnInit()
 {
-    wxImage::AddHandler(new wxPNGHandler());
-    wxImage::AddHandler(new wxJPEGHandler());
+    wxImage::AddHandler(new wxPNGHandler{});
+    wxImage::AddHandler(new wxJPEGHandler{});
 
-    auto frame = new MainFrame();
+    auto frame = new MainFrame{};
 
     frame->InitializeLog();
     frame->InitializeOpenGL();

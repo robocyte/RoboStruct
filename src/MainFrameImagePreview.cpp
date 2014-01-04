@@ -22,9 +22,9 @@ void MainFrame::GeneratePreviewImage(int img_idx)
     cv::cvtColor(image, image, CV_BGR2RGB);
 
     m_preview_image.Destroy();
-    m_preview_image = wxImage(width, height, image.data, true).Copy();
+    m_preview_image = wxImage{width, height, image.data, true}.Copy();
 
-    wxClientDC dc(m_window_image_preview);
+    wxClientDC dc{m_window_image_preview};
     DrawImgPreview(dc);
 }
 
@@ -35,7 +35,7 @@ void MainFrame::OnImagePreviewMouse(wxMouseEvent& event)
 
 void MainFrame::OnImagePreviewPaint(wxPaintEvent& event)
 {
-    wxPaintDC dc(m_window_image_preview);
+    wxPaintDC dc{m_window_image_preview};
     DrawImgPreview(dc);
 }
 
@@ -65,10 +65,10 @@ void MainFrame::DrawImgPreview(wxDC& dc)
 
         if (height_diff >= 0)
         {
-            dc.DrawBitmap(wxBitmap(m_preview_image.Scale(win_width, new_img_height, wxIMAGE_QUALITY_HIGH)), 0, height_diff);
+            dc.DrawBitmap(wxBitmap{m_preview_image.Scale(win_width, new_img_height, wxIMAGE_QUALITY_HIGH)}, 0, height_diff);
         } else
         {
-            dc.DrawBitmap(wxBitmap(m_preview_image.Scale(new_img_width, win_height, wxIMAGE_QUALITY_HIGH)), width_diff, 0);
+            dc.DrawBitmap(wxBitmap{m_preview_image.Scale(new_img_width, win_height, wxIMAGE_QUALITY_HIGH)}, width_diff, 0);
         }
     } else
     {
@@ -84,7 +84,7 @@ void MainFrame::DrawImgPreview(wxDC& dc)
         gc->StrokePath(path);
 
         double txt_width;
-        gc->SetFont(wxFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT)), *wxBLACK);
+        gc->SetFont(wxFont{wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT)}, *wxBLACK);
         gc->GetTextExtent("Select image", &txt_width, nullptr);
         double offset = (win_width - (int)txt_width) / 2.0;
         gc->DrawText("Select image", offset, 5.0);

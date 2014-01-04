@@ -55,11 +55,11 @@ struct ProfileManager
         typedef std::pair<milliseconds, std::string> report_entry;
         std::vector<report_entry> sorted_entries;
         
-        milliseconds overall_duration(0);
+        milliseconds overall_duration{0};
         for (const auto &entry : m_entries) for (const auto &duration : entry.second) overall_duration += duration;
         for (const auto &entry : m_entries)
         {
-            milliseconds entry_duration(0);
+            milliseconds entry_duration{0};
             for (const auto &duration : entry.second) entry_duration += duration;
 
             std::stringstream line; line.setf(std::ios::left, std::ios::adjustfield);
@@ -69,7 +69,7 @@ struct ProfileManager
                     << std::setw(11) << entry_duration.count() / entry.second.size()
                     << std::setw(3)  << entry_duration.count() * 100 / overall_duration.count();
 
-            sorted_entries.push_back(report_entry(entry_duration, line.str()));
+            sorted_entries.push_back(report_entry{entry_duration, line.str()});
         }
 
         auto compare_first = [&](const report_entry &a, const report_entry &b) { return a.first < b.first; };

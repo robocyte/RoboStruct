@@ -12,7 +12,7 @@ bool MainFrame::ReadCamDBFile(const std::string &filename)
 {
     m_camDB.clear();
 
-    std::ifstream cam_db_file(filename);
+    std::ifstream cam_db_file{filename};
 
     if (!cam_db_file)
     {
@@ -28,7 +28,7 @@ bool MainFrame::ReadCamDBFile(const std::string &filename)
             cam_db_file >> ccd_width;
             cam_db_file.ignore();
 
-            m_camDB.push_back(CamDBEntry(model, ccd_width));
+            m_camDB.push_back(CamDBEntry{model, ccd_width});
         }
         return true;
     }
@@ -37,7 +37,7 @@ bool MainFrame::ReadCamDBFile(const std::string &filename)
 
 void MainFrame::AddCamDBFileEntry()
 {
-    std::ofstream cam_db_file("CamDB.txt");
+    std::ofstream cam_db_file{"CamDB.txt"};
 
     if (!cam_db_file)
     {
@@ -53,7 +53,7 @@ void MainFrame::AddCamDBFileEntry()
 void MainFrame::SaveMatchFile()
 {
     std::string filename = m_path + R"(\Matches.txt)";
-    std::ofstream match_file(filename);
+    std::ofstream match_file{filename};
 
     if (!match_file)
     {
@@ -68,7 +68,7 @@ void MainFrame::SaveMatchFile()
 void MainFrame::SaveTrackFile()
 {
     std::string filename = m_path + R"(\Tracks.txt)";
-    std::ofstream track_file(filename);
+    std::ofstream track_file{filename};
 
     if (!track_file)
     {
@@ -98,7 +98,7 @@ void MainFrame::SaveProjectionMatrix(const std::string &path, int img_idx)
     filename.replace(filename.find(".jpg"), 4, ".txt");
     filename = path + R"(\)" + filename;
 
-    std::ofstream txt_file(filename);
+    std::ofstream txt_file{filename};
 
     if (!txt_file)
     {
@@ -122,10 +122,10 @@ void MainFrame::SaveProjectionMatrix(const std::string &path, int img_idx)
 
         Mat34 P = -(K * Rigid);
 
-        txt_file << "CONTOUR" << std::endl;
-        txt_file << P(0, 0) << " " << P(0, 1) << " " << P(0, 2) << " " << P(0, 3) << std::endl;
-        txt_file << P(1, 0) << " " << P(1, 1) << " " << P(1, 2) << " " << P(1, 3) << std::endl;
-        txt_file << P(2, 0) << " " << P(2, 1) << " " << P(2, 2) << " " << P(2, 3) << std::endl;
+        txt_file << "CONTOUR" << std::endl
+                 << P(0, 0) << " " << P(0, 1) << " " << P(0, 2) << " " << P(0, 3) << std::endl
+                 << P(1, 0) << " " << P(1, 1) << " " << P(1, 2) << " " << P(1, 3) << std::endl
+                 << P(2, 0) << " " << P(2, 1) << " " << P(2, 2) << " " << P(2, 3) << std::endl;
     }
 }
 
@@ -138,7 +138,7 @@ void MainFrame::SaveUndistortedImage(const std::string &path, int img_idx)
 
     // Fill camera matrix
     double focal = m_images[img_idx].m_camera.m_focal_length;
-    cv::Mat_<double> camMat(3, 3);
+    cv::Mat_<double> camMat{3, 3};
     camMat << focal,    0.0,    0.5 * img.cols - 0.5,
                 0.0,  focal,    0.5 * img.rows - 0.5,
                 0.0,    0.0,    1.0;
@@ -146,7 +146,7 @@ void MainFrame::SaveUndistortedImage(const std::string &path, int img_idx)
     // Distortion coefficients
     double k1 = m_images[img_idx].m_camera.m_k[0];
     double k2 = m_images[img_idx].m_camera.m_k[1];
-    cv::Mat_<double> distCoeffs(1, 5);
+    cv::Mat_<double> distCoeffs{1, 5};
     distCoeffs << k1, k2, 0.0, 0.0, 0.0;
 
     // Undistort!
@@ -161,10 +161,10 @@ void MainFrame::SaveUndistortedImage(const std::string &path, int img_idx)
 
 void MainFrame::ExportToCMVS(const std::string &path)
 {
-    std::string pmvs_dir   = path + R"(\cmvs)";
-    std::string image_dir  = path + R"(\cmvs\visualize)";
-    std::string txt_dir    = path + R"(\cmvs\txt)";
-    std::string models_dir = path + R"(\cmvs\models)";
+    std::string pmvs_dir{  path + R"(\cmvs)"};
+    std::string image_dir{ path + R"(\cmvs\visualize)"};
+    std::string txt_dir{   path + R"(\cmvs\txt)"};
+    std::string models_dir{path + R"(\cmvs\models)"};
 
     // Create directory structure
     if (!wxDirExists(pmvs_dir))
@@ -189,7 +189,7 @@ void MainFrame::ExportToCMVS(const std::string &path)
 void MainFrame::SaveBundleFile(const std::string &path)
 {
     std::string filename = path + R"(\bundle.rd.out)";
-    std::ofstream bundle_file(filename);
+    std::ofstream bundle_file{filename};
 
     bundle_file << "# Bundle file v0.3" << std::endl;
 
@@ -201,7 +201,7 @@ void MainFrame::SaveBundleFile(const std::string &path)
         wxLogMessage("Writing geometry and cameras to %s...", filename.c_str());
 
         int num_points(m_points.size());
-        int num_visible_points(0);
+        int num_visible_points{0};
         int num_images = std::count_if(m_images.begin(), m_images.end(), [](const ImageData &img) { return img.m_camera.m_adjusted; });
 
         for (const auto &point : m_points) if (point.m_views.size() > 0) num_visible_points++;
@@ -261,7 +261,7 @@ void MainFrame::SaveBundleFile(const std::string &path)
 void MainFrame::SavePlyFile()
 {
     std::string filename = m_path + R"(\Result.ply)";
-    std::ofstream ply_file(filename);
+    std::ofstream ply_file{filename};
 
     if (!ply_file)
     {
@@ -274,16 +274,16 @@ void MainFrame::SavePlyFile()
         int num_points = (int)m_points.size();
 
         // Output the header
-        ply_file << "ply" << std::endl;
-        ply_file << "format ascii 1.0" << std::endl;
-        ply_file << "element vertex " << num_points + 2 * num_cameras << std::endl;
-        ply_file << "property float x" << std::endl;
-        ply_file << "property float y" << std::endl;
-        ply_file << "property float z" << std::endl;
-        ply_file << "property uchar diffuse_red" << std::endl;
-        ply_file << "property uchar diffuse_green" << std::endl;
-        ply_file << "property uchar diffuse_blue" << std::endl;
-        ply_file << "end_header" << std::endl;
+        ply_file << "ply" << std::endl
+                 << "format ascii 1.0" << std::endl
+                 << "element vertex " << num_points + 2 * num_cameras << std::endl
+                 << "property float x" << std::endl
+                 << "property float y" << std::endl
+                 << "property float z" << std::endl
+                 << "property uchar diffuse_red" << std::endl
+                 << "property uchar diffuse_green" << std::endl
+                 << "property uchar diffuse_blue" << std::endl
+                 << "end_header" << std::endl;
 
         // Output the vertices
         for (const auto &point : m_points)
@@ -305,13 +305,13 @@ void MainFrame::SavePlyFile()
             const auto &R = img.m_camera.m_R;
             const auto &t = img.m_camera.m_t;
 
-            ply_file << t.x() << " " << t.y() << " " << t.z() << " ";
-            ply_file << 255   << " " << 0     << " " << 0     << std::endl;
+            ply_file << t.x() << " " << t.y() << " " << t.z() << " "
+                     << 255   << " " << 0     << " " << 0     << std::endl;
 
-            Point3 p = R.transpose() * Point3(0.0, 0.0, -0.05) + t;
+            Point3 p = R.transpose() * Point3{0.0, 0.0, -0.05} + t;
 
-            ply_file << p.x() << " " << p.y() << " " << p.z() << " ";
-            ply_file << 0     << " " << 255   << " " << 0     << std::endl;
+            ply_file << p.x() << " " << p.y() << " " << p.z() << " "
+                     << 0     << " " << 255   << " " << 0     << std::endl;
         }
     }
 }
@@ -322,7 +322,7 @@ void MainFrame::SaveMeshLabFile()
     ExportToCMVS(m_path);
 
     std::string filename = m_path + R"(\Result.mlp)";
-    std::ofstream mlp_file(filename);
+    std::ofstream mlp_file{filename};
 
     if (!mlp_file)
     {
@@ -332,18 +332,18 @@ void MainFrame::SaveMeshLabFile()
         wxLogMessage("Writing points and cameras to %s...", filename.c_str());
 
         // Write header and output mesh location
-        mlp_file << R"(<!DOCTYPE MeshLabDocument>)" << std::endl;
-        mlp_file << R"(<MeshLabProject>)" << std::endl;
-        mlp_file << R"( <MeshGroup>)" << std::endl;
-        mlp_file << R"(  <MLMesh label="Result" filename="Result.ply">)" << std::endl;
-        mlp_file << R"(   <MLMatrix44>)" << std::endl;
-        mlp_file << R"(1 0 0 0 )" << std::endl;
-        mlp_file << R"(0 1 0 0 )" << std::endl;
-        mlp_file << R"(0 0 1 0 )" << std::endl;
-        mlp_file << R"(0 0 0 1 )" << std::endl;
-        mlp_file << R"(</MLMatrix44>)" << std::endl;
-        mlp_file << R"(  </MLMesh>)" << std::endl;
-        mlp_file << R"( </MeshGroup>)" << std::endl;
+        mlp_file << R"(<!DOCTYPE MeshLabDocument>)" << std::endl
+                 << R"(<MeshLabProject>)" << std::endl
+                 << R"( <MeshGroup>)" << std::endl
+                 << R"(  <MLMesh label="Result" filename="Result.ply">)" << std::endl
+                 << R"(   <MLMatrix44>)" << std::endl
+                 << R"(1 0 0 0 )" << std::endl
+                 << R"(0 1 0 0 )" << std::endl
+                 << R"(0 0 1 0 )" << std::endl
+                 << R"(0 0 0 1 )" << std::endl
+                 << R"(</MLMatrix44>)" << std::endl
+                 << R"(  </MLMesh>)" << std::endl
+                 << R"( </MeshGroup>)" << std::endl;
 
         // Write cameras as raster layers
         mlp_file << R"( <RasterGroup>)" << std::endl;
@@ -355,20 +355,20 @@ void MainFrame::SaveMeshLabFile()
             auto Rot = img.m_camera.m_R;
             auto t = -img.m_camera.m_t;
 
-            mlp_file << R"(  <MLRaster label=")" << img.m_filename_short << R"(">)" << std::endl;
-            mlp_file << R"(   <VCGCamera TranslationVector=")" << t.x() << " " << t.y() << " " << t.z() << " " << 1 << R"(" )";
-            mlp_file <<           R"(LensDistortion="0 0" )";
-            mlp_file <<           R"(ViewportPx=")" << img.GetWidth() << " " << img.GetHeight() << R"(" )";
-            mlp_file <<           R"(PixelSizeMm="1 1" )";
-            mlp_file <<           R"(CenterPx=")" << (int)std::floor(img.GetWidth()) << " " << (int)std::floor(img.GetHeight()) << R"(" )";
-            mlp_file <<           R"(FocalMm=")" << img.m_camera.m_focal_length << R"(" )";
-            mlp_file <<           R"(RotationMatrix=")";
-            mlp_file <<             Rot(0, 0) << " " << Rot(0, 1) << " " << Rot(0, 2) << " " << "0 ";
-            mlp_file <<             Rot(1, 0) << " " << Rot(1, 1) << " " << Rot(1, 2) << " " << "0 ";
-            mlp_file <<             Rot(2, 0) << " " << Rot(2, 1) << " " << Rot(2, 2) << " " << "0 ";
-            mlp_file <<             R"(0 0 0 1 "/>)" << std::endl;
-            mlp_file << R"(   <Plane semantic="" fileName="pmvs/visualize/)" << img.m_filename_short << R"("/>)" << std::endl;
-            mlp_file << R"(  </MLRaster>)" << std::endl;
+            mlp_file << R"(  <MLRaster label=")" << img.m_filename_short << R"(">)" << std::endl
+                     << R"(   <VCGCamera TranslationVector=")" << t.x() << " " << t.y() << " " << t.z() << " " << 1 << R"(" )"
+                     <<           R"(LensDistortion="0 0" )"
+                     <<           R"(ViewportPx=")" << img.GetWidth() << " " << img.GetHeight() << R"(" )"
+                     <<           R"(PixelSizeMm="1 1" )"
+                     <<           R"(CenterPx=")" << (int)std::floor(img.GetWidth()) << " " << (int)std::floor(img.GetHeight()) << R"(" )"
+                     <<           R"(FocalMm=")" << img.m_camera.m_focal_length << R"(" )"
+                     <<           R"(RotationMatrix=")"
+                     <<             Rot(0, 0) << " " << Rot(0, 1) << " " << Rot(0, 2) << " " << "0 "
+                     <<             Rot(1, 0) << " " << Rot(1, 1) << " " << Rot(1, 2) << " " << "0 "
+                     <<             Rot(2, 0) << " " << Rot(2, 1) << " " << Rot(2, 2) << " " << "0 "
+                     <<             R"(0 0 0 1 "/>)" << std::endl
+                     << R"(   <Plane semantic="" fileName="pmvs/visualize/)" << img.m_filename_short << R"("/>)" << std::endl
+                     << R"(  </MLRaster>)" << std::endl;
         }
 
         mlp_file << R"( </RasterGroup>)" << std::endl;
@@ -382,7 +382,7 @@ void MainFrame::SaveMayaFile()
     ExportToCMVS(m_path);
 
     std::string filename = m_path + R"(\Result.ma)";
-    std::ofstream maya_file(filename);
+    std::ofstream maya_file{filename};
 
     if (!maya_file)
     {
@@ -407,16 +407,16 @@ void MainFrame::SaveMayaFile()
         {
             if (!m_images[i].m_camera.m_adjusted) continue;
 
-            double width = static_cast<double>(m_images[i].GetWidth());
-            double height = static_cast<double>(m_images[i].GetHeight());
-            double ccd_width = m_images[i].m_ccd_width;
-            double ccd_height = ccd_width * height / width;
-            double focalpx = m_images[i].m_camera.m_focal_length;
+            const double width      = m_images[i].GetWidth();
+            const double height     = m_images[i].GetHeight();
+            const double ccd_width  = m_images[i].m_ccd_width;
+            const double ccd_height = ccd_width * height / width;
+            const double focalpx    = m_images[i].m_camera.m_focal_length;
+            const auto &R           = m_images[i].m_camera.m_R;
+            const auto &t           = m_images[i].m_camera.m_t;
             double focalmm;
             double cap_w;   // cap = camera aperture
             double cap_h;
-            const auto &R = m_images[i].m_camera.m_R;
-            const auto &t = m_images[i].m_camera.m_t;
 
             if (width >= height)
             {
@@ -431,66 +431,66 @@ void MainFrame::SaveMayaFile()
                 cap_h   = ccd_width  / 25.4;    // mm to inches
             }
 
-            maya_file << R"(createNode transform -s -n "Cam)" << std::setw(4) << std::setfill('0') << i << R"(";)" << std::endl;
-            maya_file << R"(    setAttr -type "matrix" ".xformMatrix" )" << R(0, 0) << " " << R(0, 1) << " " << R(0, 2) << " " << 0.0 << " "
+            maya_file << R"(createNode transform -s -n "Cam)" << std::setw(4) << std::setfill('0') << i << R"(";)" << std::endl
+                      << R"(    setAttr -type "matrix" ".xformMatrix" )" << R(0, 0) << " " << R(0, 1) << " " << R(0, 2) << " " << 0.0 << " "
                                                                          << R(1, 0) << " " << R(1, 1) << " " << R(1, 2) << " " << 0.0 << " "
                                                                          << R(2, 0) << " " << R(2, 1) << " " << R(2, 2) << " " << 0.0 << " "
-                                                                         << t.x()   << " " << t.y()   << " " << t.z()   << " " << 1.0 << ";" << std::endl;
-            maya_file << R"(    setAttr -l on ".tx";)" << std::endl;
-            maya_file << R"(    setAttr -l on ".ty";)" << std::endl;
-            maya_file << R"(    setAttr -l on ".tz";)" << std::endl;
-            maya_file << R"(    setAttr -l on ".rx";)" << std::endl;
-            maya_file << R"(    setAttr -l on ".ry";)" << std::endl;
-            maya_file << R"(    setAttr -l on ".rz";)" << std::endl;
-            maya_file << R"(    setAttr ".s" -type "double3" 0.1 0.1 0.1;)" << std::endl;
+                                                                         << t.x()   << " " << t.y()   << " " << t.z()   << " " << 1.0 << ";" << std::endl
+                      << R"(    setAttr -l on ".tx";)" << std::endl
+                      << R"(    setAttr -l on ".ty";)" << std::endl
+                      << R"(    setAttr -l on ".tz";)" << std::endl
+                      << R"(    setAttr -l on ".rx";)" << std::endl
+                      << R"(    setAttr -l on ".ry";)" << std::endl
+                      << R"(    setAttr -l on ".rz";)" << std::endl
+                      << R"(    setAttr ".s" -type "double3" 0.1 0.1 0.1;)" << std::endl
 
-            maya_file << R"(createNode camera -s -n "Cam)" << std::setw(4) << std::setfill('0') << i << R"(Shape" -p "Cam)" << std::setw(4) << std::setfill('0') << i << R"(";)" << std::endl;
-            maya_file << R"(    setAttr -k off ".v";)" << std::endl;
-            maya_file << R"(    setAttr ".rnd" no;)" << std::endl;
-            maya_file << R"(    setAttr ".cap" -type "double2" )" << cap_w << " " << cap_h << ";" << std::endl;
-            maya_file << R"(    setAttr ".ff" 0;)" << std::endl;
-            maya_file << R"(    setAttr ".fl" )" << focalmm << ";" << std::endl;
-            maya_file << R"(    setAttr ".ncp" 0.01;)" << std::endl;
-            maya_file << R"(    setAttr ".fcp" 10000;)" << std::endl;
-            maya_file << R"(    setAttr ".ow" 30;)" << std::endl;
-            maya_file << R"(    setAttr ".imn" -type "string" "Cam)" << std::setw(4) << std::setfill('0') << i << R"(";)" << std::endl;
-            maya_file << R"(    setAttr ".den" -type "string" "Cam)" << std::setw(4) << std::setfill('0') << i << R"(_depth";)" << std::endl;
-            maya_file << R"(    setAttr ".man" -type "string" "Cam)" << std::setw(4) << std::setfill('0') << i << R"(_mask";)" << std::endl;
+                      << R"(createNode camera -s -n "Cam)" << std::setw(4) << std::setfill('0') << i << R"(Shape" -p "Cam)" << std::setw(4) << std::setfill('0') << i << R"(";)" << std::endl
+                      << R"(    setAttr -k off ".v";)" << std::endl
+                      << R"(    setAttr ".rnd" no;)" << std::endl
+                      << R"(    setAttr ".cap" -type "double2" )" << cap_w << " " << cap_h << ";" << std::endl
+                      << R"(    setAttr ".ff" 0;)" << std::endl
+                      << R"(    setAttr ".fl" )" << focalmm << ";" << std::endl
+                      << R"(    setAttr ".ncp" 0.01;)" << std::endl
+                      << R"(    setAttr ".fcp" 10000;)" << std::endl
+                      << R"(    setAttr ".ow" 30;)" << std::endl
+                      << R"(    setAttr ".imn" -type "string" "Cam)" << std::setw(4) << std::setfill('0') << i << R"(";)" << std::endl
+                      << R"(    setAttr ".den" -type "string" "Cam)" << std::setw(4) << std::setfill('0') << i << R"(_depth";)" << std::endl
+                      << R"(    setAttr ".man" -type "string" "Cam)" << std::setw(4) << std::setfill('0') << i << R"(_mask";)" << std::endl;
 
             // Write image planes
-            std::string path = m_images[i].m_filename_undistorted;
-            std::string backslashes = R"(\)";
+            std::string path{m_images[i].m_filename_undistorted};
+            std::string backslashes{R"(\)"};
             while ((path.find(backslashes)) != std::string::npos) path.replace(path.find(backslashes), backslashes.length(), "/");
 
-            maya_file << R"(createNode imagePlane -n "ImagePlane)" << std::setw(4) << std::setfill('0') << i << R"(";)" << std::endl;
-            maya_file << R"(    setAttr ".fc" 12;)" << std::endl;
-            maya_file << R"(    setAttr ".imn" -type "string" ")" << path.c_str() << R"(";)" << std::endl;
-            maya_file << R"(    setAttr ".cov" -type "short2" )" << m_images[i].GetWidth() << " " << m_images[i].GetHeight() << ";" << std::endl;
-            maya_file << R"(    setAttr ".ag" 0.5;)" << std::endl;
-            maya_file << R"(    setAttr ".d" 3;)" << std::endl;
-            maya_file << R"(    setAttr ".s" -type "double2" )" << cap_w << " " << cap_h << ";" << std::endl;
-            maya_file << R"(    setAttr ".c" -type "double3" 0.0 0.0 0.0;)" << std::endl;
-            maya_file << R"(    setAttr ".w" 30;)" << std::endl;
-            maya_file << R"(    setAttr ".h" 30;)" << std::endl;
+            maya_file << R"(createNode imagePlane -n "ImagePlane)" << std::setw(4) << std::setfill('0') << i << R"(";)" << std::endl
+                      << R"(    setAttr ".fc" 12;)" << std::endl
+                      << R"(    setAttr ".imn" -type "string" ")" << path.c_str() << R"(";)" << std::endl
+                      << R"(    setAttr ".cov" -type "short2" )" << m_images[i].GetWidth() << " " << m_images[i].GetHeight() << ";" << std::endl
+                      << R"(    setAttr ".ag" 0.5;)" << std::endl
+                      << R"(    setAttr ".d" 3;)" << std::endl
+                      << R"(    setAttr ".s" -type "double2" )" << cap_w << " " << cap_h << ";" << std::endl
+                      << R"(    setAttr ".c" -type "double3" 0.0 0.0 0.0;)" << std::endl
+                      << R"(    setAttr ".w" 30;)" << std::endl
+                      << R"(    setAttr ".h" 30;)" << std::endl;
 
             // Connect image plane to camera
             maya_file << R"(connectAttr "ImagePlane)" << std::setw(4) << std::setfill('0') << i << R"(.msg" ":Cam)" << std::setw(4) << std::setfill('0') << i << R"(Shape.ip" -na;)" << std::endl;
         }
 
         // Write particles
-        maya_file << R"(createNode transform -n "particle1";)" << std::endl;
-        maya_file << R"(createNode particle -n "particleShape1" -p "particle1";)" << std::endl;
-        maya_file << R"(    addAttr -ci true -sn "lifespanPP" -ln "lifespanPP" -bt "life" -dt "doubleArray";)" << std::endl;
-        maya_file << R"(    addAttr -ci true -h true -sn "lifespanPP0" -ln "lifespanPP0" -bt "life" -dt "doubleArray";)" << std::endl;
-        maya_file << R"(    addAttr -ci true -sn "lifespan" -ln "lifespan" -bt "life" -at "double";)" << std::endl;
-        maya_file << R"(    addAttr -ci true -sn "rgbPP" -ln "rgbPP" -dt "vectorArray";)" << std::endl;
-        maya_file << R"(    addAttr -ci true -h true -sn "rgbPP0" -ln "rgbPP0" -dt "vectorArray";)" << std::endl;
-        maya_file << R"(    addAttr -is true -ci true -sn "colorAccum" -ln "colorAccum" -min 0 -max 1 -at "bool";)" << std::endl;
-        maya_file << R"(    addAttr -is true -ci true -sn "useLighting" -ln "useLighting" -min 0 -max 1 -at "bool";)" << std::endl;
-        maya_file << R"(    addAttr -is true -ci true -sn "pointSize" -ln "pointSize" -dv 2 -min 1 -max 60 -at "long";)" << std::endl;
-        maya_file << R"(    addAttr -is true -ci true -sn "normalDir" -ln "normalDir" -dv 2 -min 1 -max 3 -at "long";)" << std::endl;
-        maya_file << R"(    setAttr -k off ".v";)" << std::endl;
-        maya_file << R"(    setAttr ".gf" -type "Int32Array" 0 ;)" << std::endl;
+        maya_file << R"(createNode transform -n "particle1";)" << std::endl
+                  << R"(createNode particle -n "particleShape1" -p "particle1";)" << std::endl
+                  << R"(    addAttr -ci true -sn "lifespanPP" -ln "lifespanPP" -bt "life" -dt "doubleArray";)" << std::endl
+                  << R"(    addAttr -ci true -h true -sn "lifespanPP0" -ln "lifespanPP0" -bt "life" -dt "doubleArray";)" << std::endl
+                  << R"(    addAttr -ci true -sn "lifespan" -ln "lifespan" -bt "life" -at "double";)" << std::endl
+                  << R"(    addAttr -ci true -sn "rgbPP" -ln "rgbPP" -dt "vectorArray";)" << std::endl
+                  << R"(    addAttr -ci true -h true -sn "rgbPP0" -ln "rgbPP0" -dt "vectorArray";)" << std::endl
+                  << R"(    addAttr -is true -ci true -sn "colorAccum" -ln "colorAccum" -min 0 -max 1 -at "bool";)" << std::endl
+                  << R"(    addAttr -is true -ci true -sn "useLighting" -ln "useLighting" -min 0 -max 1 -at "bool";)" << std::endl
+                  << R"(    addAttr -is true -ci true -sn "pointSize" -ln "pointSize" -dv 2 -min 1 -max 60 -at "long";)" << std::endl
+                  << R"(    addAttr -is true -ci true -sn "normalDir" -ln "normalDir" -dv 2 -min 1 -max 3 -at "long";)" << std::endl
+                  << R"(    setAttr -k off ".v";)" << std::endl
+                  << R"(    setAttr ".gf" -type "Int32Array" 0 ;)" << std::endl;
 
         // Position
         maya_file << R"(    setAttr ".pos0" -type "vectorArray" )" << std::setw(4) << std::setfill('0') << num_points;
@@ -502,11 +502,10 @@ void MainFrame::SaveMayaFile()
         for (const auto &p : m_points) maya_file << " " << p.m_color[0] << " " << p.m_color[1] << " " << p.m_color[2];
         maya_file << ";" << std::endl;
 
-        maya_file << R"(    setAttr -k on ".colorAccum";)" << std::endl;
-        maya_file << R"(    setAttr -k on ".useLighting";)" << std::endl;
-        maya_file << R"(    setAttr -k on ".pointSize" 3;)" << std::endl;
-        maya_file << R"(    setAttr -k on ".normalDir";)" << std::endl;
-
-        maya_file << "// End of Result.ma" << std::endl;
+        maya_file << R"(    setAttr -k on ".colorAccum";)" << std::endl
+                  << R"(    setAttr -k on ".useLighting";)" << std::endl
+                  << R"(    setAttr -k on ".pointSize" 3;)" << std::endl
+                  << R"(    setAttr -k on ".normalDir";)" << std::endl
+                  << "// End of Result.ma" << std::endl;
     }
 }

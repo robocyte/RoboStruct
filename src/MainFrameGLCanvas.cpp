@@ -7,47 +7,47 @@
 
 void MainFrame::InitializeOpenGL()
 {
-    m_gl_context = new wxGLContext(m_gl_canvas);
+    m_gl_context = new wxGLContext{m_gl_canvas};
     m_gl_canvas->SetCurrent(*m_gl_context);
 
     // Initialize GLEW
     GLenum result = glewInit();
     if (result != GLEW_OK)
     {
-        wxLogMessage("ERROR: %s", wxString(glewGetErrorString(result)));
+        wxLogMessage("ERROR: %s", wxString{glewGetErrorString(result)});
         this->Close();
     }
 
     // Display OpenGL info
-    wxLogMessage("GLEW version: %s",	wxString(glewGetString(GLEW_VERSION)));
-    wxLogMessage("OpenGL version: %s",	wxString(glGetString(GL_VERSION)));
-    wxLogMessage("OpenGL vendor: %s",	wxString(glGetString(GL_VENDOR)));
-    wxLogMessage("OpenGL renderer: %s",	wxString(glGetString(GL_RENDERER)));
-    wxLogMessage("GLSL version: %s",	wxString(glGetString(GL_SHADING_LANGUAGE_VERSION)));
+    wxLogMessage("GLEW version: %s",    wxString{glewGetString(GLEW_VERSION)});
+    wxLogMessage("OpenGL version: %s",  wxString{glGetString(GL_VERSION)});
+    wxLogMessage("OpenGL vendor: %s",   wxString{glGetString(GL_VENDOR)});
+    wxLogMessage("OpenGL renderer: %s", wxString{glGetString(GL_RENDERER)});
+    wxLogMessage("GLSL version: %s",    wxString{glGetString(GL_SHADING_LANGUAGE_VERSION)});
 }
 
 void MainFrame::InitializeScene()
 {
     gly::Clock::Init();
-    m_clock = gly::ClockPtr(new gly::Clock(0.0f));
-    m_scene = gly::ScenePtr(new gly::Scene);
+    m_clock = std::make_unique<gly::Clock>(0.0f);
+    m_scene = std::make_unique<gly::Scene>();
 
-    m_scene->SetBackground(gly::BackgroundPtr(new gly::Background));
+    m_scene->SetBackground(std::make_shared<gly::Background>());
     m_scene->GetBackground()->SetType(gly::Background::BGR_GRADIENT);
     m_scene->GetBackground()->SetMesh(gly::CreatePlane());
     m_scene->GetBackground()->SetProgram(gly::LoadProgram("shaders\\Background.xml"));
 
     int width, height;
     m_gl_canvas->GetClientSize(&width, &height);
-    m_scene->SetCamera(gly::CameraPtr(new gly::Camera(50, width, height, 1.0f, 1000.0f)));
+    m_scene->SetCamera(std::make_shared<gly::Camera>(50, width, height, 1.0f, 1000.0f));
     m_scene->GetCamera()->SetType(gly::Camera::CAM_TRACKBALL);
 
-    m_scene->AddMesh("points_mesh",             std::unique_ptr<gly::Mesh>(new gly::Mesh(gly::Meshdescription(GL_POINTS, 0), gly::Meshdata())));
+    m_scene->AddMesh("points_mesh",             std::make_unique<gly::Mesh>(gly::Meshdescription{GL_POINTS, 0}, gly::Meshdata{}));
     m_scene->AddMesh("dslr_mesh",               gly::LoadMesh("meshes\\DSLR.ctm"));
     m_scene->AddMesh("grid_mesh",               gly::CreateGrid(21));
-    m_scene->AddMesh("trackball_x_mesh",        gly::CreateCircle(100, glm::vec4(0.6f, 0.0f, 0.0f, 1.0f)));
-    m_scene->AddMesh("trackball_y_mesh",        gly::CreateCircle(100, glm::vec4(0.0f, 0.6f, 0.0f, 1.0f)));
-    m_scene->AddMesh("trackball_z_mesh",        gly::CreateCircle(100, glm::vec4(0.0f, 0.0f, 0.6f, 1.0f)));
+    m_scene->AddMesh("trackball_x_mesh",        gly::CreateCircle(100, glm::vec4{0.6f, 0.0f, 0.0f, 1.0f}));
+    m_scene->AddMesh("trackball_y_mesh",        gly::CreateCircle(100, glm::vec4{0.0f, 0.6f, 0.0f, 1.0f}));
+    m_scene->AddMesh("trackball_z_mesh",        gly::CreateCircle(100, glm::vec4{0.0f, 0.0f, 0.6f, 1.0f}));
 
     m_scene->AddProgram("points_program",       gly::LoadProgram("shaders\\Points.xml"));
     m_scene->AddProgram("cam_program",          gly::LoadProgram("shaders\\Camera.xml"));
@@ -67,13 +67,13 @@ void MainFrame::InitializeScene()
     m_scene->MakeNode("Trackball Y",            "trackball_y_mesh", "trackball_program");
     m_scene->MakeNode("Trackball Z",            "trackball_z_mesh", "trackball_program");
 
-    m_scene->GetNode("Grid")->GetTransform().Scale(glm::vec3(20.0f, 20.0f, 20.0f));
-    m_scene->GetNode("Trackball X")->GetTransform().Translate(glm::vec3(0.0f, 0.0f, -25.0f));
-    m_scene->GetNode("Trackball Y")->GetTransform().Translate(glm::vec3(0.0f, 0.0f, -25.0f));
-    m_scene->GetNode("Trackball Z")->GetTransform().Translate(glm::vec3(0.0f, 0.0f, -25.0f));
-    m_scene->GetNode("Trackball X")->GetTransform().Scale(glm::vec3(14.0f, 14.0f, 14.0f));
-    m_scene->GetNode("Trackball Y")->GetTransform().Scale(glm::vec3(14.0f, 14.0f, 14.0f));
-    m_scene->GetNode("Trackball Z")->GetTransform().Scale(glm::vec3(14.0f, 14.0f, 14.0f));
+    m_scene->GetNode("Grid")->GetTransform().Scale(glm::vec3{20.0f, 20.0f, 20.0f});
+    m_scene->GetNode("Trackball X")->GetTransform().Translate(glm::vec3{0.0f, 0.0f, -25.0f});
+    m_scene->GetNode("Trackball Y")->GetTransform().Translate(glm::vec3{0.0f, 0.0f, -25.0f});
+    m_scene->GetNode("Trackball Z")->GetTransform().Translate(glm::vec3{0.0f, 0.0f, -25.0f});
+    m_scene->GetNode("Trackball X")->GetTransform().Scale(glm::vec3{14.0f, 14.0f, 14.0f});
+    m_scene->GetNode("Trackball Y")->GetTransform().Scale(glm::vec3{14.0f, 14.0f, 14.0f});
+    m_scene->GetNode("Trackball Z")->GetTransform().Scale(glm::vec3{14.0f, 14.0f, 14.0f});
 }
 
 void MainFrame::ResetGLCanvas()
@@ -83,8 +83,8 @@ void MainFrame::ResetGLCanvas()
     camera->SetTrackballAngles(15.0f, 45.0f, 0.0f);
 
     auto rotation = camera->GetTrackballOrientation();
-    m_scene->GetNode("Trackball X")->GetTransform().SetOrientation(rotation * glm::angleAxis(90.0f, glm::vec3(0.0f, 1.0f, 0.0f)));
-    m_scene->GetNode("Trackball Y")->GetTransform().SetOrientation(rotation * glm::angleAxis(90.0f, glm::vec3(1.0f, 0.0f, 0.0f)));
+    m_scene->GetNode("Trackball X")->GetTransform().SetOrientation(rotation * glm::angleAxis(90.0f, glm::vec3{0.0f, 1.0f, 0.0f}));
+    m_scene->GetNode("Trackball Y")->GetTransform().SetOrientation(rotation * glm::angleAxis(90.0f, glm::vec3{1.0f, 0.0f, 0.0f}));
     m_scene->GetNode("Trackball Z")->GetTransform().SetOrientation(rotation);
 
     m_beginx = m_beginy = 0.0f;
@@ -104,7 +104,7 @@ void MainFrame::ResetPerspectiveMatrix()
 void MainFrame::OnGLCanvasPaint(wxPaintEvent& event)
 {
     // Must always be here
-    wxPaintDC dc(m_gl_canvas);
+    wxPaintDC dc{m_gl_canvas};
 
     auto start = m_clock->Now();
     m_scene->Render();
@@ -124,7 +124,7 @@ void MainFrame::OnGLCanvasMouse(wxMouseEvent& event)
     // Disable viewport navigation in turntable mode
     if (m_turntable_timer->IsRunning()) return;
 
-    wxSize sz(m_gl_canvas->GetClientSize());
+    wxSize sz{m_gl_canvas->GetClientSize()};
     float distx = m_beginx - event.GetX();
     float disty = m_beginy - event.GetY();
 
@@ -134,15 +134,15 @@ void MainFrame::OnGLCanvasMouse(wxMouseEvent& event)
     if (event.m_leftDown)
     {
         m_gl_canvas->SetCursor(m_rotate_cursor);
-        camera->RotateTrackball(    glm::vec2(0.8f * (2.0f * m_beginx - sz.x)     / sz.y, 0.8f * (sz.y - 2.0f * m_beginy)     / sz.y),
-                                    glm::vec2(0.8f * (2.0f * event.GetX() - sz.x) / sz.y, 0.8f * (sz.y - 2.0f * event.GetY()) / sz.y));
+        camera->RotateTrackball(glm::vec2{0.8f * (2.0f * m_beginx - sz.x)     / sz.y, 0.8f * (sz.y - 2.0f * m_beginy)     / sz.y},
+                                glm::vec2{0.8f * (2.0f * event.GetX() - sz.x) / sz.y, 0.8f * (sz.y - 2.0f * event.GetY()) / sz.y});
     }
 
     // Pan
     if (event.m_middleDown)
     {
         m_gl_canvas->SetCursor(m_pan_cursor);
-        camera->PanTrackball(glm::vec2(-distx / (sz.y * 0.044f), disty / (sz.y * 0.044f)));
+        camera->PanTrackball(glm::vec2{-distx / (sz.y * 0.044f), disty / (sz.y * 0.044f)});
     }
 
     // Zoom right mouse button
@@ -185,8 +185,8 @@ void MainFrame::OnGLCanvasMouse(wxMouseEvent& event)
     }
 
     auto rotation = camera->GetTrackballOrientation();
-    m_scene->GetNode("Trackball X")->GetTransform().SetOrientation(rotation * glm::angleAxis(90.0f, glm::vec3(0.0f, 1.0f, 0.0f)));
-    m_scene->GetNode("Trackball Y")->GetTransform().SetOrientation(rotation * glm::angleAxis(90.0f, glm::vec3(1.0f, 0.0f, 0.0f)));
+    m_scene->GetNode("Trackball X")->GetTransform().SetOrientation(rotation * glm::angleAxis(90.0f, glm::vec3{0.0f, 1.0f, 0.0f}));
+    m_scene->GetNode("Trackball Y")->GetTransform().SetOrientation(rotation * glm::angleAxis(90.0f, glm::vec3{1.0f, 0.0f, 0.0f}));
     m_scene->GetNode("Trackball Z")->GetTransform().SetOrientation(rotation);
 
     // Reset cursor icon

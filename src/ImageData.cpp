@@ -93,7 +93,7 @@ void ImageData::DetectFeatures(const Options& opts)
                           opts.surf_common_octave_layers,
                           opts.surf_desc_extended,
                           opts.surf_desc_upright};
-            Surf(grey_img, cv::Mat(), keys, m_descriptors);
+            Surf(grey_img, cv::Mat{}, keys, m_descriptors);
             break;
         }
     case 2: // Detect AKAZE features

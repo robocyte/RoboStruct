@@ -44,10 +44,7 @@ Vec3 RotationMatrixToAngleAxis(const Mat3 &R)
     }
 
     // Case 2: theta ~ 0
-    if (costheta > 0.0)
-    {
-        return angle_axis * 0.5;
-    }
+    if (costheta > 0.0) return angle_axis * 0.5;
 
     // Case 3: theta ~ pi
     double inv_one_minus_costheta = 1.0 / (1.0 - costheta);

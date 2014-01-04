@@ -33,7 +33,7 @@ namespace
 
     PolyVec ComputeConstraintMatrix(const Mat &basis)
     {
-        PolyVec constraints(10);
+        PolyVec constraints{10};
 
         // Basis rows are X, Y, Z, W; essential matrix is of form x*X + y*Y + z*Z + W
 
@@ -171,7 +171,7 @@ namespace
     {
         Mat3Vec solutions;
 
-        Eigen::EigenSolver<Eigen::Matrix<double, 10, 10>> Es(action);
+        Eigen::EigenSolver<Eigen::Matrix<double, 10, 10>> Es{action};
 
         for (int i = 0; i < 10; ++i)
         {

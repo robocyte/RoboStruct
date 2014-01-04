@@ -18,18 +18,37 @@
 #include "Eigen/Dense"
 #include "Eigen/Geometry"
 
-const wxEventTypeTag<wxThreadEvent> wxEVT_SFM_THREAD_UPDATE(wxNewEventType());
-const wxEventTypeTag<wxThreadEvent> wxEVT_SFM_THREAD_COMPLETE(wxNewEventType());
+const wxEventTypeTag<wxThreadEvent> wxEVT_SFM_THREAD_UPDATE{wxNewEventType()};
+const wxEventTypeTag<wxThreadEvent> wxEVT_SFM_THREAD_COMPLETE{wxNewEventType()};
+
+class wxAuiSolidToolBarArt : public wxAuiDefaultToolBarArt
+{
+public:
+    wxAuiSolidToolBarArt() = default;
+    virtual ~wxAuiSolidToolBarArt() {}
+    
+    wxAuiToolBarArt *Clone() { return new wxAuiSolidToolBarArt{}; }
+
+    virtual void DrawBackground(wxDC& dc, wxWindow* wnd, const wxRect& rect)
+    {
+        wxUnusedVar(wnd);
+        wxColour initialColour = wxColour{240, 240, 240};
+        wxColour endColour     = wxColour{240, 240, 240};
+        dc.GradientFillLinear(rect, initialColour, endColour);
+    }
+};
 
 MainFrame::MainFrame(wxWindow* parent)
     : MainFrame_base(parent)
 {
-    m_turntable_timer       = new wxTimer(this, ID_TIMER_TURNTABLE);
-    m_reset_viewport_timer  = new wxTimer(this, ID_TIMER_RESET_VIEWPORT);
+    m_turntable_timer       = new wxTimer{this, ID_TIMER_TURNTABLE};
+    m_reset_viewport_timer  = new wxTimer{this, ID_TIMER_RESET_VIEWPORT};
 
-    m_rotate_cursor = wxCursor("rotate_cursor");
-    m_pan_cursor    = wxCursor("pan_cursor");
-    m_zoom_cursor   = wxCursor("zoom_cursor");
+    m_rotate_cursor = wxCursor{"rotate_cursor"};
+    m_pan_cursor    = wxCursor{"pan_cursor"};
+    m_zoom_cursor   = wxCursor{"zoom_cursor"};
+
+    m_toolbar_log->SetArtProvider(new wxAuiSolidToolBarArt{});
 
     // Setup the image list
     m_img_ctrl->InsertColumn(0, "Name",         wxLIST_FORMAT_LEFT, 60);
@@ -55,7 +74,7 @@ MainFrame::~MainFrame()
 
 void MainFrame::OnSFMThreadUpdate(wxThreadEvent& event)
 {
-    wxCriticalSectionLocker lock(m_points_cs);
+    wxCriticalSectionLocker lock{m_points_cs};
 
     gly::Meshdata data;
 
@@ -81,7 +100,7 @@ void MainFrame::OnSFMThreadUpdate(wxThreadEvent& event)
 
         image.m_camera_mesh->GetTransform().Reset();
         image.m_camera_mesh->GetTransform().Translate(glm::vec3(image.m_camera.m_t.x(), image.m_camera.m_t.y(), image.m_camera.m_t.z()));
-        Eigen::Quaternion<double> quat(image.m_camera.m_R.transpose());
+        Eigen::Quaternion<double> quat{image.m_camera.m_R.transpose()};
         image.m_camera_mesh->GetTransform().Rotate(glm::quat(quat.w(), quat.x(), quat.y(), quat.z()));
         image.m_camera_mesh->GetTransform().Scale(glm::vec3(0.02f, 0.02f, 0.02f));
     }
@@ -131,7 +150,7 @@ void MainFrame::InitializeLog()
     wxLogMessage("Log initialized");
     wxLogMessage("OS: %s", wxPlatformInfo::Get().GetOperatingSystemDescription());
 
-    auto font = new wxFont(9, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, "consolas");
+    auto font = new wxFont{9, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, "consolas"};
     m_tc_log->SetFont(*font);
 }
 
@@ -144,7 +163,7 @@ void MainFrame::InitializeCameraDatabase()
 
 bool MainFrame::AddImage(const std::string &filename, const std::string &filename_short)
 {
-    ImageData img(filename, filename_short);
+    ImageData img{filename, filename_short};
 
     if(!img.GetExifInfo())
     {
@@ -173,7 +192,7 @@ bool MainFrame::AddImage(const std::string &filename, const std::string &filenam
         {
             wxString caption;
             caption << img.m_camera_make << img.m_camera_model << ": " << "Camera model not found!";
-            wxTextEntryDialog dlg(this, "Add CCD width (in mm) to database...\n(decimal point must be a dot!)", caption);
+            wxTextEntryDialog dlg{this, "Add CCD width (in mm) to database...\n(decimal point must be a dot!)", caption};
 
             CamDBEntry cam;
 
@@ -218,9 +237,9 @@ void MainFrame::DetectFeaturesAll()
     int num_images = GetNumImages();
 
     // Show progress dialog
-    wxProgressDialog dialog("Progress", "Detecting features...", num_images, this,
+    wxProgressDialog dialog{"Progress", "Detecting features...", num_images, this,
                             wxPD_APP_MODAL | wxPD_AUTO_HIDE | wxPD_ELAPSED_TIME |
-                            wxPD_ESTIMATED_TIME | wxPD_REMAINING_TIME);
+                            wxPD_ESTIMATED_TIME | wxPD_REMAINING_TIME};
 
     // Detect features
     for (int i = 0; i < num_images; i++)
@@ -240,7 +259,7 @@ void MainFrame::DetectFeaturesAll()
 
 void MainFrame::DetectFeatures(int img_idx)
 {
-    ScopedTimer timer(m_profile_manager, "[DetectFeatures]");
+    ScopedTimer timer{m_profile_manager, "[DetectFeatures]"};
     m_images[img_idx].DetectFeatures(m_options);
     wxLogMessage("[DetectFeatures] %s: found %i features", m_images[img_idx].m_filename_short.c_str(), GetNumKeys(img_idx));
 }
@@ -260,7 +279,7 @@ void MainFrame::MatchAll()
     }
 
     m_tracks.clear();
-    m_matches = MatchTable(num_images);
+    m_matches = MatchTable{num_images};
     m_matches.RemoveAll();
     m_transforms.clear();
 
@@ -276,7 +295,7 @@ void MainFrame::MatchAll()
 
         // Create a search index
         cv::Mat idx_desc(m_images[i].m_keys.size(), m_desc_length, CV_32F, (void*)m_images[i].m_descriptors.data());
-        cv::flann::Index flann_index(idx_desc, cv::flann::KDTreeIndexParams(m_options.matching_trees));
+        cv::flann::Index flann_index{idx_desc, cv::flann::KDTreeIndexParams{m_options.matching_trees}};
 
         for (int j = 0; j < i; j++)
         {
@@ -284,14 +303,14 @@ void MainFrame::MatchAll()
 
             // Setup query data
             int num_descriptors = (int)m_images[j].m_keys.size();
-            cv::Mat query_desc(num_descriptors, m_desc_length, CV_32F, (void*)m_images[j].m_descriptors.data());
-            cv::Mat indices(num_descriptors, 2, CV_32S);
-            cv::Mat dists(num_descriptors, 2, CV_32F);
+            cv::Mat query_desc{num_descriptors, m_desc_length, CV_32F, (void*)m_images[j].m_descriptors.data()};
+            cv::Mat indices{num_descriptors, 2, CV_32S};
+            cv::Mat dists{num_descriptors, 2, CV_32F};
 
             // Match!
             {
-                ScopedTimer timer(m_profile_manager, "[MatchImagePair]");
-                flann_index.knnSearch(query_desc, indices, dists, 2, cv::flann::SearchParams(m_options.matching_checks));
+                ScopedTimer timer{m_profile_manager, "[MatchImagePair]"};
+                flann_index.knnSearch(query_desc, indices, dists, 2, cv::flann::SearchParams{m_options.matching_checks});
             }
 
             // Store putative matches in ptpairs
@@ -303,7 +322,7 @@ void MainFrame::MatchAll()
             {
                 if (dists_ptr[2 * k] < (m_options.matching_distance_ratio * dists_ptr[2 * k + 1]))
                 {
-                    tmp_matches.push_back(IntPair(indices_ptr[2 * k], k));
+                    tmp_matches.push_back(IntPair{indices_ptr[2 * k], k});
                 }
             }
 
@@ -317,13 +336,13 @@ void MainFrame::MatchAll()
 
             // Compute transforms
             TransformInfo tinfo;
-            MatchIndex midx(i, j);
+            MatchIndex midx{i, j};
             tinfo.m_inlier_ratio = ComputeHomography(i, j, tmp_matches);
 
             // Store matches and transforms
             if (num_inliers > m_options.matching_min_matches)
             {
-                TransformsEntry trans_entry(midx, tinfo);
+                TransformsEntry trans_entry{midx, tinfo};
                 m_transforms.insert(trans_entry);
 
                 SetMatch(i, j);
@@ -332,7 +351,7 @@ void MainFrame::MatchAll()
                 matches.clear();
                 matches.reserve(num_inliers);
 
-                for (const auto &match : tmp_matches) matches.push_back(KeypointMatch(match.first, match.second));
+                for (const auto &match : tmp_matches) matches.push_back(KeypointMatch{match.first, match.second});
 
                 // Be verbose
                 wxLogMessage("[MatchAll]    ...with %s: %i inliers (%i putative, %i duplicates pruned), ratio = %.2f",
@@ -374,29 +393,29 @@ void MainFrame::MatchAllAkaze()
     }
 
     m_tracks.clear();
-    m_matches = MatchTable(num_images);
+    m_matches = MatchTable{num_images};
     m_matches.RemoveAll();
     m_transforms.clear();
 
     // Show progress dialog
-    wxProgressDialog dialog("Progress", "Matching images...", num_pairs, this, wxPD_APP_MODAL | wxPD_AUTO_HIDE | wxPD_ELAPSED_TIME | wxPD_ESTIMATED_TIME | wxPD_REMAINING_TIME);
+    wxProgressDialog dialog{"Progress", "Matching images...", num_pairs, this, wxPD_APP_MODAL | wxPD_AUTO_HIDE | wxPD_ELAPSED_TIME | wxPD_ESTIMATED_TIME | wxPD_REMAINING_TIME};
 
     for (int i = 1; i < num_images; i++)
     {
-        cv::flann::Index flannIndex(m_images[i].m_descriptors_akaze, cv::flann::LshIndexParams(12, 20, 2), cvflann::FLANN_DIST_HAMMING);
+        cv::flann::Index flannIndex{m_images[i].m_descriptors_akaze, cv::flann::LshIndexParams{12, 20, 2}, cvflann::FLANN_DIST_HAMMING};
         wxLogMessage("[MatchAll] Matching %s...", m_images[i].m_filename_short.c_str());
 
         for (int j = 0; j < i; j++)
         {
             // Setup query data
             int num_descriptors = (int)m_images[j].m_descriptors_akaze.rows;
-            cv::Mat indices = cv::Mat(num_descriptors, 2, CV_32SC1);
-            cv::Mat dists = cv::Mat(num_descriptors, 2, CV_32FC1);
+            cv::Mat indices = cv::Mat{num_descriptors, 2, CV_32SC1};
+            cv::Mat dists = cv::Mat{num_descriptors, 2, CV_32FC1};
 
             // Match!
             {
-                ScopedTimer timer(m_profile_manager, "[MatchImagePair]");
-                flannIndex.knnSearch(m_images[j].m_descriptors_akaze, indices, dists, 2, cv::flann::SearchParams(m_options.matching_checks));
+                ScopedTimer timer{m_profile_manager, "[MatchImagePair]"};
+                flannIndex.knnSearch(m_images[j].m_descriptors_akaze, indices, dists, 2, cv::flann::SearchParams{m_options.matching_checks});
             }
 
             // Store putative matches in ptpairs
@@ -408,7 +427,7 @@ void MainFrame::MatchAllAkaze()
             {
                 if (dists_ptr[2 * k] < (m_options.matching_distance_ratio * dists_ptr[2 * k + 1]))
                 {
-                    tmp_matches.push_back(IntPair(indices_ptr[2 * k], k));
+                    tmp_matches.push_back(IntPair{indices_ptr[2 * k], k});
                 }
             }
 
@@ -431,13 +450,13 @@ void MainFrame::MatchAllAkaze()
 
             // Compute transforms
             TransformInfo tinfo;
-            MatchIndex midx(i, j);
+            MatchIndex midx{i, j};
             tinfo.m_inlier_ratio = ComputeHomography(i, j, tmp_matches);
 
             // Store matches and transforms
             if (num_inliers > m_options.matching_min_matches)
             {
-                TransformsEntry trans_entry(midx, tinfo);
+                TransformsEntry trans_entry{midx, tinfo};
                 m_transforms.insert(trans_entry);
 
                 SetMatch(i, j);
@@ -446,7 +465,7 @@ void MainFrame::MatchAllAkaze()
                 matches.clear();
                 matches.reserve(num_inliers);
 
-                for (const auto &match : tmp_matches) matches.push_back(KeypointMatch(match.first, match.second));
+                for (const auto &match : tmp_matches) matches.push_back(KeypointMatch{match.first, match.second});
 
                 // Be verbose
                 wxLogMessage("[MatchAll]    ...with %s: %i inliers (%i putative, %i duplicates pruned), ratio = %.2f",
@@ -472,7 +491,7 @@ void MainFrame::MatchAllAkaze()
 
 int MainFrame::PruneDoubleMatches(IntPairVec &matches)
 {
-    ScopedTimer timer(m_profile_manager, "[PruneDoubleMatches]");
+    ScopedTimer timer{m_profile_manager, "[PruneDoubleMatches]"};
 
     int num_before = matches.size();
 
@@ -491,7 +510,7 @@ int MainFrame::PruneDoubleMatches(IntPairVec &matches)
 
 int MainFrame::ComputeEpipolarGeometry(int idx1, int idx2, IntPairVec &matches)
 {
-    ScopedTimer timer(m_profile_manager, "[ComputeEpipolarGeometry]");
+    ScopedTimer timer{m_profile_manager, "[ComputeEpipolarGeometry]"};
 
     auto num_putative = matches.size();
     std::vector<cv::Point2f> points1, points2;
@@ -524,7 +543,7 @@ int MainFrame::ComputeEpipolarGeometry(int idx1, int idx2, IntPairVec &matches)
 
 double MainFrame::ComputeHomography(int idx1, int idx2, const IntPairVec &matches)
 {
-    ScopedTimer timer(m_profile_manager, "[ComputeHomography]");
+    ScopedTimer timer{m_profile_manager, "[ComputeHomography]"};
 
     auto num_matches = matches.size();
     std::vector<cv::Point2f> points1, points2;
@@ -552,7 +571,7 @@ double MainFrame::ComputeHomography(int idx1, int idx2, const IntPairVec &matche
 
 void MainFrame::ComputeTracks()
 {
-    ScopedTimer timer(m_profile_manager, "[ComputeTracks]");
+    ScopedTimer timer{m_profile_manager, "[ComputeTracks]"};
 
     int num_images = GetNumImages();
 
@@ -580,7 +599,7 @@ void MainFrame::ComputeTracks()
 
     std::vector<bool> img_marked(num_images, false);
 
-    IntVec touched(num_images);
+    IntVec touched{num_images};
     std::vector<TrackData> tracks;
 
     for (int i = 0; i < num_images; i++)
@@ -606,8 +625,8 @@ void MainFrame::ComputeTracks()
             // Do a breadth first search given this feature
             m_images[i].m_key_flags[j] = true;
 
-            features.push_back(ImageKey(i, j));
-            features_queue.push(ImageKey(i, j));
+            features.push_back(ImageKey{i, j});
+            features_queue.push(ImageKey{i, j});
 
             img_marked[i] = true;
             touched.push_back(i);
@@ -648,8 +667,8 @@ void MainFrame::ComputeTracks()
 
                     // Mark and push the point
                     m_images[k].m_key_flags[idx2] = true;
-                    features.push_back(ImageKey(k, idx2));
-                    features_queue.push(ImageKey(k, idx2));
+                    features.push_back(ImageKey{k, idx2});
+                    features_queue.push(ImageKey{k, idx2});
 
                     img_marked[k] = true;
                     touched.push_back(k);
@@ -658,7 +677,7 @@ void MainFrame::ComputeTracks()
 
             if (features.size() >= 2)
             {
-                tracks.push_back(TrackData(features));
+                tracks.push_back(TrackData{features});
                 pt_idx++;
             }
         } // For loop over features
@@ -693,7 +712,7 @@ void MainFrame::ComputeTracks()
 
 void MainFrame::MakeMatchListsSymmetric()
 {
-    ScopedTimer timer(m_profile_manager, "[MakeMatchListsSymmetric]");
+    ScopedTimer timer{m_profile_manager, "[MakeMatchListsSymmetric]"};
 
     unsigned int num_images = GetNumImages();
 
@@ -754,14 +773,14 @@ double MainFrame::GetInlierRatio(int idx1, int idx2)
 {
     double inlier_ratio = 0.0;
 
-    auto match = m_transforms.find(MatchIndex(idx1, idx2));
+    auto match = m_transforms.find(MatchIndex{idx1, idx2});
 
     if (match != m_transforms.end())
     {
         inlier_ratio = match->second.m_inlier_ratio;
     } else
     {
-        match = m_transforms.find(MatchIndex(idx2, idx1));
+        match = m_transforms.find(MatchIndex{idx2, idx1});
         if (match != m_transforms.end())
         {
             inlier_ratio = match->second.m_inlier_ratio;

@@ -169,8 +169,8 @@ void MainFrame::OnOptionsChanged(wxPropertyGridEvent& event)
     auto t = m_options.viewport_top_color;
     auto b = m_options.viewport_bottom_color;
 
-    m_scene->GetBackground()->SetGradient(  glm::vec3(t.Red() / 255.0f, t.Green() / 255.0f, t.Blue() / 255.0f),
-                                            glm::vec3(b.Red() / 255.0f, b.Green() / 255.0f, b.Blue() / 255.0f));
+    m_scene->GetBackground()->SetGradient(glm::vec3{t.Red() / 255.0f, t.Green() / 255.0f, t.Blue() / 255.0f},
+                                          glm::vec3{b.Red() / 255.0f, b.Green() / 255.0f, b.Blue() / 255.0f});
 
     GenerateMatchImage();
     this->Refresh();

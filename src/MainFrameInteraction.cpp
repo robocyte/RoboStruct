@@ -158,10 +158,10 @@ void MainFrame::OnTimerUpdate(wxTimerEvent& event)
             auto camera   = m_scene->GetCamera();
             auto rotation = camera->GetTrackballOrientation();
 
-            camera->RotateTrackball(glm::vec2(0.0f, 0.0f), glm::vec2(-0.0002f * m_tb_turntable_speed_slider->GetValue(), 0.0f));
+            camera->RotateTrackball(glm::vec2{0.0f, 0.0f}, glm::vec2{-0.0002f * m_tb_turntable_speed_slider->GetValue(), 0.0f});
 
-            m_scene->GetNode("Trackball X")->GetTransform().SetOrientation(rotation * glm::angleAxis(90.0f, glm::vec3(0.0f, 1.0f, 0.0f)));
-            m_scene->GetNode("Trackball Y")->GetTransform().SetOrientation(rotation * glm::angleAxis(90.0f, glm::vec3(1.0f, 0.0f, 0.0f)));
+            m_scene->GetNode("Trackball X")->GetTransform().SetOrientation(rotation * glm::angleAxis(90.0f, glm::vec3{0.0f, 1.0f, 0.0f}));
+            m_scene->GetNode("Trackball Y")->GetTransform().SetOrientation(rotation * glm::angleAxis(90.0f, glm::vec3{1.0f, 0.0f, 0.0f}));
             m_scene->GetNode("Trackball Z")->GetTransform().SetOrientation(rotation);
 
             break;
@@ -172,15 +172,15 @@ void MainFrame::OnTimerUpdate(wxTimerEvent& event)
             if (m_counter >= 1.0f) m_reset_viewport_timer->Stop();
 
             auto camera = m_scene->GetCamera();
-            auto quat_x = glm::angleAxis(15.0f, glm::vec3(1, 0, 0));
-            auto quat_y = glm::angleAxis(45.0f, glm::vec3(0, 1, 0));
-            auto quat_z = glm::angleAxis(0.0f,  glm::vec3(0, 0, 1));
+            auto quat_x = glm::angleAxis(15.0f, glm::vec3{1, 0, 0});
+            auto quat_y = glm::angleAxis(45.0f, glm::vec3{0, 1, 0});
+            auto quat_z = glm::angleAxis(0.0f,  glm::vec3{0, 0, 1});
 
             auto orientation_start  = camera->GetTrackballOrientation();
             auto orientation_target = quat_x * quat_y * quat_z;
 
             auto position_start     = camera->GetTrackballPosition();
-            auto position_target    = glm::vec3(0.0f, 0.0f, 0.0f);
+            auto position_target    = glm::vec3{0.0f, 0.0f, 0.0f};
 
             auto zoom_start         = camera->GetTrackballZoom();
             auto zoom_target        = 1.0f;
@@ -194,8 +194,8 @@ void MainFrame::OnTimerUpdate(wxTimerEvent& event)
             camera->SetTrackballOrientation(orientation_mix);
 
             auto rotation = camera->GetTrackballOrientation();
-            m_scene->GetNode("Trackball X")->GetTransform().SetOrientation(orientation_mix * glm::angleAxis(90.0f, glm::vec3(0.0f, 1.0f, 0.0f)));
-            m_scene->GetNode("Trackball Y")->GetTransform().SetOrientation(orientation_mix * glm::angleAxis(90.0f, glm::vec3(1.0f, 0.0f, 0.0f)));
+            m_scene->GetNode("Trackball X")->GetTransform().SetOrientation(orientation_mix * glm::angleAxis(90.0f, glm::vec3{0.0f, 1.0f, 0.0f}));
+            m_scene->GetNode("Trackball Y")->GetTransform().SetOrientation(orientation_mix * glm::angleAxis(90.0f, glm::vec3{1.0f, 0.0f, 0.0f}));
             m_scene->GetNode("Trackball Z")->GetTransform().SetOrientation(orientation_mix);
 
             m_beginx = m_beginy = 0.0f;
@@ -269,7 +269,7 @@ void MainFrame::OnSelectDirectory(wxFileDirPickerEvent& event)
     wxString filename, focalPx, res, path;
     path   = m_dir_picker->GetPath();
     m_path = (path).ToStdString();
-    wxDir dir(path);
+    wxDir dir{path};
 
     m_images.clear();
 

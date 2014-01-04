@@ -45,8 +45,8 @@ double ComputeRayAngle(Point2 p, Point2 q, const Camera &cam1, const Camera &cam
     Point2 pn = p3n.head<2>() / p3n.z();
     Point2 qn = q3n.head<2>() / q3n.z();
 
-    Point3 p_w = cam1.m_R.transpose() * Point3(pn.x(), pn.y(), -1.0);
-    Point3 q_w = cam2.m_R.transpose() * Point3(qn.x(), qn.y(), -1.0);
+    Point3 p_w = cam1.m_R.transpose() * Point3{pn.x(), pn.y(), -1.0};
+    Point3 q_w = cam2.m_R.transpose() * Point3{qn.x(), qn.y(), -1.0};
 
     // Compute the angle between the rays
     double dot = p_w.dot(q_w);
@@ -145,8 +145,8 @@ bool FindExtrinsics(const Mat3 &E, const Point2Vec &pts1, const Point2Vec &pts2,
     for (int i = 0; i < num_correspondences; i++)
     {
         Observations observations;
-        observations.push_back(Observation(pts1[i], R0, t0));
-        observations.push_back(Observation(pts2[i], Ra, tu));
+        observations.push_back(Observation{pts1[i], R0, t0});
+        observations.push_back(Observation{pts2[i], Ra, tu});
 
         Point3 Q = Triangulate(observations);
         Point3 PQ = (Ra * Q) + tu;
@@ -174,8 +174,8 @@ bool FindExtrinsics(const Mat3 &E, const Point2Vec &pts1, const Point2Vec &pts2,
         for (int i = 0; i < num_correspondences; i++)
         {
             Observations observations;
-            observations.push_back(Observation(pts1[i], R0, t0));
-            observations.push_back(Observation(pts2[i], Rb, tu));
+            observations.push_back(Observation{pts1[i], R0, t0});
+            observations.push_back(Observation{pts2[i], Rb, tu});
 
             Point3 Q = Triangulate(observations);
             Point3 PQ = (Rb * Q) + tu;

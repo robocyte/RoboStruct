@@ -107,7 +107,7 @@ Point2 Camera::Project(const Point3 &point) const
 
 void RefineCamera(Camera *camera, const Point3Vec &points, const Point2Vec &projections, bool adjust_focal)
 {
-    Vec x(adjust_focal ? 9 : 6);
+    Vec x{adjust_focal ? 9 : 6};
     if (adjust_focal)   x << camera->m_t.x(), camera->m_t.y(), camera->m_t.z(), 0.0, 0.0, 0.0, camera->m_focal_length, camera->m_k(0), camera->m_k(1);
     else                x << camera->m_t.x(), camera->m_t.y(), camera->m_t.z(), 0.0, 0.0, 0.0;
 
