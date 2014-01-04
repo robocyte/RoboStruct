@@ -71,9 +71,9 @@ Point3 Triangulate(const Observations &observations, double *error, bool optimiz
 {
     int num_points = static_cast<int>(observations.size());
 
-    Mat A(2 * num_points, 3);
-    Vec b(2 * num_points);
-    Vec x(3);
+    Mat A{2 * num_points, 3};
+    Vec b{2 * num_points};
+    Vec x{3};
 
     for (int i = 0; i < num_points; i++)
     {
@@ -87,13 +87,13 @@ Point3 Triangulate(const Observations &observations, double *error, bool optimiz
     // Find the least squares result
     x = A.colPivHouseholderQr().solve(b);
 
-    TriangulationResidual functor(observations);
+    TriangulationResidual functor{observations};
 
     // Run a non-linear optimization to refine the result
     if (optimize)
     {
-        Eigen::NumericalDiff<TriangulationResidual> numDiff(functor);
-        Eigen::LevenbergMarquardt<Eigen::NumericalDiff<TriangulationResidual>> lm(numDiff);
+        Eigen::NumericalDiff<TriangulationResidual> numDiff{functor};
+        Eigen::LevenbergMarquardt<Eigen::NumericalDiff<TriangulationResidual>> lm{numDiff};
 
         lm.parameters.ftol   = 1.0e-5;
         lm.parameters.xtol   = 1.0e-5;
@@ -104,7 +104,7 @@ Point3 Triangulate(const Observations &observations, double *error, bool optimiz
 
     if (error != nullptr)
     {
-        Vec residuals(2 * num_points);
+        Vec residuals{2 * num_points};
         functor(x, residuals);
         *error = residuals.squaredNorm();
     }
@@ -121,7 +121,7 @@ bool FindExtrinsics(const Mat3 &E, const Point2Vec &pts1, const Point2Vec &pts2,
     Vec3 t0;    t0.setZero();
 
     // Find the SVD of E
-    Eigen::JacobiSVD<Mat3> svd(E, Eigen::ComputeFullU | Eigen::ComputeFullV);
+    Eigen::JacobiSVD<Mat3> svd{E, Eigen::ComputeFullU | Eigen::ComputeFullV};
     Mat3 U  = svd.matrixU();
     Mat3 Vt = svd.matrixV().transpose();
 

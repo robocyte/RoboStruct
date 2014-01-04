@@ -111,10 +111,10 @@ void RefineCamera(Camera *camera, const Point3Vec &points, const Point2Vec &proj
     if (adjust_focal)   x << camera->m_t.x(), camera->m_t.y(), camera->m_t.z(), 0.0, 0.0, 0.0, camera->m_focal_length, camera->m_k(0), camera->m_k(1);
     else                x << camera->m_t.x(), camera->m_t.y(), camera->m_t.z(), 0.0, 0.0, 0.0;
 
-    CameraResidual functor(*camera, points, projections, adjust_focal);
+    CameraResidual functor{*camera, points, projections, adjust_focal};
 
-    Eigen::NumericalDiff<CameraResidual> numDiff(functor);
-    Eigen::LevenbergMarquardt<Eigen::NumericalDiff<CameraResidual>> lm(numDiff);
+    Eigen::NumericalDiff<CameraResidual> numDiff{functor};
+    Eigen::LevenbergMarquardt<Eigen::NumericalDiff<CameraResidual>> lm{numDiff};
 
     lm.parameters.ftol   = 1.0e-12;
     lm.parameters.xtol   = 1.0e-12;

@@ -65,12 +65,12 @@ Vec3 RotationMatrixToAngleAxis(const Mat3 &R)
 
 Point3 EuclideanToHomogenous(const Point2 &x)
 {
-    return Point3(x.x(), x.y(), 1.0);
+    return Point3{x.x(), x.y(), 1.0};
 }
 
 Point4 EuclideanToHomogenous(const Point3 &x)
 {
-    return Point4(x.x(), x.y(), x.z(), 1.0);
+    return Point4{x.x(), x.y(), x.z(), 1.0};
 }
 
 Point2 HomogenousToEuclidean(const Point3 &x)

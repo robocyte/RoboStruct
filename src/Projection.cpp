@@ -81,15 +81,15 @@ namespace
 
     Mat34 RefineProjectionMatrixNonlinear(const Mat34& P, const Point3Vec &points, const Point2Vec &projections)
     {
-        Vec x(11);
+        Vec x{11};
 
         x.segment(0, 4) = P.row(0);
         x.segment(4, 4) = P.row(1);
         x.segment(8, 3) = P.block<1, 3>(2, 0);
 
-        ProjectionResidual functor(points, projections);
-        Eigen::NumericalDiff<ProjectionResidual> numDiff(functor);
-        Eigen::LevenbergMarquardt<Eigen::NumericalDiff<ProjectionResidual>> lm(numDiff);
+        ProjectionResidual functor{points, projections};
+        Eigen::NumericalDiff<ProjectionResidual> numDiff{functor};
+        Eigen::LevenbergMarquardt<Eigen::NumericalDiff<ProjectionResidual>> lm{numDiff};
 
         lm.parameters.ftol   = 1.0e-5;
         lm.parameters.xtol   = 1.0e-5;

@@ -25,7 +25,7 @@ ImageData::ImageData(const std::string &filename, const std::string &filename_sh
 
 bool ImageData::GetExifInfo()
 {
-    ExifReader er(m_filename.c_str());
+    ExifReader er{m_filename.c_str()};
 
     //TODO: ReadExifInfo maybe should take ref to this as argument..
     if (er.ReadExifInfo())
@@ -54,20 +54,20 @@ void ImageData::DetectFeatures(const Options& opts)
     {
     case 0: // Detect YAPE/Daisy features
         {
-            cv::YAPE YapeDet(   opts.yape_radius,
-                                opts.yape_threshold,
-                                opts.yape_octaves,
-                                opts.yape_views,
-                                opts.yape_base_feature_size,
-                                opts.yape_clustering_distance);
+            cv::YAPE YapeDet{opts.yape_radius,
+                             opts.yape_threshold,
+                             opts.yape_octaves,
+                             opts.yape_views,
+                             opts.yape_base_feature_size,
+                             opts.yape_clustering_distance};
             YapeDet(grey_img, keys);
 
-            daisy DaisyDesc = daisy();
+            daisy DaisyDesc{};
             DaisyDesc.set_image(grey_img.data, m_height, m_width);
-            DaisyDesc.set_parameters(   opts.daisy_radius,
-                                        opts.daisy_radius_quantization,
-                                        opts.daisy_angular_quantization,
-                                        opts.daisy_histogram_quantization);
+            DaisyDesc.set_parameters(opts.daisy_radius,
+                                     opts.daisy_radius_quantization,
+                                     opts.daisy_angular_quantization,
+                                     opts.daisy_histogram_quantization);
             DaisyDesc.verbose(0);
             DaisyDesc.initialize_single_descriptor_mode();
 
@@ -88,11 +88,11 @@ void ImageData::DetectFeatures(const Options& opts)
             if (opts.surf_desc_extended)    m_desc_size = 128;
             else                            m_desc_size = 64;
 
-            cv::SURF Surf(  opts.surf_det_hessian_threshold,
-                            opts.surf_common_octaves,
-                            opts.surf_common_octave_layers,
-                            opts.surf_desc_extended,
-                            opts.surf_desc_upright);
+            cv::SURF Surf{opts.surf_det_hessian_threshold,
+                          opts.surf_common_octaves,
+                          opts.surf_common_octave_layers,
+                          opts.surf_desc_extended,
+                          opts.surf_desc_upright};
             Surf(grey_img, cv::Mat(), keys, m_descriptors);
             break;
         }
@@ -120,7 +120,7 @@ void ImageData::DetectFeatures(const Options& opts)
             options.save_keypoints          = DEFAULT_SAVE_KEYPOINTS;
             options.verbosity               = DEFAULT_VERBOSITY;
 
-            AKAZE akaze(options);
+            AKAZE akaze{options};
             akaze.Create_Nonlinear_Scale_Space(working_img);
             akaze.Feature_Detection(keys);
             akaze.Compute_Descriptors(keys, m_descriptors_akaze);
@@ -137,7 +137,8 @@ void ImageData::SaveDescriptors(bool clear)
 {
     if (m_descriptors.empty()) return;
 
-    std::string filename = m_filename;
+    std::string filename{m_filename};
+
     filename.replace(filename.find(".jpg"), 4, ".desc");
 
     SaveDescriptorsToFileBinary(filename, m_descriptors);
@@ -149,7 +150,7 @@ void ImageData::LoadDescriptors()
 {
     if (!m_descriptors.empty()) return;
 
-    std::string filename = m_filename;
+    std::string filename{m_filename};
     filename.replace(filename.find(".jpg"), 4, ".desc");
 
     LoadDescriptorsFromFileBinary(filename, m_descriptors);
@@ -170,21 +171,21 @@ void ImageData::ConvertOpenCVKeys(const std::vector<cv::KeyPoint>& keys, const c
         int xf = static_cast<int>(std::floor(key.pt.x)), yf = static_cast<int>(std::floor(key.pt.y));
         const uchar *ptr = image.ptr<uchar>(yf);
 
-        m_keys.push_back(KeyPoint(x, y, ptr[3 * xf + 2], ptr[3 * xf + 1], ptr[3 * xf]));
+        m_keys.push_back(KeyPoint{x, y, ptr[3 * xf + 2], ptr[3 * xf + 1], ptr[3 * xf]});
     }
 }
 
 void ImageData::ClearDescriptors()
 {
-    std::vector<float>().swap(m_descriptors);   // STL swap trick
+    std::vector<float>{}.swap(m_descriptors);   // STL swap trick
 }
 
 void ImageData::SetTracks()
 {
     for (unsigned int i = 0; i < m_visible_points.size(); i++)
     {
-        int track(m_visible_points[i]);
-        int key(m_visible_keys[i]);
+        int track{m_visible_points[i]};
+        int key{m_visible_keys[i]};
 
         m_keys[key].m_track = track;
     }

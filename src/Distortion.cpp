@@ -2,12 +2,12 @@
 
 Vec6 InvertDistortion(double r0, double r1, const Vec6 &k_in)
 {
-    int num_eqns = 20;
-    int num_vars = 6;
+    const int num_eqns = 20;
+    const int num_vars = 6;
 
-    Eigen::Matrix<double, 20, 6>    A;
-    Eigen::Matrix<double, 20, 1>    b;
-    Eigen::Matrix<double, 6, 1>     x;
+    Eigen::Matrix<double, 20, 6> A;
+    Eigen::Matrix<double, 20, 1> b;
+    Eigen::Matrix<double, 6, 1>  x;
 
     for (int i = 0; i < num_eqns; i++)
     {
@@ -21,7 +21,7 @@ Vec6 InvertDistortion(double r0, double r1, const Vec6 &k_in)
         }
 
         double ap = 1.0;
-        for (int j = 0; j < 6; j++)
+        for (int j = 0; j < num_vars; j++)
         {
             A(i, j) = ap;
             ap *= a;
