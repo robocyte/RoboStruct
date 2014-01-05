@@ -73,6 +73,8 @@ class MainFrame_base : public wxFrame
 			ID_TURNTABLE_SPEED_SLIDER,
 			ID_CAMERA_MESH_CHOICE,
 			ID_PANE_MATCHES,
+			ID_RESET_OPTIONS,
+			ID_SAVE_OPTIONS,
 			ID_SAVE_LOG,
 			ID_CLEAR_LOG
 		};
@@ -99,9 +101,9 @@ class MainFrame_base : public wxFrame
 		wxListCtrl* m_img_ctrl;
 		wxPanel* m_window_image_preview;
 		wxPanel* m_window_options;
+		wxAuiToolBar* m_toolbar_options;
 		wxPropertyGrid* m_pg_options;
 		
-		wxButton* m_btn_reset_options;
 		wxPanel* m_window_log;
 		wxTextCtrl* m_tc_log;
 		wxAuiToolBar* m_toolbar_log;

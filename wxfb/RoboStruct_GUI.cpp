@@ -15,7 +15,7 @@ MainFrame_base::MainFrame_base( wxWindow* parent, wxWindowID id, const wxString&
 	this->SetForegroundColour( wxColour( 238, 238, 242 ) );
 	this->SetBackgroundColour( wxColour( 238, 238, 242 ) );
 	m_mgr.SetManagedWindow(this);
-	m_mgr.SetFlags(wxAUI_MGR_ALLOW_FLOATING|wxAUI_MGR_HINT_FADE|wxAUI_MGR_LIVE_RESIZE|wxAUI_MGR_NO_VENETIAN_BLINDS_FADE|wxAUI_MGR_TRANSPARENT_DRAG|wxAUI_MGR_TRANSPARENT_HINT);
+	m_mgr.SetFlags(wxAUI_MGR_ALLOW_FLOATING|wxAUI_MGR_HINT_FADE|wxAUI_MGR_LIVE_RESIZE|wxAUI_MGR_NO_VENETIAN_BLINDS_FADE|wxAUI_MGR_TRANSPARENT_DRAG|wxAUI_MGR_TRANSPARENT_HINT|wxAUI_MGR_ALLOW_ACTIVE_PANE);
 	
 	m_statusbar = this->CreateStatusBar( 4, wxST_SIZEGRIP, wxID_ANY );
 	m_statusbar->SetForegroundColour( wxColour( 238, 238, 242 ) );
@@ -245,7 +245,7 @@ MainFrame_base::MainFrame_base( wxWindow* parent, wxWindowID id, const wxString&
 	
 	int GLCanvasAttributes[] = {WX_GL_RGBA, 1, WX_GL_DOUBLEBUFFER, 1, WX_GL_SAMPLES, 8, 0};
 	m_gl_canvas = new wxGLCanvas(m_panel8, -1, GLCanvasAttributes);
-	m_gl_canvas->SetBackgroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_BTNSHADOW ) );
+	m_gl_canvas->SetBackgroundColour( wxColour( 238, 238, 242 ) );
 	
 	bSizer8->Add( m_gl_canvas, 1, wxEXPAND, 5 );
 	
@@ -319,15 +319,23 @@ MainFrame_base::MainFrame_base( wxWindow* parent, wxWindowID id, const wxString&
 	wxBoxSizer* bSizer2;
 	bSizer2 = new wxBoxSizer( wxVERTICAL );
 	
-	m_pg_options = new wxPropertyGrid(m_window_options, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxPG_BOLD_MODIFIED | wxPG_DEFAULT_STYLE);
+	m_toolbar_options = new wxAuiToolBar( m_window_options, wxID_ANY, wxDefaultPosition, wxDefaultSize,  wxAUI_TB_HORZ_LAYOUT|wxNO_BORDER);
+	m_toolbar_options->SetToolBitmapSize(wxSize(22, 22));
+	m_toolbar_options->SetToolPacking(2);
+	m_toolbar_options->SetBackgroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOW ) );
+	
+	m_toolbar_options->AddTool(ID_RESET_OPTIONS, wxT("Reset options"), wxIcon("reset_icon", wxBITMAP_TYPE_ICO_RESOURCE, 22, 22), wxNullBitmap, wxITEM_NORMAL, "Reset options", "Reset options", NULL); 
+	m_toolbar_options->AddTool(ID_SAVE_OPTIONS, wxT("Save options"), wxIcon("floppy_icon", wxBITMAP_TYPE_ICO_RESOURCE, 22, 22), wxNullBitmap, wxITEM_NORMAL, "Save options", "Save options", NULL); 
+	
+	m_toolbar_options->Realize(); 
+	
+	bSizer2->Add( m_toolbar_options, 0, wxEXPAND, 5 );
+	
+	m_pg_options = new wxPropertyGrid(m_window_options, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxPG_BOLD_MODIFIED | wxPG_DEFAULT_STYLE | wxNO_BORDER);
 	
 	m_pg_options->SetBackgroundColour( wxColour( 238, 238, 242 ) );
 	
 	bSizer2->Add( m_pg_options, 1, wxEXPAND, 5 );
-	
-	m_btn_reset_options = new wxButton( m_window_options, wxID_ANY, wxT("Reset"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer2->Add( m_btn_reset_options, 0, 0, 5 );
-	
 	
 	m_window_options->SetSizer( bSizer2 );
 	m_window_options->Layout();
@@ -343,16 +351,17 @@ MainFrame_base::MainFrame_base( wxWindow* parent, wxWindowID id, const wxString&
 	
 	m_tc_log = new wxTextCtrl( m_window_log, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_DONTWRAP|wxTE_MULTILINE|wxTE_READONLY|wxNO_BORDER );
 	m_tc_log->SetMaxLength( 0 ); 
-	m_tc_log->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_GRAYTEXT ) );
-	m_tc_log->SetBackgroundColour( wxColour( 238, 238, 242 ) );
+	m_tc_log->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOWTEXT ) );
+	m_tc_log->SetBackgroundColour( wxColour( 245, 245, 245 ) );
 	
 	bSizer3->Add( m_tc_log, 1, wxEXPAND, 5 );
 	
-	m_toolbar_log = new wxAuiToolBar(m_window_log, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_VERTICAL);
-	m_toolbar_log->SetToolBitmapSize(wxSize(24, 24));
-	m_toolbar_log->SetToolPacking(2);
-
-	m_toolbar_log->AddTool(ID_SAVE_LOG,	 "Save Log",  wxIcon("save_icon", wxBITMAP_TYPE_ICO_RESOURCE, 22, 22),	 wxNullBitmap, wxITEM_NORMAL, "Save the log to a .txt file", "Save the log to a .txt file", NULL);
+	m_toolbar_log = new wxAuiToolBar( m_window_log, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_DEFAULT_STYLE|wxAUI_TB_OVERFLOW|wxAUI_TB_VERTICAL );
+	m_toolbar_log->SetToolBitmapSize( wxSize( 24,24 ) );
+	m_toolbar_log->SetToolPacking( 2 );
+	m_toolbar_log->SetBackgroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOW ) );
+	
+	m_toolbar_log->AddTool(ID_SAVE_LOG,	 "Save Log",  wxIcon("floppy_icon", wxBITMAP_TYPE_ICO_RESOURCE, 22, 22),	 wxNullBitmap, wxITEM_NORMAL, "Save the log to a .txt file", "Save the log to a .txt file", NULL);
 	m_toolbar_log->AddTool(ID_CLEAR_LOG, "Clear log", wxIcon("delete_icon", wxBITMAP_TYPE_ICO_RESOURCE, 22, 22), wxNullBitmap, wxITEM_NORMAL, "Clear the log window", "Clear the log window", NULL);
 	
 	m_toolbar_log->Realize(); 
@@ -452,7 +461,7 @@ MainFrame_base::MainFrame_base( wxWindow* parent, wxWindowID id, const wxString&
 	m_window_image_preview->Connect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( MainFrame_base::OnImagePreviewMouse ), NULL, this );
 	m_window_image_preview->Connect( wxEVT_PAINT, wxPaintEventHandler( MainFrame_base::OnImagePreviewPaint ), NULL, this );
 	m_window_image_preview->Connect( wxEVT_SIZE, wxSizeEventHandler( MainFrame_base::OnImagePreviewResize ), NULL, this );
-	m_btn_reset_options->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainFrame_base::OnResetOptions ), NULL, this );
+	this->Connect( ID_RESET_OPTIONS, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnResetOptions ) );
 	this->Connect( ID_SAVE_LOG, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnSaveLog ) );
 	this->Connect( ID_CLEAR_LOG, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnClearLog ) );
 }
@@ -531,7 +540,7 @@ MainFrame_base::~MainFrame_base()
 	m_window_image_preview->Disconnect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( MainFrame_base::OnImagePreviewMouse ), NULL, this );
 	m_window_image_preview->Disconnect( wxEVT_PAINT, wxPaintEventHandler( MainFrame_base::OnImagePreviewPaint ), NULL, this );
 	m_window_image_preview->Disconnect( wxEVT_SIZE, wxSizeEventHandler( MainFrame_base::OnImagePreviewResize ), NULL, this );
-	m_btn_reset_options->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainFrame_base::OnResetOptions ), NULL, this );
+	this->Disconnect( ID_RESET_OPTIONS, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnResetOptions ) );
 	this->Disconnect( ID_SAVE_LOG, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnSaveLog ) );
 	this->Disconnect( ID_CLEAR_LOG, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnClearLog ) );
 	
