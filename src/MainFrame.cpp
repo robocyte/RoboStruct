@@ -32,9 +32,22 @@ public:
     virtual void DrawBackground(wxDC& dc, wxWindow* wnd, const wxRect& rect)
     {
         wxUnusedVar(wnd);
-        wxColour initialColour = wxColour{240, 240, 240};
-        wxColour endColour     = wxColour{240, 240, 240};
-        dc.GradientFillLinear(rect, initialColour, endColour);
+        dc.GradientFillLinear(rect, wxColour{238, 238, 242}, wxColour{238, 238, 242});
+    }
+};
+
+class wxAuiSolidTabArt : public wxAuiDefaultTabArt
+{
+public:
+    wxAuiSolidTabArt() = default;
+    virtual ~wxAuiSolidTabArt() {}
+    
+    wxAuiSolidTabArt *Clone() { return new wxAuiSolidTabArt{}; }
+
+    virtual void DrawBackground(wxDC& dc, wxWindow* wnd, const wxRect& rect)
+    {
+        wxUnusedVar(wnd);
+        dc.GradientFillLinear(rect, wxColour{0, 122, 204}, wxColour{0, 122, 204});
     }
 };
 
@@ -48,7 +61,9 @@ MainFrame::MainFrame(wxWindow* parent)
     m_pan_cursor    = wxCursor{"pan_cursor"};
     m_zoom_cursor   = wxCursor{"zoom_cursor"};
 
+    m_toolbar->SetArtProvider(new wxAuiSolidToolBarArt{});
     m_toolbar_log->SetArtProvider(new wxAuiSolidToolBarArt{});
+    m_window_viewport->SetArtProvider(new wxAuiSimpleTabArt{});
 
     // Setup the image list
     m_img_ctrl->InsertColumn(0, "Name",         wxLIST_FORMAT_LEFT, 60);

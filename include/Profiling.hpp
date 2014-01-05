@@ -89,6 +89,7 @@ struct ProfileManager
 
 struct ScopedTimer
 {
+    ScopedTimer() = delete;
     ScopedTimer(ProfileManager &mgr, const std::string &name)
         : m_profile_manager(mgr)
         , m_name(name)
@@ -100,6 +101,9 @@ struct ScopedTimer
     {
         m_profile_manager.Add(m_name, duration_cast<milliseconds>(high_resolution_clock::now() - m_start));
     }
+
+    ScopedTimer(const ScopedTimer&) = delete;
+    ScopedTimer& operator=(const ScopedTimer&) = delete;
 
     ProfileManager&                    m_profile_manager;
     std::string                        m_name;

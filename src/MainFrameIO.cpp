@@ -367,7 +367,7 @@ void MainFrame::SaveMeshLabFile()
                      <<             Rot(1, 0) << " " << Rot(1, 1) << " " << Rot(1, 2) << " " << "0 "
                      <<             Rot(2, 0) << " " << Rot(2, 1) << " " << Rot(2, 2) << " " << "0 "
                      <<             R"(0 0 0 1 "/>)" << std::endl
-                     << R"(   <Plane semantic="" fileName="pmvs/visualize/)" << img.m_filename_short << R"("/>)" << std::endl
+                     << R"(   <Plane semantic="" fileName="cmvs/visualize/)" << img.m_filename_short << R"("/>)" << std::endl
                      << R"(  </MLRaster>)" << std::endl;
         }
 

@@ -73,7 +73,7 @@ struct Options
     double          loss_function_scale = 0.5;
 
     // Display options
-    wxColour    viewport_top_color = { 77, 77, 77 };
+    wxColour    viewport_top_color = { 65, 75, 80 };
     wxColour    viewport_bottom_color = { 204, 204, 204 };
     bool        trackball_visibility = true;
     bool        grid_visibility = true;

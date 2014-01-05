@@ -12,10 +12,15 @@
 MainFrame_base::MainFrame_base( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
 {
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+	this->SetForegroundColour( wxColour( 238, 238, 242 ) );
+	this->SetBackgroundColour( wxColour( 238, 238, 242 ) );
 	m_mgr.SetManagedWindow(this);
-	m_mgr.SetFlags(wxAUI_MGR_ALLOW_FLOATING|wxAUI_MGR_HINT_FADE|wxAUI_MGR_NO_VENETIAN_BLINDS_FADE|wxAUI_MGR_TRANSPARENT_DRAG|wxAUI_MGR_TRANSPARENT_HINT);
+	m_mgr.SetFlags(wxAUI_MGR_ALLOW_FLOATING|wxAUI_MGR_HINT_FADE|wxAUI_MGR_LIVE_RESIZE|wxAUI_MGR_NO_VENETIAN_BLINDS_FADE|wxAUI_MGR_TRANSPARENT_DRAG|wxAUI_MGR_TRANSPARENT_HINT);
 	
 	m_statusbar = this->CreateStatusBar( 4, wxST_SIZEGRIP, wxID_ANY );
+	m_statusbar->SetForegroundColour( wxColour( 238, 238, 242 ) );
+	m_statusbar->SetBackgroundColour( wxColour( 238, 238, 242 ) );
+	
 	m_menubar = new wxMenuBar( 0 );
 	m_file_menu = new wxMenu();
 	wxMenuItem* m_menu_exit;
@@ -229,7 +234,7 @@ MainFrame_base::MainFrame_base( wxWindow* parent, wxWindowID id, const wxString&
 	m_toolbar->AddTool( ID_VIEW_LOG, wxT("Log"), wxICON( log_icon ), wxNullBitmap, wxITEM_NORMAL, wxT("Show log window"), wxT("Show log window"), NULL ); 
 	
 	m_toolbar->Realize();
-	m_mgr.AddPane( m_toolbar, wxAuiPaneInfo().Top().CaptionVisible( false ).CloseButton( false ).PaneBorder( false ).Movable( false ).Dock().Resizable().FloatingSize( wxSize( -1,-1 ) ).BottomDockable( false ).TopDockable( false ).LeftDockable( false ).RightDockable( false ).Floatable( false ).Layer( 10 ).ToolbarPane() );
+	m_mgr.AddPane( m_toolbar, wxAuiPaneInfo().Top().CaptionVisible( false ).CloseButton( false ).PaneBorder( false ).Movable( false ).Dock().Resizable().FloatingSize( wxSize( -1,-1 ) ).BottomDockable( false ).TopDockable( false ).LeftDockable( false ).RightDockable( false ).Floatable( false ).Layer( 10 ) );
 	
 	m_window_viewport = new wxAuiNotebook(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_NB_TAB_EXTERNAL_MOVE | wxAUI_NB_TAB_SPLIT | wxNO_BORDER );
 	m_mgr.AddPane(m_window_viewport, wxAuiPaneInfo().CentrePane().Name("Viewport").Caption("Viewport").CaptionVisible(true).MaximizeButton(true).MinimizeButton(false).PinButton(false).CloseButton(false));
@@ -285,20 +290,28 @@ MainFrame_base::MainFrame_base( wxWindow* parent, wxWindowID id, const wxString&
 	bSizer1 = new wxBoxSizer( wxVERTICAL );
 	
 	m_dir_picker = new wxDirPickerCtrl( m_window_image_browser, wxID_ANY, wxT("D:\\Reconstruct\\TestData\\"), wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE|wxNO_BORDER );
-	bSizer1->Add( m_dir_picker, 0, wxEXPAND, 5 );
+	m_dir_picker->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOW ) );
+	m_dir_picker->SetBackgroundColour( wxColour( 238, 238, 242 ) );
 	
-	m_img_ctrl = new wxListCtrl( m_window_image_browser, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_HRULES|wxLC_REPORT|wxLC_SINGLE_SEL|wxNO_BORDER );
+	bSizer1->Add( m_dir_picker, 0, wxEXPAND|wxALL, 5 );
+	
+	m_img_ctrl = new wxListCtrl( m_window_image_browser, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_HRULES|wxLC_REPORT|wxLC_SINGLE_SEL|wxLC_VRULES|wxNO_BORDER );
+	m_img_ctrl->SetBackgroundColour( wxColour( 238, 238, 242 ) );
+	
 	bSizer1->Add( m_img_ctrl, 1, wxEXPAND, 5 );
 	
 	
 	m_window_image_browser->SetSizer( bSizer1 );
 	m_window_image_browser->Layout();
 	m_window_image_preview = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxSize( 370,200 ), wxNO_BORDER|wxTAB_TRAVERSAL );
+	m_window_image_preview->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOW ) );
+	m_window_image_preview->SetBackgroundColour( wxColour( 238, 238, 242 ) );
 	m_window_image_preview->SetMinSize( wxSize( 370,200 ) );
 	
 	m_mgr.AddPane( m_window_image_preview, wxAuiPaneInfo() .Name( wxT("Image preview") ).Left() .Caption( wxT("Image preview") ).MaximizeButton( true ).PaneBorder( false ).Dock().Resizable().FloatingSize( wxSize( 386,234 ) ).DockFixed( false ).Layer( 1 ) );
 	
 	m_window_options = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxSize( 370,200 ), wxNO_BORDER|wxTAB_TRAVERSAL );
+	m_window_options->SetBackgroundColour( wxColour( 238, 238, 242 ) );
 	m_window_options->SetMinSize( wxSize( 370,200 ) );
 	
 	m_mgr.AddPane( m_window_options, wxAuiPaneInfo() .Name( wxT("Options") ).Left() .Caption( wxT("Options") ).MaximizeButton( true ).PaneBorder( false ).Dock().Resizable().FloatingSize( wxSize( 439,316 ) ).DockFixed( false ).Layer( 1 ) );
@@ -307,6 +320,8 @@ MainFrame_base::MainFrame_base( wxWindow* parent, wxWindowID id, const wxString&
 	bSizer2 = new wxBoxSizer( wxVERTICAL );
 	
 	m_pg_options = new wxPropertyGrid(m_window_options, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxPG_BOLD_MODIFIED | wxPG_DEFAULT_STYLE);
+	
+	m_pg_options->SetBackgroundColour( wxColour( 238, 238, 242 ) );
 	
 	bSizer2->Add( m_pg_options, 1, wxEXPAND, 5 );
 	
@@ -317,14 +332,21 @@ MainFrame_base::MainFrame_base( wxWindow* parent, wxWindowID id, const wxString&
 	m_window_options->SetSizer( bSizer2 );
 	m_window_options->Layout();
 	m_window_log = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxSize( 150,150 ), wxTAB_TRAVERSAL );
+	m_window_log->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOW ) );
+	m_window_log->SetBackgroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOW ) );
 	m_window_log->SetMinSize( wxSize( 150,150 ) );
 	
 	m_mgr.AddPane( m_window_log, wxAuiPaneInfo() .Name( wxT("Log") ).Bottom() .Caption( wxT("Log") ).MaximizeButton( true ).PaneBorder( false ).Dock().Resizable().FloatingSize( wxSize( 596,244 ) ).DockFixed( false ).Row( 0 ).Layer( 0 ) );
 	
-	wxBoxSizer* bSizer3 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* bSizer3;
+	bSizer3 = new wxBoxSizer( wxHORIZONTAL );
 	
-	m_tc_log = new wxTextCtrl(m_window_log, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_DONTWRAP | wxTE_MULTILINE | wxTE_READONLY |wxNO_BORDER);
-	bSizer3->Add(m_tc_log, 1, wxEXPAND, 5);
+	m_tc_log = new wxTextCtrl( m_window_log, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_DONTWRAP|wxTE_MULTILINE|wxTE_READONLY|wxNO_BORDER );
+	m_tc_log->SetMaxLength( 0 ); 
+	m_tc_log->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_GRAYTEXT ) );
+	m_tc_log->SetBackgroundColour( wxColour( 238, 238, 242 ) );
+	
+	bSizer3->Add( m_tc_log, 1, wxEXPAND, 5 );
 	
 	m_toolbar_log = new wxAuiToolBar(m_window_log, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_VERTICAL);
 	m_toolbar_log->SetToolBitmapSize(wxSize(24, 24));
