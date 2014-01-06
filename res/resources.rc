@@ -18,6 +18,7 @@ frustrum_icon       ICON    "Frustrum.ico"
 // Button icons
 save_icon           ICON    "Save.ico"
 delete_icon         ICON    "Delete.ico"
+clear_log_icon      ICON    "Clear log.ico"
 reset_icon          ICON    "Reset.ico"
 floppy_icon         ICON    "Floppy.ico"
 

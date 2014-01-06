@@ -13,6 +13,7 @@
 
 #include "EigenTools.hpp"
 #include "MainFrame.hpp"
+#include "RoboStruct_GUI_style.hpp"
 
 #include "Eigen/Core"
 #include "Eigen/Dense"
@@ -20,36 +21,6 @@
 
 const wxEventTypeTag<wxThreadEvent> wxEVT_SFM_THREAD_UPDATE{wxNewEventType()};
 const wxEventTypeTag<wxThreadEvent> wxEVT_SFM_THREAD_COMPLETE{wxNewEventType()};
-
-class wxAuiSolidToolBarArt : public wxAuiDefaultToolBarArt
-{
-public:
-    wxAuiSolidToolBarArt() = default;
-    virtual ~wxAuiSolidToolBarArt() {}
-    
-    wxAuiToolBarArt *Clone() { return new wxAuiSolidToolBarArt{}; }
-
-    virtual void DrawBackground(wxDC& dc, wxWindow* wnd, const wxRect& rect)
-    {
-        wxUnusedVar(wnd);
-        dc.GradientFillLinear(rect, wxColour{238, 238, 242}, wxColour{238, 238, 242});
-    }
-};
-
-class wxAuiSolidTabArt : public wxAuiDefaultTabArt
-{
-public:
-    wxAuiSolidTabArt() = default;
-    virtual ~wxAuiSolidTabArt() {}
-    
-    wxAuiSolidTabArt *Clone() { return new wxAuiSolidTabArt{}; }
-
-    virtual void DrawBackground(wxDC& dc, wxWindow* wnd, const wxRect& rect)
-    {
-        wxUnusedVar(wnd);
-        dc.GradientFillLinear(rect, wxColour{0, 122, 204}, wxColour{0, 122, 204});
-    }
-};
 
 MainFrame::MainFrame(wxWindow* parent)
     : MainFrame_base(parent)
@@ -65,12 +36,6 @@ MainFrame::MainFrame(wxWindow* parent)
     m_toolbar_log->SetArtProvider(new wxAuiSolidToolBarArt{});
     m_toolbar_options->SetArtProvider(new wxAuiSolidToolBarArt{});
 
-    m_window_viewport->SetArtProvider(new wxAuiSimpleTabArt{});
-    m_window_viewport->GetAuiManager().GetArtProvider()->SetColor(wxAUI_DOCKART_BORDER_COLOUR, wxColour{238, 238, 242});
-    m_window_viewport->GetAuiManager().GetArtProvider()->SetColor(wxAUI_DOCKART_SASH_COLOUR, wxColour{238, 238, 242});
-    m_window_viewport->GetAuiManager().GetArtProvider()->SetColor(wxAUI_DOCKART_BACKGROUND_COLOUR, wxColour{238, 238, 242});
-    m_window_viewport->GetAuiManager().GetArtProvider()->SetMetric(wxAUI_DOCKART_PANE_BORDER_SIZE, 0);
-     
     m_mgr.GetArtProvider()->SetColor(wxAUI_DOCKART_BORDER_COLOUR, wxColour{238, 238, 242});
     m_mgr.GetArtProvider()->SetColor(wxAUI_DOCKART_SASH_COLOUR, wxColour{238, 238, 242});
     m_mgr.GetArtProvider()->SetColor(wxAUI_DOCKART_BACKGROUND_COLOUR, wxColour{238, 238, 242});
@@ -84,6 +49,7 @@ MainFrame::MainFrame(wxWindow* parent)
     m_mgr.GetArtProvider()->SetColor(wxAUI_DOCKART_INACTIVE_CAPTION_TEXT_COLOUR, wxColour{20, 20, 20});
     m_mgr.GetArtProvider()->SetFont(wxAUI_DOCKART_CAPTION_FONT, wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
     m_mgr.GetArtProvider()->SetMetric(wxAUI_DOCKART_CAPTION_SIZE, 19);
+    m_mgr.Update();
 
     // Setup the image list
     m_img_ctrl->InsertColumn(0, "Name",         wxLIST_FORMAT_LEFT, 60);

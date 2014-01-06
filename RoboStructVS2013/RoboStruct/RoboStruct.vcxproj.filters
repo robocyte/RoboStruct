@@ -145,6 +145,9 @@
     <ClInclude Include="..\..\include\Profiling.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\wxfb\RoboStruct_GUI_style.hpp">
+      <Filter>wxFormBuilder</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\wxfb\RoboStruct.fbp">

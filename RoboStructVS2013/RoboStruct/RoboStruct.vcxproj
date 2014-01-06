@@ -222,6 +222,7 @@
     <ClInclude Include="..\..\include\Triangulation.hpp" />
     <ClInclude Include="..\..\include\Utilities.hpp" />
     <ClInclude Include="..\..\wxfb\RoboStruct_GUI.h" />
+    <ClInclude Include="..\..\wxfb\RoboStruct_GUI_style.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\wxfb\RoboStruct.fbp" />

@@ -5,6 +5,8 @@
 // PLEASE DO "NOT" EDIT THIS FILE!
 ///////////////////////////////////////////////////////////////////////////
 
+#include "RoboStruct_GUI_style.hpp"
+
 #include "RoboStruct_GUI.h"
 
 ///////////////////////////////////////////////////////////////////////////
@@ -236,7 +238,7 @@ MainFrame_base::MainFrame_base( wxWindow* parent, wxWindowID id, const wxString&
 	m_toolbar->Realize();
 	m_mgr.AddPane( m_toolbar, wxAuiPaneInfo().Top().CaptionVisible( false ).CloseButton( false ).PaneBorder( false ).Movable( false ).Dock().Resizable().FloatingSize( wxSize( -1,-1 ) ).BottomDockable( false ).TopDockable( false ).LeftDockable( false ).RightDockable( false ).Floatable( false ).Layer( 10 ) );
 	
-	m_window_viewport = new wxAuiNotebook(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_NB_TAB_EXTERNAL_MOVE | wxAUI_NB_TAB_SPLIT | wxNO_BORDER );
+	m_window_viewport = new wxAuiMyNotebook(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_NB_TAB_EXTERNAL_MOVE|wxAUI_NB_TAB_SPLIT|wxAUI_NB_BOTTOM|wxNO_BORDER);
 	m_mgr.AddPane(m_window_viewport, wxAuiPaneInfo().CentrePane().Name("Viewport").Caption("Viewport").CaptionVisible(true).MaximizeButton(true).MinimizeButton(false).PinButton(false).CloseButton(false));
 	
 	m_panel8 = new wxPanel( m_window_viewport, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER|wxTAB_TRAVERSAL );
@@ -337,6 +339,7 @@ MainFrame_base::MainFrame_base( wxWindow* parent, wxWindowID id, const wxString&
 	
 	bSizer2->Add( m_pg_options, 1, wxEXPAND, 5 );
 	
+	
 	m_window_options->SetSizer( bSizer2 );
 	m_window_options->Layout();
 	m_window_log = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxSize( 150,150 ), wxTAB_TRAVERSAL );
@@ -357,12 +360,12 @@ MainFrame_base::MainFrame_base( wxWindow* parent, wxWindowID id, const wxString&
 	bSizer3->Add( m_tc_log, 1, wxEXPAND, 5 );
 	
 	m_toolbar_log = new wxAuiToolBar( m_window_log, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_DEFAULT_STYLE|wxAUI_TB_OVERFLOW|wxAUI_TB_VERTICAL );
-	m_toolbar_log->SetToolBitmapSize( wxSize( 24,24 ) );
+	m_toolbar_log->SetToolBitmapSize( wxSize(22, 22) );
 	m_toolbar_log->SetToolPacking( 2 );
 	m_toolbar_log->SetBackgroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOW ) );
 	
 	m_toolbar_log->AddTool(ID_SAVE_LOG,	 "Save Log",  wxIcon("floppy_icon", wxBITMAP_TYPE_ICO_RESOURCE, 22, 22),	 wxNullBitmap, wxITEM_NORMAL, "Save the log to a .txt file", "Save the log to a .txt file", NULL);
-	m_toolbar_log->AddTool(ID_CLEAR_LOG, "Clear log", wxIcon("delete_icon", wxBITMAP_TYPE_ICO_RESOURCE, 22, 22), wxNullBitmap, wxITEM_NORMAL, "Clear the log window", "Clear the log window", NULL);
+	m_toolbar_log->AddTool(ID_CLEAR_LOG, "Clear log", wxIcon("clear_log_icon", wxBITMAP_TYPE_ICO_RESOURCE, 22, 22), wxNullBitmap, wxITEM_NORMAL, "Clear the log window", "Clear the log window", NULL);
 	
 	m_toolbar_log->Realize(); 
 	

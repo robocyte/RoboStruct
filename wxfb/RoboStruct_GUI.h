@@ -10,6 +10,8 @@
 
 #include <wx/artprov.h>
 #include <wx/xrc/xmlres.h>
+class wxAuiMyNotebook;
+
 #include <wx/statusbr.h>
 #include <wx/gdicmn.h>
 #include <wx/font.h>
@@ -33,7 +35,6 @@
 #include <wx/listctrl.h>
 #include "wx/propgrid/propgrid.h"
 #include "wx/propgrid/advprops.h"
-#include <wx/button.h>
 #include <wx/textctrl.h>
 #include <wx/frame.h>
 
@@ -89,7 +90,7 @@ class MainFrame_base : public wxFrame
 		wxAuiToolBar* m_toolbar;
 		wxSlider* m_tb_turntable_speed_slider;
 		wxChoice* m_tb_camera_mesh_choice;
-		wxAuiNotebook* m_window_viewport;
+		wxAuiMyNotebook* m_window_viewport;
 		wxPanel* m_panel8;
 		wxGLCanvas *m_gl_canvas;
 		wxPanel* m_pane_matches;
