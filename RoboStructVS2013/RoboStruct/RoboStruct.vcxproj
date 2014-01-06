@@ -197,6 +197,7 @@
     <ClCompile Include="..\..\src\Poly.cpp" />
     <ClCompile Include="..\..\src\Projection.cpp" />
     <ClCompile Include="..\..\src\RoboStruct.cpp" />
+    <ClCompile Include="..\..\src\RoboStruct_GUI_style.cpp" />
     <ClCompile Include="..\..\src\Sfm.cpp" />
     <ClCompile Include="..\..\src\Triangulation.cpp" />
     <ClCompile Include="..\..\wxfb\RoboStruct_GUI.cpp" />

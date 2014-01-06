@@ -10,6 +10,7 @@ bool MyApp::OnInit()
 
     auto frame = new MainFrame{};
 
+    frame->InitializeGuiStyle();
     frame->InitializeLog();
     frame->InitializeOpenGL();
     frame->InitializeScene();

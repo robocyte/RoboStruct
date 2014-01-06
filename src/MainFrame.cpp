@@ -32,25 +32,6 @@ MainFrame::MainFrame(wxWindow* parent)
     m_pan_cursor    = wxCursor{"pan_cursor"};
     m_zoom_cursor   = wxCursor{"zoom_cursor"};
 
-    m_toolbar->SetArtProvider(new wxAuiSolidToolBarArt{});
-    m_toolbar_log->SetArtProvider(new wxAuiSolidToolBarArt{});
-    m_toolbar_options->SetArtProvider(new wxAuiSolidToolBarArt{});
-
-    m_mgr.GetArtProvider()->SetColor(wxAUI_DOCKART_BORDER_COLOUR, wxColour{238, 238, 242});
-    m_mgr.GetArtProvider()->SetColor(wxAUI_DOCKART_SASH_COLOUR, wxColour{238, 238, 242});
-    m_mgr.GetArtProvider()->SetColor(wxAUI_DOCKART_BACKGROUND_COLOUR, wxColour{238, 238, 242});
-    m_mgr.GetArtProvider()->SetMetric(wxAUI_DOCKART_PANE_BORDER_SIZE, 0);
-    m_mgr.GetArtProvider()->SetColor(wxAUI_DOCKART_SASH_COLOUR, wxColour{238, 238, 242});
-    m_mgr.GetArtProvider()->SetColor(wxAUI_DOCKART_ACTIVE_CAPTION_COLOUR, wxColour{0, 122, 204});
-    m_mgr.GetArtProvider()->SetColor(wxAUI_DOCKART_ACTIVE_CAPTION_GRADIENT_COLOUR, wxColour{0, 122, 204});
-    m_mgr.GetArtProvider()->SetColor(wxAUI_DOCKART_ACTIVE_CAPTION_TEXT_COLOUR, wxColour{255, 255, 255});
-    m_mgr.GetArtProvider()->SetColor(wxAUI_DOCKART_INACTIVE_CAPTION_COLOUR, wxColour{238, 238, 242});
-    m_mgr.GetArtProvider()->SetColor(wxAUI_DOCKART_INACTIVE_CAPTION_GRADIENT_COLOUR, wxColour{238, 238, 242});
-    m_mgr.GetArtProvider()->SetColor(wxAUI_DOCKART_INACTIVE_CAPTION_TEXT_COLOUR, wxColour{20, 20, 20});
-    m_mgr.GetArtProvider()->SetFont(wxAUI_DOCKART_CAPTION_FONT, wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
-    m_mgr.GetArtProvider()->SetMetric(wxAUI_DOCKART_CAPTION_SIZE, 19);
-    m_mgr.Update();
-
     // Setup the image list
     m_img_ctrl->InsertColumn(0, "Name",         wxLIST_FORMAT_LEFT, 60);
     m_img_ctrl->InsertColumn(1, "Resolution",   wxLIST_FORMAT_LEFT, 75);

@@ -83,6 +83,9 @@
     <ClCompile Include="..\..\src\MainFrameMatchesView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\RoboStruct_GUI_style.cpp">
+      <Filter>wxFormBuilder</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\MainFrame.hpp">

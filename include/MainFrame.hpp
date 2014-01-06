@@ -39,6 +39,7 @@ public:
     MainFrame(wxWindow* parent = nullptr);
     ~MainFrame();
 
+    void InitializeGuiStyle();
     void InitializeLog();
     void InitializeOpenGL();
     void InitializeScene();

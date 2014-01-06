@@ -359,7 +359,7 @@ MainFrame_base::MainFrame_base( wxWindow* parent, wxWindowID id, const wxString&
 	
 	bSizer3->Add( m_tc_log, 1, wxEXPAND, 5 );
 	
-	m_toolbar_log = new wxAuiToolBar( m_window_log, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_DEFAULT_STYLE|wxAUI_TB_OVERFLOW|wxAUI_TB_VERTICAL );
+	m_toolbar_log = new wxAuiToolBar( m_window_log, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_VERTICAL|wxNO_BORDER);
 	m_toolbar_log->SetToolBitmapSize( wxSize(22, 22) );
 	m_toolbar_log->SetToolPacking( 2 );
 	m_toolbar_log->SetBackgroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOW ) );
