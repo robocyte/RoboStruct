@@ -311,7 +311,7 @@ void MainFrame::SetMatchesFromTracks(int img1, int img2)
 
     // Find tracks visible from both cameras
     IntVec intersection;
-    std::set_intersection(tracks1.begin(), tracks1.end(), tracks2.begin(), tracks2.end(), std::inserter(intersection, intersection.begin()));
+    std::set_intersection(tracks1.begin(), tracks1.end(), tracks2.begin(), tracks2.end(), std::back_inserter(intersection));
 
     if (intersection.empty()) return;
 

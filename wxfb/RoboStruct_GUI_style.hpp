@@ -34,6 +34,8 @@ public:
                  int close_button_state, wxRect* out_tab_rect, wxRect* out_button_rect, int* x_extent);
 
     int GetBestTabCtrlSize(wxWindow* wnd, const wxAuiNotebookPageArray& pages, const wxSize& requiredBmp_size);
+
+    int GetIndentSize() { return 0; }
 };
 
 // Deriving my own class from wxAuiNotebook to get rid of the border, see http://forums.wxwidgets.org/viewtopic.php?t=30277
