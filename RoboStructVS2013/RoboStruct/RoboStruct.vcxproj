@@ -194,6 +194,7 @@
     <ClCompile Include="..\..\src\MainFrameIO.cpp" />
     <ClCompile Include="..\..\src\MainFrameMatchesView.cpp" />
     <ClCompile Include="..\..\src\MainFrameOptions.cpp" />
+    <ClCompile Include="..\..\src\MatchData.cpp" />
     <ClCompile Include="..\..\src\Poly.cpp" />
     <ClCompile Include="..\..\src\Projection.cpp" />
     <ClCompile Include="..\..\src\RoboStruct.cpp" />

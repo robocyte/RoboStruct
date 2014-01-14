@@ -572,7 +572,7 @@ void MainFrame::ComputeTracks()
     // Sort all match lists
     for (int i = 0; i < num_images; i++)
     {
-        std::for_each(m_matches.Begin(i), m_matches.End(i), [&](AdjListElem val)
+        std::for_each(m_matches.begin(i), m_matches.end(i), [&](AdjListElem val)
         {
             auto &list = val.m_match_list;
             std::sort(list.begin(), list.end(), [](KeypointMatch k1, KeypointMatch k2) { return k1.m_idx1 < k2.m_idx1; });
@@ -702,7 +702,7 @@ void MainFrame::MakeMatchListsSymmetric()
 
     for (unsigned int i = 0; i < num_images; i++)
     {
-        for (auto iter = m_matches.Begin(i); iter != m_matches.End(i); ++iter)
+        for (auto iter = m_matches.begin(i); iter != m_matches.end(i); ++iter)
         {
             unsigned int j = iter->m_index;
 
