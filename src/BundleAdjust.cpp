@@ -236,8 +236,8 @@ void MainFrame::SetupInitialCameraPair(CamVec &cameras, const IntVec &added_orde
     for (int i = 0; i < num_matches; i++)
     {
         // Set up the 3D point
-        int key_idx1(list[i].m_idx1);
-        int key_idx2(list[i].m_idx2);
+        int key_idx1(list[i].first);
+        int key_idx2(list[i].second);
 
         // Normalize the point
         Point3 p_norm1 = K1_inv * Point3(m_images[img_1].m_keys[key_idx1].m_coords.x(), m_images[img_1].m_keys[key_idx1].m_coords.y(), -1.0);
@@ -284,8 +284,8 @@ bool MainFrame::EstimateRelativePose(int i1, int i2, Camera *camera1, Camera *ca
 
     for (const auto &match : matches)
     {
-        projections1.push_back(m_images[i1].m_keys[match.m_idx1].m_coords);
-        projections2.push_back(m_images[i2].m_keys[match.m_idx2].m_coords);
+        projections1.push_back(m_images[i1].m_keys[match.first].m_coords);
+        projections2.push_back(m_images[i2].m_keys[match.second].m_coords);
     }
 
     Mat3 R; Vec3 t;

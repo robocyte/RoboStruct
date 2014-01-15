@@ -3,14 +3,6 @@
 
 #include "MatchData.hpp"
 
-KeypointMatch::KeypointMatch(int index1, int index2)
-    : m_idx1(index1)
-    , m_idx2(index2)
-{
-}
-
-
-
 bool operator < (const AdjListElem& lhs, const AdjListElem& rhs)
 {
     return lhs.m_index < rhs.m_index;

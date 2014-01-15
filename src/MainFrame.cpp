@@ -575,7 +575,7 @@ void MainFrame::ComputeTracks()
         std::for_each(m_matches.begin(i), m_matches.end(i), [&](AdjListElem val)
         {
             auto &list = val.m_match_list;
-            std::sort(list.begin(), list.end(), [](KeypointMatch k1, KeypointMatch k2) { return k1.m_idx1 < k2.m_idx1; });
+            std::sort(list.begin(), list.end(), [](KeypointMatch k1, KeypointMatch k2) { return k1.first < k2.first; });
         });
     }
 
@@ -624,7 +624,7 @@ void MainFrame::ComputeTracks()
                 int img1 = feature.first;
                 int f1 = feature.second;
                 KeypointMatch dummy;
-                dummy.m_idx1 = f1;
+                dummy.first = f1;
 
                 // Check all adjacent images
                 auto &nbrs = m_matches.GetNeighbors(img1);
@@ -638,11 +638,11 @@ void MainFrame::ComputeTracks()
                     auto &list = m_matches.GetMatchList(base);
 
                     // Do a binary search for the feature
-                    auto p = std::equal_range(list.begin(), list.end(), dummy, [](KeypointMatch k1, KeypointMatch k2) { return k1.m_idx1 < k2.m_idx1; });
+                    auto p = std::equal_range(list.begin(), list.end(), dummy, [](KeypointMatch k1, KeypointMatch k2) { return k1.first < k2.first; });
 
                     if (p.first == p.second) continue;  // not found
 
-                    int idx2 = (p.first)->m_idx2;
+                    int idx2 = (p.first)->second;
 
                     // Check if we visited this point already
                     if (m_images[k].m_key_flags[idx2]) continue;
@@ -696,7 +696,7 @@ void MainFrame::MakeMatchListsSymmetric()
 {
     ScopedTimer timer{m_profile_manager, "[MakeMatchListsSymmetric]"};
 
-    unsigned int num_images = GetNumImages();
+    const unsigned int num_images = GetNumImages();
 
     std::vector<MatchIndex> matches;
 
@@ -706,32 +706,21 @@ void MainFrame::MakeMatchListsSymmetric()
         {
             unsigned int j = iter->m_index;
 
-            MatchIndex idx = GetMatchIndex(i, j);
+            MatchIndex idx     = GetMatchIndex(i, j);
             MatchIndex idx_rev = GetMatchIndex(j, i);
 
             auto &list = iter->m_match_list;
-            unsigned int num_matches = list.size();
 
             m_matches.SetMatch(idx_rev);
             m_matches.ClearMatch(idx_rev);
 
-            for (unsigned int k = 0; k < num_matches; k++)
-            {
-                KeypointMatch m1, m2;
-
-                m1 = list[k];
-
-                m2.m_idx1 = m1.m_idx2;
-                m2.m_idx2 = m1.m_idx1;
-
-                m_matches.AddMatch(idx_rev, m2);
-            }
+            for (const auto& pair : list) m_matches.AddMatch(idx_rev, KeypointMatch(pair.second, pair.first));
 
             matches.push_back(idx);
         }
     }
 
-    for (auto match : matches) SetMatch(static_cast<int>(match.second), static_cast<int>(match.first));
+    for (const auto& match : matches) SetMatch(static_cast<int>(match.second), static_cast<int>(match.first));
 
     matches.clear();
 }

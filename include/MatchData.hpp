@@ -2,14 +2,8 @@
 
 #include <vector>
 
-struct KeypointMatch
-{
-    KeypointMatch() = default;
-
-    KeypointMatch(int index1, int index2);
-
-    int m_idx1 = 0, m_idx2 = 0;
-};
+typedef std::pair<unsigned int, unsigned int>	KeypointMatch;
+typedef std::pair<unsigned int, unsigned int>	MatchIndex;
 
 struct AdjListElem
 {
@@ -21,8 +15,7 @@ struct AdjListElem
 
 bool operator < (const AdjListElem& lhs, const AdjListElem& rhs);
 
-typedef std::vector<AdjListElem>                MatchAdjList;
-typedef std::pair<unsigned int, unsigned int>	MatchIndex;
+typedef std::vector<AdjListElem> MatchAdjList;
 
 // Table containing information about which pairs of images match
 class MatchTable
@@ -43,11 +36,11 @@ public:
     MatchAdjList&               GetNeighbors(unsigned int i);
     std::vector<KeypointMatch>& GetMatchList(MatchIndex idx);
 
-    MatchAdjList::iterator begin(unsigned int i);
-    MatchAdjList::iterator end(unsigned int i);
+    MatchAdjList::iterator      begin(unsigned int i);
+    MatchAdjList::iterator      end(unsigned int i);
 
 private:
-    std::vector<MatchAdjList> m_match_lists;
+    std::vector<MatchAdjList>   m_match_lists;
 };
 
 // Return the match index of a pair of images

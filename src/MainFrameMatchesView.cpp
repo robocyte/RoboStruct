@@ -60,7 +60,7 @@ void MainFrame::GenerateMatchImage()
     const auto &list = m_matches.GetMatchList(GetMatchIndex(left_idx, right_idx));
 
     matches.reserve(list.size());
-    for (const auto &match : list) matches.push_back(cv::DMatch(match.m_idx1, match.m_idx2, 0.0f));
+    for (const auto &match : list) matches.push_back(cv::DMatch(match.first, match.second, 0.0f));
 
     cv::Scalar_<double> line_colour;
     if (m_options.draw_coloured_lines)  line_colour = cv::Scalar_<double>::all(-1);
