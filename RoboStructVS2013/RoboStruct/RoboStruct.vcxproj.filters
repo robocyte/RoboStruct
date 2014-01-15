@@ -145,9 +145,6 @@
     <ClInclude Include="..\..\include\Projection.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Descriptor.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Profiling.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

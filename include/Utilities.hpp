@@ -39,8 +39,8 @@ T deg2rad(T d)
 }
 
 // Returns the value of the nth element
-template<typename T> typename
-T::value_type GetNthElement(int n, const T &container)
+template<typename T>
+typename T::value_type GetNthElement(int n, const T &container)
 {
     T container_copy(container);
     std::nth_element(container_copy.begin(), container_copy.begin() + n, container_copy.end());
@@ -60,6 +60,35 @@ inline std::vector<int> GetNRandomIndices(int n, int max)
     indices.erase(indices.begin() + n, indices.end());
 
     return indices;
+}
+
+template<typename T>
+bool SaveContainerToFileBinary(const std::string& filename, const T& descriptors)
+{
+    std::ofstream file(filename, std::ios::out | std::ios::binary);
+
+    const std::size_t size = descriptors.size();
+    file.write(reinterpret_cast<const char*>(&size), sizeof(std::size_t));
+    file.write(reinterpret_cast<const char*>(descriptors.data()), size * sizeof(typename T::value_type));
+
+    file.close();
+    return file.good();
+}
+
+template<typename T>
+bool LoadContainerFromFileBinary(const std::string& filename, T& descriptors)
+{
+    descriptors.clear();
+    std::ifstream file(filename, std::ios::in | std::ios::binary);
+
+    std::size_t size;
+    file.read(reinterpret_cast<char*>(&size), sizeof(std::size_t));
+
+    descriptors.resize(size);
+    file.read(reinterpret_cast<char*>(descriptors.data()), size * sizeof(typename T::value_type));
+
+    file.close();
+    return file.good();
 }
 
 }

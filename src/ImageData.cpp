@@ -8,7 +8,7 @@
 #include "opencv2/nonfree.hpp"
 #include "wx/log.h"
 
-#include "Descriptor.hpp"
+#include "Utilities.hpp"
 #include "ExifReader.hpp"
 #include "ImageData.hpp"
 #include "Options.hpp"
@@ -141,7 +141,7 @@ void ImageData::SaveDescriptors(bool clear)
 
     filename.replace(filename.find(".jpg"), 4, ".desc");
 
-    SaveDescriptorsToFileBinary(filename, m_descriptors);
+    util::SaveContainerToFileBinary(filename, m_descriptors);
 
     if (clear) ClearDescriptors();
 }
@@ -153,7 +153,7 @@ void ImageData::LoadDescriptors()
     std::string filename{m_filename};
     filename.replace(filename.find(".jpg"), 4, ".desc");
 
-    LoadDescriptorsFromFileBinary(filename, m_descriptors);
+    util::LoadContainerFromFileBinary(filename, m_descriptors);
 }
 
 void ImageData::ConvertOpenCVKeys(const std::vector<cv::KeyPoint>& keys, const cv::Mat& image)
