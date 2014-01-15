@@ -227,6 +227,10 @@ int ComputeProjectionMatrixRansac(const Point3Vec &points, const Point2Vec &proj
 
 void DecomposeProjectionMatrix(const Mat &P, Mat3 *K, Mat3 *R, Vec3 *t)
 {
+    // This is a modified version of the function "KRt_From_P", found in libmv and openMVG.
+    // It is subject to the terms of the Mozilla Public License, v. 2.0, a copy of the MPL
+    // can be found under "license.openMVG"
+
     // Decompose using the RQ decomposition HZ A4.1.1 pag.579.
     Mat3 Kp = P.block(0, 0, 3, 3);
     Mat3 Q; Q.setIdentity();
