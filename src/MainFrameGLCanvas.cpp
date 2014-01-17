@@ -200,8 +200,7 @@ void MainFrame::OnGLCanvasMouse(wxMouseEvent& event)
 
 void MainFrame::OnGLCanvasSize(wxSizeEvent& event)
 {
-    // This is necessary to update the context on some platforms
-    m_gl_canvas->OnSize(event);
+    event.Skip();
 
     // Reset the OpenGL view aspect
     ResetPerspectiveMatrix();
