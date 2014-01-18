@@ -6,7 +6,6 @@
 #include "opencv2/legacy.hpp"
 
 #include "MainFrame.hpp"
-#include "ImageData.hpp"
 
 void MainFrame::OnSelectMatchImage(wxCommandEvent& event)
 {

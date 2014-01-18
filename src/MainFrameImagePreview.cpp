@@ -6,7 +6,6 @@
 #include "opencv2/legacy.hpp"
 
 #include "MainFrame.hpp"
-#include "ImageData.hpp"
 
 void MainFrame::OnSelectPreviewImage(wxListEvent& event)
 {
@@ -25,7 +24,7 @@ void MainFrame::GeneratePreviewImage(int img_idx)
     m_preview_image = wxImage{width, height, image.data, true}.Copy();
 
     wxClientDC dc{m_window_image_preview};
-    DrawImgPreview(dc);
+    DrawImagePreview(dc);
 }
 
 void MainFrame::OnImagePreviewMouse(wxMouseEvent& event)
@@ -36,7 +35,7 @@ void MainFrame::OnImagePreviewMouse(wxMouseEvent& event)
 void MainFrame::OnImagePreviewPaint(wxPaintEvent& event)
 {
     wxPaintDC dc{m_window_image_preview};
-    DrawImgPreview(dc);
+    DrawImagePreview(dc);
 }
 
 void MainFrame::OnImagePreviewResize(wxSizeEvent& event)
@@ -45,7 +44,7 @@ void MainFrame::OnImagePreviewResize(wxSizeEvent& event)
     event.Skip();
 }
 
-void MainFrame::DrawImgPreview(wxDC& dc)
+void MainFrame::DrawImagePreview(wxDC& dc)
 {
     if (!dc.IsOk()) return;
 

@@ -1,7 +1,5 @@
 #include <numeric>
 
-#include "EigenTools.hpp"
-
 #include "ceres/ceres.h"
 #include "ceres/rotation.h"
 #include "snavely_reprojection_error.h"

@@ -2,9 +2,6 @@
 
 #include "gly_scene.hpp"
 
-#include "wx/glcanvas.h"
-#include "wx/timer.h"
-
 #include "Sfm.hpp"
 #include "ImageData.hpp"
 #include "MatchData.hpp"
@@ -90,7 +87,7 @@ private:
 
     void        GeneratePreviewImage(int img_idx);
     void        GenerateMatchImage();
-    void        DrawImgPreview(wxDC& dc);
+    void        DrawImagePreview(wxDC& dc);
     void        DrawMatches(wxDC& dc);
 
     bool        AddImage(const std::string &filename, const std::string &filename_short);       // Try to add an image to the initial list of images

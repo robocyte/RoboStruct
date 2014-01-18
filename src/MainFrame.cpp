@@ -15,8 +15,6 @@
 #include "MainFrame.hpp"
 #include "RoboStruct_GUI_style.hpp"
 
-#include "Eigen/Core"
-#include "Eigen/Dense"
 #include "Eigen/Geometry"
 
 const wxEventTypeTag<wxThreadEvent> wxEVT_SFM_THREAD_UPDATE{wxNewEventType()};
