@@ -90,6 +90,7 @@ struct ProfileManager
 struct ScopedTimer
 {
     ScopedTimer() = delete;
+
     ScopedTimer(ProfileManager &mgr, const std::string &name)
         : m_profile_manager(mgr)
         , m_name(name)

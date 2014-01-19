@@ -36,11 +36,8 @@ namespace
 
 double ComputeRayAngle(Point2 p, Point2 q, const Camera &cam1, const Camera &cam2)
 {
-    Mat3 K1_inv = cam1.GetIntrinsicMatrix().inverse();
-    Mat3 K2_inv = cam2.GetIntrinsicMatrix().inverse();
-
-    Point3 p3n = K1_inv * EuclideanToHomogenous(p);
-    Point3 q3n = K2_inv * EuclideanToHomogenous(q);
+    Point3 p3n = cam1.GetIntrinsicMatrix().inverse() * EuclideanToHomogenous(p);
+    Point3 q3n = cam2.GetIntrinsicMatrix().inverse() * EuclideanToHomogenous(q);
 
     Point2 pn = p3n.head<2>() / p3n.z();
     Point2 qn = q3n.head<2>() / q3n.z();
@@ -69,7 +66,7 @@ Point2 Project(const Point3 &p, const Observation &observation)
 
 Point3 Triangulate(const Observations &observations, double *error, bool optimize)
 {
-    int num_points = static_cast<int>(observations.size());
+    const int num_points = static_cast<int>(observations.size());
 
     Mat A{2 * num_points, 3};
     Vec b{2 * num_points};
@@ -114,7 +111,7 @@ Point3 Triangulate(const Observations &observations, double *error, bool optimiz
 
 bool FindExtrinsics(const Mat3 &E, const Point2Vec &pts1, const Point2Vec &pts2, Mat3 *R, Vec3 *t)
 {
-    int num_correspondences = static_cast<int>(pts1.size());
+    const int num_correspondences = static_cast<int>(pts1.size());
 
     // Put first camera at origin
     Mat3 R0;    R0.setIdentity();

@@ -10,7 +10,6 @@
 void MainFrame::OnSelectMatchImage(wxCommandEvent& event)
 {
     GenerateMatchImage();
-    m_pane_matches_view->Refresh();
 }
 
 void MainFrame::GenerateMatchImage()
@@ -76,12 +75,13 @@ void MainFrame::GenerateMatchImage()
 
     m_matches_image.Destroy();
     m_matches_image = wxImage{matches_img.cols, matches_img.rows, matches_img.data, true}.Copy();
+
+    DrawMatches(wxClientDC{m_pane_matches_view});
 }
 
 void MainFrame::OnMatchesViewPaint(wxPaintEvent& event)
 {
-    wxPaintDC dc{m_pane_matches_view};
-    DrawMatches(dc);
+    DrawMatches(wxPaintDC{m_pane_matches_view});
 }
 
 void MainFrame::OnMatchesViewResize(wxSizeEvent& event)

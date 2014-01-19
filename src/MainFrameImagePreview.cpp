@@ -23,8 +23,7 @@ void MainFrame::GeneratePreviewImage(int img_idx)
     m_preview_image.Destroy();
     m_preview_image = wxImage{width, height, image.data, true}.Copy();
 
-    wxClientDC dc{m_window_image_preview};
-    DrawImagePreview(dc);
+    DrawImagePreview(wxClientDC{m_window_image_preview});
 }
 
 void MainFrame::OnImagePreviewMouse(wxMouseEvent& event)
@@ -34,8 +33,7 @@ void MainFrame::OnImagePreviewMouse(wxMouseEvent& event)
 
 void MainFrame::OnImagePreviewPaint(wxPaintEvent& event)
 {
-    wxPaintDC dc{m_window_image_preview};
-    DrawImagePreview(dc);
+    DrawImagePreview(wxPaintDC{m_window_image_preview});
 }
 
 void MainFrame::OnImagePreviewResize(wxSizeEvent& event)
@@ -49,8 +47,8 @@ void MainFrame::DrawImagePreview(wxDC& dc)
     if (!dc.IsOk()) return;
 
     dc.Clear();
-    int win_width = m_window_image_preview->GetClientSize().GetX();
-    int win_height = m_window_image_preview->GetClientSize().GetY();
+    int win_width  = m_window_image_preview->GetClientSize().GetWidth();
+    int win_height = m_window_image_preview->GetClientSize().GetHeight();
 
     if (m_img_ctrl->GetSelectedItemCount())
     {
