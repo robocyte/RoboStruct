@@ -160,7 +160,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)..\include;$(SolutionDir)..\wxfb;$(OPENCV_64_DIR)\3rdparty\libjpeg;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996;4351;</DisableSpecificWarnings>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <ExceptionHandling>Async</ExceptionHandling>
+      <ExceptionHandling>Sync</ExceptionHandling>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

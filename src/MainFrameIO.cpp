@@ -52,7 +52,7 @@ void MainFrame::AddCamDBFileEntry()
 
 void MainFrame::SaveMatchFile()
 {
-    std::string filename = m_path + R"(\Matches.txt)";
+    auto filename = m_path + R"(\Matches.txt)";
     std::ofstream match_file{filename};
 
     if (!match_file)
@@ -67,7 +67,7 @@ void MainFrame::SaveMatchFile()
 
 void MainFrame::SaveTrackFile()
 {
-    std::string filename = m_path + R"(\Tracks.txt)";
+    auto filename = m_path + R"(\Tracks.txt)";
     std::ofstream track_file{filename};
 
     if (!track_file)
@@ -94,7 +94,7 @@ void MainFrame::SaveProjectionMatrix(const std::string &path, int img_idx)
 {
     if (!m_images[img_idx].m_camera.m_adjusted) return;
 
-    std::string filename = m_images[img_idx].m_filename_short;
+    auto filename = m_images[img_idx].m_filename_short;
     filename.replace(filename.find(".jpg"), 4, ".txt");
     filename = path + R"(\)" + filename;
 
@@ -188,7 +188,7 @@ void MainFrame::ExportToCMVS(const std::string &path)
 
 void MainFrame::SaveBundleFile(const std::string &path)
 {
-    std::string filename = path + R"(\bundle.rd.out)";
+    auto filename = path + R"(\bundle.rd.out)";
     std::ofstream bundle_file{filename};
 
     bundle_file << "# Bundle file v0.3" << std::endl;
@@ -260,7 +260,7 @@ void MainFrame::SaveBundleFile(const std::string &path)
 
 void MainFrame::SavePlyFile()
 {
-    std::string filename = m_path + R"(\Result.ply)";
+    auto filename = m_path + R"(\Result.ply)";
     std::ofstream ply_file{filename};
 
     if (!ply_file)
@@ -321,7 +321,7 @@ void MainFrame::SaveMeshLabFile()
     // Export to CMVS first to get undistorted images
     ExportToCMVS(m_path);
 
-    std::string filename = m_path + R"(\Result.mlp)";
+    auto filename = m_path + R"(\Result.mlp)";
     std::ofstream mlp_file{filename};
 
     if (!mlp_file)
@@ -381,7 +381,7 @@ void MainFrame::SaveMayaFile()
     // Export to CMVS first to get undistorted images
     ExportToCMVS(m_path);
 
-    std::string filename = m_path + R"(\Result.ma)";
+    auto filename = m_path + R"(\Result.ma)";
     std::ofstream maya_file{filename};
 
     if (!maya_file)
