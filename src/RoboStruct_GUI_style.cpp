@@ -24,6 +24,10 @@ wxAuiSolidTabArt::wxAuiSolidTabArt()
     m_selectedFont  = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
     m_selectedFont.SetWeight(wxNORMAL);
     m_measuringFont = m_selectedFont;
+
+    m_baseColour      = light_theme_main_color;
+    m_borderPen       = wxPen(m_baseColour);
+    m_baseColourBrush = wxBrush(m_baseColour);
 }
 
 wxAuiSolidTabArt* wxAuiSolidTabArt::Clone()
@@ -102,9 +106,9 @@ wxAuiMyNotebook::wxAuiMyNotebook(wxWindow* parent, wxWindowID id, const wxPoint&
 {
     SetArtProvider(new wxAuiSolidTabArt{});
         
-    m_mgr.GetArtProvider()->SetMetric(wxAUI_DOCKART_PANE_BORDER_SIZE,0);
-    m_mgr.GetArtProvider()->SetColor(wxAUI_DOCKART_BORDER_COLOUR, light_theme_main_color);
-    m_mgr.GetArtProvider()->SetColor(wxAUI_DOCKART_SASH_COLOUR, light_theme_main_color);
+    m_mgr.GetArtProvider()->SetMetric(wxAUI_DOCKART_PANE_BORDER_SIZE, 0);
+    m_mgr.GetArtProvider()->SetColor(wxAUI_DOCKART_BORDER_COLOUR,     light_theme_main_color);
+    m_mgr.GetArtProvider()->SetColor(wxAUI_DOCKART_SASH_COLOUR,       light_theme_main_color);
     m_mgr.GetArtProvider()->SetColor(wxAUI_DOCKART_BACKGROUND_COLOUR, light_theme_main_color);
 }
 
