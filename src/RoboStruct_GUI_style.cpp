@@ -103,9 +103,9 @@ wxAuiMyNotebook::wxAuiMyNotebook(wxWindow* parent, wxWindowID id, const wxPoint&
     SetArtProvider(new wxAuiSolidTabArt{});
         
     m_mgr.GetArtProvider()->SetMetric(wxAUI_DOCKART_PANE_BORDER_SIZE,0);
-    m_mgr.GetArtProvider()->SetColor(wxAUI_DOCKART_BORDER_COLOUR, wxColour{238, 238, 242});
-    m_mgr.GetArtProvider()->SetColor(wxAUI_DOCKART_SASH_COLOUR, wxColour{238, 238, 242});
-    m_mgr.GetArtProvider()->SetColor(wxAUI_DOCKART_BACKGROUND_COLOUR, wxColour{238, 238, 242});
+    m_mgr.GetArtProvider()->SetColor(wxAUI_DOCKART_BORDER_COLOUR, light_theme_main_color);
+    m_mgr.GetArtProvider()->SetColor(wxAUI_DOCKART_SASH_COLOUR, light_theme_main_color);
+    m_mgr.GetArtProvider()->SetColor(wxAUI_DOCKART_BACKGROUND_COLOUR, light_theme_main_color);
 }
 
 
@@ -129,5 +129,4 @@ void MainFrame::InitializeGuiStyle()
     m_mgr.GetArtProvider()->SetColor(wxAUI_DOCKART_INACTIVE_CAPTION_COLOUR, light_theme_main_color);
     m_mgr.GetArtProvider()->SetColor(wxAUI_DOCKART_INACTIVE_CAPTION_GRADIENT_COLOUR, light_theme_main_color);
     m_mgr.GetArtProvider()->SetColor(wxAUI_DOCKART_INACTIVE_CAPTION_TEXT_COLOUR, wxColour{20, 20, 20});
-    m_mgr.Update();
 }
