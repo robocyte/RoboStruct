@@ -26,8 +26,8 @@ wxAuiSolidTabArt::wxAuiSolidTabArt()
     m_measuringFont = m_selectedFont;
 
     m_baseColour      = light_theme_main_color;
-    m_borderPen       = wxPen(m_baseColour);
-    m_baseColourBrush = wxBrush(m_baseColour);
+    m_borderPen       = wxPen{m_baseColour};
+    m_baseColourBrush = wxBrush{m_baseColour};
 }
 
 wxAuiSolidTabArt* wxAuiSolidTabArt::Clone()
@@ -39,6 +39,10 @@ void wxAuiSolidTabArt::DrawBackground(wxDC& dc, wxWindow* wnd, const wxRect& rec
 {
     wxUnusedVar(wnd);
     dc.GradientFillLinear(rect, wxColour{238, 238, 242}, wxColour{238, 238, 242});
+}
+
+void wxAuiSolidTabArt::DrawBorder(wxDC& dc, wxWindow* wnd, const wxRect& rect)
+{
 }
 
 void wxAuiSolidTabArt::DrawTab(wxDC& dc, wxWindow* wnd, const wxAuiNotebookPage& page, const wxRect& in_rect,
@@ -105,11 +109,29 @@ wxAuiMyNotebook::wxAuiMyNotebook(wxWindow* parent, wxWindowID id, const wxPoint&
     : wxAuiNotebook(parent, id, pos, size, style)
 {
     SetArtProvider(new wxAuiSolidTabArt{});
-        
+    m_mgr.SetArtProvider(new wxAuiSolidDockArt{});
+
     m_mgr.GetArtProvider()->SetMetric(wxAUI_DOCKART_PANE_BORDER_SIZE, 0);
     m_mgr.GetArtProvider()->SetColor(wxAUI_DOCKART_BORDER_COLOUR,     light_theme_main_color);
     m_mgr.GetArtProvider()->SetColor(wxAUI_DOCKART_SASH_COLOUR,       light_theme_main_color);
     m_mgr.GetArtProvider()->SetColor(wxAUI_DOCKART_BACKGROUND_COLOUR, light_theme_main_color);
+}
+
+
+
+wxAuiSolidDockArt::wxAuiSolidDockArt()
+{
+}
+
+void wxAuiSolidDockArt::DrawBackground(wxDC& dc, wxWindow *window, int orientation, const wxRect& rect)
+{
+    dc.SetPen(*wxTRANSPARENT_PEN);
+    dc.SetBrush(wxBrush{light_theme_main_color});
+    dc.DrawRectangle(rect.x, rect.y, rect.width, rect.height);
+}
+
+void wxAuiSolidDockArt::DrawBorder(wxDC& dc, wxWindow *window, const wxRect& rect, wxAuiPaneInfo& pane)
+{
 }
 
 
@@ -133,4 +155,6 @@ void MainFrame::InitializeGuiStyle()
     m_mgr.GetArtProvider()->SetColor(wxAUI_DOCKART_INACTIVE_CAPTION_COLOUR, light_theme_main_color);
     m_mgr.GetArtProvider()->SetColor(wxAUI_DOCKART_INACTIVE_CAPTION_GRADIENT_COLOUR, light_theme_main_color);
     m_mgr.GetArtProvider()->SetColor(wxAUI_DOCKART_INACTIVE_CAPTION_TEXT_COLOUR, wxColour{20, 20, 20});
+
+    m_mgr.Update();
 }

@@ -10,7 +10,6 @@ bool MyApp::OnInit()
 
     auto frame = new MainFrame{};
 
-    frame->InitializeGuiStyle();
     frame->InitializeLog();
     frame->InitializeOpenGL();
     frame->InitializeScene();
@@ -18,6 +17,7 @@ bool MyApp::OnInit()
     frame->ResetGLCanvas();
     frame->ResetOptions();
     frame->SetIcon(wxICON(aaaamain));
+    frame->InitializeGuiStyle();
     frame->Maximize();
     frame->Show();
 

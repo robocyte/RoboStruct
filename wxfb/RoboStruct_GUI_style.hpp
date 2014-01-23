@@ -29,12 +29,11 @@ public:
     wxAuiSolidTabArt *Clone();
 
     void DrawBackground(wxDC& dc, wxWindow* wnd, const wxRect& rect);
-
+    void DrawBorder(wxDC& dc, wxWindow* wnd, const wxRect& rect);
     void DrawTab(wxDC& dc, wxWindow* wnd, const wxAuiNotebookPage& page, const wxRect& in_rect,
                  int close_button_state, wxRect* out_tab_rect, wxRect* out_button_rect, int* x_extent);
 
     int GetBestTabCtrlSize(wxWindow* wnd, const wxAuiNotebookPageArray& pages, const wxSize& requiredBmp_size);
-
     int GetIndentSize() { return 0; }
 };
 
@@ -45,4 +44,14 @@ public:
     wxAuiMyNotebook(wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
                     long style = wxAUI_NB_DEFAULT_STYLE);
     ~wxAuiMyNotebook() {}
+};
+
+class wxAuiSolidDockArt : public wxAuiDefaultDockArt
+{
+public:
+    wxAuiSolidDockArt();
+    ~wxAuiSolidDockArt() {}
+
+    void DrawBackground(wxDC& dc, wxWindow *window, int orientation, const wxRect& rect);
+    void DrawBorder(wxDC& dc, wxWindow *window, const wxRect& rect, wxAuiPaneInfo& pane);
 };
