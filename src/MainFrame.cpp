@@ -5,7 +5,6 @@
 
 #include "opencv2/core.hpp"
 #include "opencv2/core/utility.hpp"
-#include "opencv2/flann.hpp"
 #include "opencv2/calib3d.hpp"
 
 #include "wx/progdlg.h"
@@ -16,6 +15,8 @@
 #include "RoboStruct_GUI_style.hpp"
 
 #include "Eigen/Geometry"
+
+#include "flann.hpp"
 
 const wxEventTypeTag<wxThreadEvent> wxEVT_SFM_THREAD_UPDATE{wxNewEventType()};
 const wxEventTypeTag<wxThreadEvent> wxEVT_SFM_THREAD_COMPLETE{wxNewEventType()};
@@ -244,120 +245,6 @@ void MainFrame::DetectFeatures(int img_idx)
     wxLogMessage("[DetectFeatures] %s: found %i features", m_images[img_idx].m_filename_short.c_str(), GetNumKeys(img_idx));
 }
 
-void MainFrame::MatchAll()
-{
-    int num_images = GetNumImages();
-    int num_pairs = (num_images * (num_images - 1)) / 2;
-    int progress_idx = 0;
-
-    // Clean up
-    for (auto &image : m_images)
-    {
-        image.m_visible_points.clear();
-        image.m_visible_keys.clear();
-        image.m_key_flags.clear();
-    }
-
-    m_tracks.clear();
-    m_matches = MatchTable{num_images};
-    m_matches.RemoveAll();
-    m_transforms.clear();
-
-    // Show progress dialog
-    wxProgressDialog dialog("Progress", "Matching images...", num_pairs, this, wxPD_APP_MODAL | wxPD_AUTO_HIDE | wxPD_ELAPSED_TIME | wxPD_ESTIMATED_TIME | wxPD_REMAINING_TIME);
-
-    for (int i = 1; i < num_images; i++)
-    {
-        wxLogMessage("[MatchAll] Matching %s...", m_images[i].m_filename_short.c_str());
-
-        m_images[i].LoadDescriptors();
-        m_desc_length = m_images[i].m_desc_size;
-
-        // Create a search index
-        cv::Mat idx_desc(m_images[i].m_keys.size(), m_desc_length, CV_32F, (void*)m_images[i].m_descriptors.data());
-        cv::flann::Index flann_index{idx_desc, cv::flann::KDTreeIndexParams{m_options.matching_trees}};
-
-        for (int j = 0; j < i; j++)
-        {
-            m_images[j].LoadDescriptors();
-
-            // Setup query data
-            int num_descriptors = (int)m_images[j].m_keys.size();
-            cv::Mat query_desc{num_descriptors, m_desc_length, CV_32F, (void*)m_images[j].m_descriptors.data()};
-            cv::Mat indices{num_descriptors, 2, CV_32S};
-            cv::Mat dists{num_descriptors, 2, CV_32F};
-
-            // Match!
-            {
-                ScopedTimer timer{m_profile_manager, "[MatchImagePair]"};
-                flann_index.knnSearch(query_desc, indices, dists, 2, cv::flann::SearchParams{m_options.matching_checks});
-            }
-
-            // Store putative matches in ptpairs
-            IntPairVec tmp_matches;
-            int *indices_ptr = indices.ptr<int>(0);
-            float *dists_ptr = dists.ptr<float>(0);
-
-            for (int k = 0; k < indices.rows; ++k)
-            {
-                if (dists_ptr[2 * k] < (m_options.matching_distance_ratio * dists_ptr[2 * k + 1]))
-                {
-                    tmp_matches.push_back(IntPair{indices_ptr[2 * k], k});
-                }
-            }
-
-            int num_putative = static_cast<int>(tmp_matches.size());
-
-            // Find and delete double matches
-            int num_pruned = PruneDoubleMatches(tmp_matches);
-
-            // Compute the fundamental matrix and remove outliers
-            int num_inliers = ComputeEpipolarGeometry(i, j, tmp_matches);
-
-            // Compute transforms
-            TransformInfo tinfo;
-            MatchIndex midx{i, j};
-            tinfo.m_inlier_ratio = ComputeHomography(i, j, tmp_matches);
-
-            // Store matches and transforms
-            if (num_inliers > m_options.matching_min_matches)
-            {
-                TransformsEntry trans_entry{midx, tinfo};
-                m_transforms.insert(trans_entry);
-
-                SetMatch(i, j);
-                auto &matches = m_matches.GetMatchList(GetMatchIndex(i, j));
-
-                matches.clear();
-                matches.reserve(num_inliers);
-
-                for (const auto &match : tmp_matches) matches.push_back(KeypointMatch{match.first, match.second});
-
-                // Be verbose
-                wxLogMessage("[MatchAll]    ...with %s: %i inliers (%i putative, %i duplicates pruned), ratio = %.2f",
-                    m_images[j].m_filename_short.c_str(), num_inliers, num_putative, num_pruned, tinfo.m_inlier_ratio);
-            } else
-            {
-                // Be verbose
-                wxLogMessage("[MatchAll]    ...with %s: no match", m_images[j].m_filename_short.c_str());
-            }
-
-            m_images[j].ClearDescriptors();
-
-            progress_idx++;
-            dialog.Update(progress_idx);
-            wxSafeYield();
-        }
-        m_images[i].ClearDescriptors();
-    }
-
-    MakeMatchListsSymmetric();
-    ComputeTracks();
-    m_matches.RemoveAll();
-
-    m_matches_loaded = true;
-}
-
 void MainFrame::MatchAllAkaze()
 {
     int num_images = GetNumImages();
@@ -382,34 +269,43 @@ void MainFrame::MatchAllAkaze()
 
     for (int i = 1; i < num_images; i++)
     {
-        cv::flann::Index flannIndex{m_images[i].m_descriptors_akaze, cv::flann::LshIndexParams{12, 20, 2}, cvflann::FLANN_DIST_HAMMING};
         wxLogMessage("[MatchAll] Matching %s...", m_images[i].m_filename_short.c_str());
+
+        m_desc_length = m_images[i].m_descriptors_akaze.cols;
+
+        flann::Matrix<unsigned char> train(m_images[i].m_descriptors_akaze.data, m_images[i].m_keys.size(), m_desc_length);
+        flann::Index<flann::Hamming<unsigned char>> flann_index{train, flann::LshIndexParams{12, 20, 2}};
+        flann_index.buildIndex();
 
         for (int j = 0; j < i; j++)
         {
             // Setup query data
-            int num_descriptors = (int)m_images[j].m_descriptors_akaze.rows;
-            cv::Mat indices = cv::Mat{num_descriptors, 2, CV_32SC1};
-            cv::Mat dists = cv::Mat{num_descriptors, 2, CV_32FC1};
+            const int num_descriptors = m_images[j].m_descriptors_akaze.rows;
+            flann::Matrix<unsigned char> query(m_images[j].m_descriptors_akaze.data, num_descriptors, m_desc_length);
+            flann::Matrix<int>           indices(new int[num_descriptors * 2], num_descriptors, 2);
+            flann::Matrix<unsigned int>  dists(new unsigned int[num_descriptors * 2], num_descriptors, 2);
 
             // Match!
             {
                 ScopedTimer timer{m_profile_manager, "[MatchImagePair]"};
-                flannIndex.knnSearch(m_images[j].m_descriptors_akaze, indices, dists, 2, cv::flann::SearchParams{m_options.matching_checks});
+
+                flann::SearchParams params{m_options.matching_checks};
+                params.cores = 0;
+                flann_index.knnSearch(query, indices, dists, 2, params);
             }
 
             // Store putative matches in ptpairs
             IntPairVec tmp_matches;
-            int *indices_ptr = indices.ptr<int>(0);
-            float *dists_ptr = dists.ptr<float>(0);
-
-            for (int k = 0; k < indices.rows; ++k)
+            for (int k = 0; k < num_descriptors; ++k)
             {
-                if (dists_ptr[2 * k] < (m_options.matching_distance_ratio * dists_ptr[2 * k + 1]))
+                if (*(dists[k]) < (m_options.matching_distance_ratio * (*(dists[k] + 1))))
                 {
-                    tmp_matches.push_back(IntPair{indices_ptr[2 * k], k});
+                    tmp_matches.push_back(IntPair{*(indices[k]), k});
                 }
             }
+
+            delete[] indices.ptr();
+            delete[] dists.ptr();
 
             if (tmp_matches.size() < m_options.matching_min_matches)
             {
@@ -460,6 +356,124 @@ void MainFrame::MatchAllAkaze()
             dialog.Update(progress_idx);
             wxSafeYield();
         }
+    }
+
+    MakeMatchListsSymmetric();
+    ComputeTracks();
+    m_matches.RemoveAll();
+
+    m_matches_loaded = true;
+}
+
+void MainFrame::MatchAll()
+{
+    int num_images = GetNumImages();
+    int num_pairs = (num_images * (num_images - 1)) / 2;
+    int progress_idx = 0;
+
+    // Clean up
+    for (auto &image : m_images)
+    {
+        image.m_visible_points.clear();
+        image.m_visible_keys.clear();
+        image.m_key_flags.clear();
+    }
+
+    m_tracks.clear();
+    m_matches = MatchTable{num_images};
+    m_matches.RemoveAll();
+    m_transforms.clear();
+
+    // Show progress dialog
+    wxProgressDialog dialog("Progress", "Matching images...", num_pairs, this, wxPD_APP_MODAL | wxPD_AUTO_HIDE | wxPD_ELAPSED_TIME | wxPD_ESTIMATED_TIME | wxPD_REMAINING_TIME);
+
+    for (int i = 1; i < num_images; i++)
+    {
+        wxLogMessage("[MatchAll] Matching %s...", m_images[i].m_filename_short.c_str());
+
+        m_images[i].LoadDescriptors();
+        m_desc_length = m_images[i].m_desc_size;
+
+        // Create a search index
+        flann::Matrix<float> train(m_images[i].m_descriptors.data(), m_images[i].m_keys.size(), m_desc_length);
+        flann::Index<flann::L2<float>> flann_index(train, flann::KDTreeIndexParams{m_options.matching_trees});
+        flann_index.buildIndex();
+
+        for (int j = 0; j < i; j++)
+        {
+            m_images[j].LoadDescriptors();
+
+            // Setup query data
+            const int num_descriptors = static_cast<int>(m_images[j].m_keys.size());
+            flann::Matrix<float> query(m_images[j].m_descriptors.data(), num_descriptors, m_desc_length);
+            flann::Matrix<int>   indices(new int[num_descriptors * 2], num_descriptors, 2);
+            flann::Matrix<float> dists(new float[num_descriptors * 2], num_descriptors, 2);
+
+            // Match!
+            {
+                ScopedTimer timer{m_profile_manager, "[MatchImagePair]"};
+
+                flann::SearchParams params{m_options.matching_checks};
+                params.cores = 0;
+                flann_index.knnSearch(query, indices, dists, 2, params);
+            }
+
+            // Store putative matches in ptpairs
+            IntPairVec tmp_matches;
+            for (int k = 0; k < num_descriptors; ++k)
+            {
+                if (*(dists[k]) < (m_options.matching_distance_ratio * (*(dists[k] + 1))))
+                {
+                    tmp_matches.push_back(IntPair{*(indices[k]), k});
+                }
+            }
+
+            delete[] indices.ptr();
+            delete[] dists.ptr();
+
+            int num_putative = static_cast<int>(tmp_matches.size());
+
+            // Find and delete double matches
+            int num_pruned = PruneDoubleMatches(tmp_matches);
+
+            // Compute the fundamental matrix and remove outliers
+            int num_inliers = ComputeEpipolarGeometry(i, j, tmp_matches);
+
+            // Compute transforms
+            TransformInfo tinfo;
+            MatchIndex midx{i, j};
+            tinfo.m_inlier_ratio = ComputeHomography(i, j, tmp_matches);
+
+            // Store matches and transforms
+            if (num_inliers > m_options.matching_min_matches)
+            {
+                TransformsEntry trans_entry{midx, tinfo};
+                m_transforms.insert(trans_entry);
+
+                SetMatch(i, j);
+                auto &matches = m_matches.GetMatchList(GetMatchIndex(i, j));
+
+                matches.clear();
+                matches.reserve(num_inliers);
+
+                for (const auto &match : tmp_matches) matches.push_back(KeypointMatch{match.first, match.second});
+
+                // Be verbose
+                wxLogMessage("[MatchAll]    ...with %s: %i inliers (%i putative, %i duplicates pruned), ratio = %.2f",
+                    m_images[j].m_filename_short.c_str(), num_inliers, num_putative, num_pruned, tinfo.m_inlier_ratio);
+            } else
+            {
+                // Be verbose
+                wxLogMessage("[MatchAll]    ...with %s: no match", m_images[j].m_filename_short.c_str());
+            }
+
+            m_images[j].ClearDescriptors();
+
+            progress_idx++;
+            dialog.Update(progress_idx);
+            wxSafeYield();
+        }
+        m_images[i].ClearDescriptors();
     }
 
     MakeMatchListsSymmetric();

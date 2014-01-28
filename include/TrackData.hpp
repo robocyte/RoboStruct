@@ -7,7 +7,6 @@ typedef std::vector<ImageKey>   ImageKeyVector;
 
 struct TrackData
 {
-public:
     TrackData() = default;
 
     TrackData(ImageKeyVector views)

@@ -4,9 +4,10 @@
 #include "ceres/rotation.h"
 #include "snavely_reprojection_error.h"
 
+#include "flann.hpp"
+
 #include "opencv2/core.hpp"
 #include "opencv2/core/utility.hpp"
-#include "opencv2/flann.hpp"
 
 #include "FivePoint.hpp"
 #include "MainFrame.hpp"
@@ -721,21 +722,21 @@ void MainFrame::BundleAdjust(CamVec &cameras, const IntVec &added_order, PointVe
         {
             // Get the rotation
             Vec3 axis = RotationMatrixToAngleAxis(camera.m_R);
-            Vec3 t = -(camera.m_R * camera.m_t);
+            Vec3 t    = -(camera.m_R * camera.m_t);
 
-            double f = camera.m_focal_length;
+            double f  = camera.m_focal_length;
             double k1 = camera.m_k[0];
             double k2 = camera.m_k[1];
 
             ptr[idx] = axis[0]; idx++;
             ptr[idx] = axis[1]; idx++;
             ptr[idx] = axis[2]; idx++;
-            ptr[idx] = t[0]; idx++;
-            ptr[idx] = t[1]; idx++;
-            ptr[idx] = t[2]; idx++;
-            ptr[idx] = f; idx++;
-            ptr[idx] = k1; idx++;
-            ptr[idx] = k2; idx++;
+            ptr[idx] = t[0];    idx++;
+            ptr[idx] = t[1];    idx++;
+            ptr[idx] = t[2];    idx++;
+            ptr[idx] = f;       idx++;
+            ptr[idx] = k1;      idx++;
+            ptr[idx] = k2;      idx++;
         }
 
         // Insert point parameters
@@ -766,8 +767,8 @@ void MainFrame::BundleAdjust(CamVec &cameras, const IntVec &added_order, PointVe
             }
 
             // Each observation correponds to a pair of a camera and a point which are identified by camera_index[i] and point_index[i] respectively
-            double *camera	= pcameras  + cnp * cidx[i];
-            double *point	= ppoints   + pnp * pidx[i];
+            double *camera = pcameras  + cnp * cidx[i];
+            double *point  = ppoints   + pnp * pidx[i];
 
             problem.AddResidualBlock(cost_function, loss_function, camera, point);
         }
@@ -811,7 +812,7 @@ void MainFrame::BundleAdjust(CamVec &cameras, const IntVec &added_order, PointVe
 
             camera.m_R = AngleAxisToRotationMatrix(axis);
             camera.m_t = -(camera.m_R.transpose() * t);
-            double f = camera.m_focal_length = *ptr; ptr++;
+            camera.m_focal_length = *ptr; ptr++;
             camera.m_k[0] = *ptr; ptr++;
             camera.m_k[1] = *ptr; ptr++;
         }
@@ -889,7 +890,7 @@ void MainFrame::BundleAdjust(CamVec &cameras, const IntVec &added_order, PointVe
                 int k = view.second;
 
                 // Sanity check
-                if (GetKey(added_order[v], k).m_extra != idx) wxLogMessage("Error! Entry for (%d,%d) should be %d, but is %d", added_order[v], k, idx, GetKey(added_order[v], k).m_extra);
+                if (GetKey(added_order[v], k).m_extra != idx) wxLogMessage("[BundleAdjust] Error! Entry for (%d, %d) should be %d, but is %d", added_order[v], k, idx, GetKey(added_order[v], k).m_extra);
 
                 GetKey(added_order[v], k).m_extra = -2;
             }
@@ -1125,7 +1126,7 @@ void MainFrame::RadiusOutlierRemoval(double threshold, const IntVec &added_order
 
     std::vector<int> outliers;
 
-    std::vector<float> coords, query;
+    std::vector<float> coords;
     for (const auto &point : points)
     {
         coords.push_back((float)point.m_pos.x());
@@ -1133,24 +1134,24 @@ void MainFrame::RadiusOutlierRemoval(double threshold, const IntVec &added_order
         coords.push_back((float)point.m_pos.z());
     }
 
-    query = coords;
+    const int num_points = static_cast<int>(points.size());
 
-    cv::Mat query_pts(points.size(), 3, CV_32F, (void*)coords.data());
-    cv::Mat idx_pts(points.size(), 3, CV_32F, (void*)query.data());
-    cv::Mat indices(points.size(), 2, CV_32S);
-    cv::Mat dists(points.size(), 2, CV_32F);
+    flann::Matrix<float> train(coords.data(), num_points, 3);
+    flann::Matrix<float> query(coords.data(), num_points, 3);
+    flann::Matrix<int>   indices(new int[num_points * 2], num_points, 2);
+    flann::Matrix<float> dists(new float[num_points * 2], num_points, 2);
 
-    cv::flann::Index index(query_pts, cv::flann::KDTreeIndexParams());
+    flann::Index<flann::L2<float>> index(train, flann::KDTreeSingleIndexParams{});
+    index.buildIndex();
 
-    index.knnSearch(idx_pts, indices, dists, 2, cv::flann::SearchParams(32));
-
-    int *indices_ptr = indices.ptr<int>(0);
-    float *dists_ptr = dists.ptr<float>(0);
+    flann::SearchParams params{m_options.matching_checks};
+    params.cores = 0;
+    index.knnSearch(query, indices, dists, 2, params);
 
     std::vector<float> d;
-    for (int i = 0; i < indices.rows; ++i) d.push_back(dists_ptr[2 * i + 1]);
+    for (int i = 0; i < num_points; ++i) d.push_back(*(dists[i] + 1));
     double thresh = util::GetNthElement(util::iround(threshold * d.size()), d);
-    for (int i = 0; i < indices.rows; ++i) if (d[i] > thresh) outliers.push_back(i);
+    for (int i = 0; i < num_points; ++i) if (d[i] > thresh) outliers.push_back(i);
 
     for (const auto &idx : outliers)
     {
@@ -1162,7 +1163,7 @@ void MainFrame::RadiusOutlierRemoval(double threshold, const IntVec &added_order
             int k = view.second;
 
             // Sanity check
-            if (GetKey(added_order[v], k).m_extra != idx) wxLogMessage("Error! Entry for (%d,%d) should be %d, but is %d", added_order[v], k, idx, GetKey(added_order[v], k).m_extra);
+            if (GetKey(added_order[v], k).m_extra != idx) wxLogMessage("[RadiusOutlierRemoval] Error! Entry for (%d,%d) should be %d, but is %d", added_order[v], k, idx, GetKey(added_order[v], k).m_extra);
 
             GetKey(added_order[v], k).m_extra = -2;
         }
