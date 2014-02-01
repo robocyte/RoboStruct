@@ -8,13 +8,13 @@ namespace
 
     struct ProjectionResidual : LMFunctor<double>
     {
-        ProjectionResidual(const Point3Vec &points, const Point2Vec &projections)
+        ProjectionResidual(const Point3Vec& points, const Point2Vec& projections)
             : LMFunctor<double>(11, 2 * static_cast<int>(points.size()))
             , m_points(points)
             , m_projections(projections)
         {}
 
-        int operator()(const Vec &x, Vec &fvec) const
+        int operator()(const Vec& x, Vec& fvec) const
         {
             Mat34 P;
             P.row(0) = x.segment(0, 4);
@@ -36,7 +36,7 @@ namespace
             return 0;
         }
 
-        int operator()(const Mat34 &P, Vec &fvec) const
+        int operator()(const Mat34& P, Vec& fvec) const
         {
             int position = 0;
             for (int i = 0; i < m_points.size(); ++i)
@@ -57,7 +57,7 @@ namespace
         Point2Vec m_projections;
     };
 
-    std::vector<int> EvaluateProjectionMatrix(const Mat34 &P, const Point3Vec &points, const Point2Vec &projections, double threshold, double *error)
+    std::vector<int> EvaluateProjectionMatrix(const Mat34& P, const Point3Vec& points, const Point2Vec& projections, double threshold, double* error)
     {
         std::vector<int> inlier_indices;
         *error = 0.0;
@@ -107,7 +107,7 @@ namespace
 
 }
 
-Mat34 ComputeProjectionMatrix(const Point3Vec &points, const Point2Vec &projections, bool optimize)
+Mat34 ComputeProjectionMatrix(const Point3Vec& points, const Point2Vec& projections, bool optimize)
 {
     int num_pts{static_cast<int>(points.size())};
 
@@ -151,7 +151,7 @@ Mat34 ComputeProjectionMatrix(const Point3Vec &points, const Point2Vec &projecti
     return P;
 }
 
-int ComputeProjectionMatrixRansac(const Point3Vec &points, const Point2Vec &projections, int ransac_rounds, double ransac_threshold, Mat34 *P)
+int ComputeProjectionMatrixRansac(const Point3Vec& points, const Point2Vec& projections, int ransac_rounds, double ransac_threshold, Mat34* P)
 {
     int num_pts = static_cast<int>(points.size());
 
@@ -225,7 +225,7 @@ int ComputeProjectionMatrixRansac(const Point3Vec &points, const Point2Vec &proj
     return max_inliers;
 }
 
-void DecomposeProjectionMatrix(const Mat &P, Mat3 *K, Mat3 *R, Vec3 *t)
+void DecomposeProjectionMatrix(const Mat& P, Mat3* K, Mat3* R, Vec3* t)
 {
     // This is a modified version of the function "KRt_From_P", found in libmv and openMVG.
     // It is subject to the terms of the Mozilla Public License, v. 2.0, a copy of the MPL

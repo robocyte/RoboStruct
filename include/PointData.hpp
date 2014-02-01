@@ -7,7 +7,7 @@ struct PointData
 {
     PointData() = default;
 
-    PointData(const Point3 &pos, const Vec3 &color, const ImageKeyVector &views)
+    PointData(const Point3& pos, const Vec3& color, const ImageKeyVector& views)
         : m_pos(pos)
         , m_color(color)
         , m_views(views)

@@ -15,19 +15,20 @@ ExifReader::~ExifReader()
 
 bool ExifReader::ReadExifInfo()
 {
-    FILE *infile = fopen(m_filename, "rb");
+    FILE* infile = fopen(m_filename, "rb");
 
-    if (infile == nullptr)          return false;
-    if (!ReadJpgSections(infile))   return false;
+    if (infile == nullptr)        return false;
+    if (!ReadJpgSections(infile)) return false;
 
     for (int b = 0; b < m_sectionsRead; b++) free(m_sections[b].Data);
 
     m_sectionsRead = 0;
     fclose(infile);
+
     return true;
 }
 
-bool ExifReader::ReadJpgSections(FILE *infile)
+bool ExifReader::ReadJpgSections(FILE* infile)
 {
     int a = fgetc(infile);
     int data_precision;
@@ -148,7 +149,7 @@ bool ExifReader::ReadJpgSections(FILE *infile)
     return true;
 }
 
-void ExifReader::ProcessExif(unsigned char * ExifSection, unsigned int length)
+void ExifReader::ProcessExif(unsigned char* ExifSection, unsigned int length)
 {
     int FirstOffset;
 
@@ -192,7 +193,7 @@ void ExifReader::ProcessExif(unsigned char * ExifSection, unsigned int length)
     if (m_focal_plane_x_res != 0) m_ccd_width = (m_width * m_focal_plane_units / m_focal_plane_x_res);
 }
 
-void ExifReader::ProcessExifDir(unsigned char *DirStart, unsigned char *OffsetBase, unsigned ExifLength, int NestingLevel)
+void ExifReader::ProcessExifDir(unsigned char* DirStart, unsigned char* OffsetBase, unsigned ExifLength, int NestingLevel)
 {
     int de, NumDirEntries;
     char IndentString[25];
@@ -325,17 +326,17 @@ void ExifReader::ProcessExifDir(unsigned char *DirStart, unsigned char *OffsetBa
     }
 }
 
-double ExifReader::ConvertAnyFormat(void *ValuePtr, int Format)
+double ExifReader::ConvertAnyFormat(void* ValuePtr, int Format)
 {
     double Value;
     Value = 0;
 
     switch(Format)
     {
-    case FMT_SBYTE:     Value = *(signed char *)ValuePtr;   break;
-    case FMT_BYTE:      Value = *(unsigned char *)ValuePtr; break;
-    case FMT_USHORT:    Value = Get16u(ValuePtr);           break;
-    case FMT_ULONG:     Value = Get32u(ValuePtr);           break;
+    case FMT_SBYTE:     Value = *(signed char*)ValuePtr;   break;
+    case FMT_BYTE:      Value = *(unsigned char*)ValuePtr; break;
+    case FMT_USHORT:    Value = Get16u(ValuePtr);          break;
+    case FMT_ULONG:     Value = Get32u(ValuePtr);          break;
     case FMT_URATIONAL:
     case FMT_SRATIONAL:
     {
@@ -353,31 +354,31 @@ double ExifReader::ConvertAnyFormat(void *ValuePtr, int Format)
     }
     case FMT_SSHORT:    Value = (signed short)Get16u(ValuePtr); break;
     case FMT_SLONG:     Value = Get32s(ValuePtr);               break;
-    case FMT_SINGLE:    Value = (double)*(float *)ValuePtr;     break;
-    case FMT_DOUBLE:    Value = *(double *)ValuePtr;            break;
+    case FMT_SINGLE:    Value = (double)*(float*)ValuePtr;      break;
+    case FMT_DOUBLE:    Value = *(double*)ValuePtr;             break;
     default:            wxLogMessage("Illegal format code %d", Format);
     }
     return Value;
 }
 
-int ExifReader::Get16m(const void *Short)
+int ExifReader::Get16m(const void* Short)
 {
-    return (((unsigned char *)Short)[0] << 8) | ((unsigned char *)Short)[1];
+    return (((unsigned char*)Short)[0] << 8) | ((unsigned char*)Short)[1];
 }
 
-int ExifReader::Get16u(void *Short)
+int ExifReader::Get16u(void* Short)
 {
-    if (m_motorolaOrder)    return (((unsigned char *)Short)[0] << 8) | ((unsigned char *)Short)[1];
-    else                    return (((unsigned char *)Short)[1] << 8) | ((unsigned char *)Short)[0];
+    if (m_motorolaOrder)    return (((unsigned char*)Short)[0] << 8) | ((unsigned char*)Short)[1];
+    else                    return (((unsigned char*)Short)[1] << 8) | ((unsigned char*)Short)[0];
 }
 
-unsigned ExifReader::Get32u(void *Long)
+unsigned ExifReader::Get32u(void*Long)
 {
     return (unsigned)Get32s(Long) & 0xffffffff;
 }
 
-int ExifReader::Get32s(void *Long)
+int ExifReader::Get32s(void*Long)
 {
-    if (m_motorolaOrder)    return ((( char *)Long)[0] << 24) | (((unsigned char *)Long)[1] << 16) | (((unsigned char *)Long)[2] << 8 ) | (((unsigned char *)Long)[3] << 0 );
-    else                    return ((( char *)Long)[3] << 24) | (((unsigned char *)Long)[2] << 16) | (((unsigned char *)Long)[1] << 8 ) | (((unsigned char *)Long)[0] << 0 );
+    if (m_motorolaOrder)    return ((( char*)Long)[0] << 24) | (((unsigned char*)Long)[1] << 16) | (((unsigned char*)Long)[2] << 8 ) | (((unsigned char*)Long)[3] << 0 );
+    else                    return ((( char*)Long)[3] << 24) | (((unsigned char*)Long)[2] << 16) | (((unsigned char*)Long)[1] << 8 ) | (((unsigned char*)Long)[0] << 0 );
 }

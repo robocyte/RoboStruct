@@ -47,7 +47,7 @@ const int BytesPerFormat[] = {0,1,1,2,4,8,1,1,2,4,8,4,8};
 
 struct Section
 {
-    unsigned char   *Data;
+    unsigned char*  Data;
     int             Type;
     unsigned        Size;
 };
@@ -79,12 +79,12 @@ private:
     int         m_process = 0;
     unsigned    m_largest_exif_offset = 0;
 
-    bool        ReadJpgSections(FILE *infile);
-    void        ProcessExif(unsigned char *CharBuf, unsigned int length);       // Process an EXIF marker; Describes all the drivel that most digital cameras include...
-    void        ProcessExifDir(unsigned char *DirStart, unsigned char *OffsetBase, unsigned ExifLength, int NestingLevel);  // Process one of the nested EXIF directories
-    double      ConvertAnyFormat(void *ValuePtr, int Format);                   // Evaluate number, be it int, rational, or float from directory
-    int         Get16m(const void *Short);                                      // Get 16 bits motorola order (always) for jpeg header stuff
-    int         Get16u(void *Short);                                            // Convert a 16 bit unsigned value from file's native byte order
-    unsigned    Get32u(void *Long);                                             // Convert a 32 bit unsigned value from file's native byte order
-    int         Get32s(void *Long);                                             // Convert a 32 bit signed value from file's native byte order
+    bool        ReadJpgSections(FILE* infile);
+    void        ProcessExif(unsigned char* CharBuf, unsigned int length);       // Process an EXIF marker; Describes all the drivel that most digital cameras include...
+    void        ProcessExifDir(unsigned char* DirStart, unsigned char* OffsetBase, unsigned ExifLength, int NestingLevel);  // Process one of the nested EXIF directories
+    double      ConvertAnyFormat(void* ValuePtr, int Format);                   // Evaluate number, be it int, rational, or float from directory
+    int         Get16m(const void* Short);                                      // Get 16 bits motorola order (always) for jpeg header stuff
+    int         Get16u(void* Short);                                            // Convert a 16 bit unsigned value from file's native byte order
+    unsigned    Get32u(void* Long);                                             // Convert a 32 bit unsigned value from file's native byte order
+    int         Get32s(void* Long);                                             // Convert a 32 bit signed value from file's native byte order
 };

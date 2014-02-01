@@ -61,14 +61,14 @@ struct LMFunctor
     // int operator() (const InputType& x, ValueType* v, JacobianType* _j=0) const;
 };
 
-Mat3 AngleAxisToRotationMatrix(const Vec3 &w);
+Mat3 AngleAxisToRotationMatrix(const Vec3& w);
 
-Vec3 RotationMatrixToAngleAxis(const Mat3 &R);
+Vec3 RotationMatrixToAngleAxis(const Mat3& R);
 
-Point3 EuclideanToHomogenous(const Point2 &x);
+Point3 EuclideanToHomogenous(const Point2& x);
 
-Point4 EuclideanToHomogenous(const Point3 &x);
+Point4 EuclideanToHomogenous(const Point3& x);
 
-Point2 HomogenousToEuclidean(const Point3 &x);
+Point2 HomogenousToEuclidean(const Point3& x);
 
-Point3 HomogenousToEuclidean(const Point4 &x);
+Point3 HomogenousToEuclidean(const Point4& x);

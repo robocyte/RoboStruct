@@ -63,27 +63,27 @@ void MainFrame::OnSFMThreadUpdate(wxThreadEvent& event)
     std::iota(data.m_indices.begin(), data.m_indices.end(), 0);
 
     data.m_vertices.reserve(m_points.size());
-    for (const auto &point : m_points)
+    for (const auto& point : m_points)
     {
         gly::Vertex vert;
-        vert.m_position = glm::vec3(point.m_pos[0], point.m_pos[1], point.m_pos[2]);
-        vert.m_color = glm::vec4(point.m_color[0], point.m_color[1], point.m_color[2], 1.0f);
+        vert.m_position = glm::vec3{point.m_pos[0],   point.m_pos[1],   point.m_pos[2]};
+        vert.m_color    = glm::vec4{point.m_color[0], point.m_color[1], point.m_color[2], 1.0f};
         data.m_vertices.push_back(vert);
     }
 
     m_scene->GetNode("Points")->GetMesh()->ChangeData(data);
 
-    for (const auto &image : m_images)
+    for (const auto& image : m_images)
     {
         if (!image.m_camera.m_adjusted) continue;
 
         image.m_camera_mesh->SetVisibilityMesh(true);
 
         image.m_camera_mesh->GetTransform().Reset();
-        image.m_camera_mesh->GetTransform().Translate(glm::vec3(image.m_camera.m_t.x(), image.m_camera.m_t.y(), image.m_camera.m_t.z()));
+        image.m_camera_mesh->GetTransform().Translate(glm::vec3{image.m_camera.m_t.x(), image.m_camera.m_t.y(), image.m_camera.m_t.z()});
         Eigen::Quaternion<double> quat{image.m_camera.m_R.transpose()};
-        image.m_camera_mesh->GetTransform().Rotate(glm::quat(quat.w(), quat.x(), quat.y(), quat.z()));
-        image.m_camera_mesh->GetTransform().Scale(glm::vec3(0.02f, 0.02f, 0.02f));
+        image.m_camera_mesh->GetTransform().Rotate(glm::quat{quat.w(), quat.x(), quat.y(), quat.z()});
+        image.m_camera_mesh->GetTransform().Scale(glm::vec3{0.02f, 0.02f, 0.02f});
     }
 
     for (int i = 0; i < (int)m_images.size(); i++)
@@ -127,7 +127,7 @@ void MainFrame::OnSFMThreadComplete(wxThreadEvent& event)
 void MainFrame::InitializeLog()
 {
     // Redirect log messages
-    wxLog::SetActiveTarget(new wxLogTextCtrl(m_tc_log));
+    wxLog::SetActiveTarget(new wxLogTextCtrl{m_tc_log});
     wxLogMessage("Log initialized");
     wxLogMessage("OS: %s", wxPlatformInfo::Get().GetOperatingSystemDescription());
 
@@ -142,7 +142,7 @@ void MainFrame::InitializeCameraDatabase()
     else                            wxLogMessage("Error: Camera database not found!");
 }
 
-bool MainFrame::AddImage(const std::string &filename, const std::string &filename_short)
+bool MainFrame::AddImage(const std::string& filename, const std::string& filename_short)
 {
     ImageData img{filename, filename_short};
 
@@ -195,7 +195,7 @@ bool MainFrame::AddImage(const std::string &filename, const std::string &filenam
     }
 }
 
-bool MainFrame::FindCameraInDatabase(ImageData &img)
+bool MainFrame::FindCameraInDatabase(ImageData& img)
 {
     auto found = std::find_if(m_camDB.begin(), m_camDB.end(), [&](CamDBEntry& entry)
     {
@@ -207,6 +207,7 @@ bool MainFrame::FindCameraInDatabase(ImageData &img)
         img.m_ccd_width = found->second;
         if (img.GetWidth() > img.GetHeight())   img.m_init_focal = img.GetWidth()  * (img.m_init_focal_mm / img.m_ccd_width);
         else                                    img.m_init_focal = img.GetHeight() * (img.m_init_focal_mm / img.m_ccd_width);
+
         return true;
     }
 
@@ -252,7 +253,7 @@ void MainFrame::MatchAllAkaze()
     int progress_idx = 0;
 
     // Clean up
-    for (auto &image : m_images)
+    for (auto& image : m_images)
     {
         image.m_visible_points.clear();
         image.m_visible_keys.clear();
@@ -336,12 +337,12 @@ void MainFrame::MatchAllAkaze()
                 m_transforms.insert(trans_entry);
 
                 SetMatch(i, j);
-                auto &matches = m_matches.GetMatchList(GetMatchIndex(i, j));
+                auto& matches = m_matches.GetMatchList(GetMatchIndex(i, j));
 
                 matches.clear();
                 matches.reserve(num_inliers);
 
-                for (const auto &match : tmp_matches) matches.push_back(KeypointMatch{match.first, match.second});
+                for (const auto& match : tmp_matches) matches.push_back(KeypointMatch{match.first, match.second});
 
                 // Be verbose
                 wxLogMessage("[MatchAll]    ...with %s: %i inliers (%i putative, %i duplicates pruned), ratio = %.2f",
@@ -372,7 +373,7 @@ void MainFrame::MatchAll()
     int progress_idx = 0;
 
     // Clean up
-    for (auto &image : m_images)
+    for (auto& image : m_images)
     {
         image.m_visible_points.clear();
         image.m_visible_keys.clear();
@@ -396,7 +397,7 @@ void MainFrame::MatchAll()
 
         // Create a search index
         flann::Matrix<float> train(m_images[i].m_descriptors.data(), m_images[i].m_keys.size(), m_desc_length);
-        flann::Index<flann::L2<float>> flann_index(train, flann::KDTreeIndexParams{m_options.matching_trees});
+        flann::Index<flann::L2<float>> flann_index{train, flann::KDTreeIndexParams{m_options.matching_trees}};
         flann_index.buildIndex();
 
         for (int j = 0; j < i; j++)
@@ -451,12 +452,12 @@ void MainFrame::MatchAll()
                 m_transforms.insert(trans_entry);
 
                 SetMatch(i, j);
-                auto &matches = m_matches.GetMatchList(GetMatchIndex(i, j));
+                auto& matches = m_matches.GetMatchList(GetMatchIndex(i, j));
 
                 matches.clear();
                 matches.reserve(num_inliers);
 
-                for (const auto &match : tmp_matches) matches.push_back(KeypointMatch{match.first, match.second});
+                for (const auto& match : tmp_matches) matches.push_back(KeypointMatch{match.first, match.second});
 
                 // Be verbose
                 wxLogMessage("[MatchAll]    ...with %s: %i inliers (%i putative, %i duplicates pruned), ratio = %.2f",
@@ -483,7 +484,7 @@ void MainFrame::MatchAll()
     m_matches_loaded = true;
 }
 
-int MainFrame::PruneDoubleMatches(IntPairVec &matches)
+int MainFrame::PruneDoubleMatches(IntPairVec& matches)
 {
     ScopedTimer timer{m_profile_manager, "[PruneDoubleMatches]"};
 
@@ -502,7 +503,7 @@ int MainFrame::PruneDoubleMatches(IntPairVec &matches)
     return num_before - matches.size();
 }
 
-int MainFrame::ComputeEpipolarGeometry(int idx1, int idx2, IntPairVec &matches)
+int MainFrame::ComputeEpipolarGeometry(int idx1, int idx2, IntPairVec& matches)
 {
     ScopedTimer timer{m_profile_manager, "[ComputeEpipolarGeometry]"};
 
@@ -516,7 +517,7 @@ int MainFrame::ComputeEpipolarGeometry(int idx1, int idx2, IntPairVec &matches)
     const auto& keys1 = m_images[idx1].m_keys;
     const auto& keys2 = m_images[idx2].m_keys;
 
-    for (const auto &match : matches)
+    for (const auto& match : matches)
     {
         points1.push_back(cv::Point2f(keys1[match.first].m_coords.x(), keys1[match.first].m_coords.y()));
         points2.push_back(cv::Point2f(keys2[match.second].m_coords.x(), keys2[match.second].m_coords.y()));
@@ -524,7 +525,7 @@ int MainFrame::ComputeEpipolarGeometry(int idx1, int idx2, IntPairVec &matches)
 
     // Find the fundamental matrix
     double threshold(m_options.ransac_threshold_fundamental * std::max(m_images[idx1].GetWidth(), m_images[idx1].GetHeight()));
-    auto Fmat = cv::findFundamentalMat(cv::Mat(points1, true), cv::Mat(points2, true), status, cv::FM_RANSAC, threshold);
+    auto Fmat = cv::findFundamentalMat(cv::Mat{points1, true}, cv::Mat{points2, true}, status, cv::FM_RANSAC, threshold);
 
     // Remove outliers from ptpairs
     auto matches_old = matches;
@@ -535,7 +536,7 @@ int MainFrame::ComputeEpipolarGeometry(int idx1, int idx2, IntPairVec &matches)
     return (int)matches.size();
 }
 
-double MainFrame::ComputeHomography(int idx1, int idx2, const IntPairVec &matches)
+double MainFrame::ComputeHomography(int idx1, int idx2, const IntPairVec& matches)
 {
     ScopedTimer timer{m_profile_manager, "[ComputeHomography]"};
 
@@ -557,7 +558,7 @@ double MainFrame::ComputeHomography(int idx1, int idx2, const IntPairVec &matche
 
     // Find the homography matrix
     double threshold(m_options.ransac_threshold_homography * std::max(m_images[idx1].GetWidth(), m_images[idx1].GetHeight()));
-    cv::Mat Hmat = cv::findHomography(cv::Mat(points1, true), cv::Mat(points2, true), status, cv::RANSAC, threshold);
+    cv::Mat Hmat = cv::findHomography(cv::Mat{points1, true}, cv::Mat{points2, true}, status, cv::RANSAC, threshold);
 
     // Compute and return inlier ratio
     return std::count(status.begin(), status.end(), 1) / static_cast<double>(num_matches);
@@ -586,7 +587,7 @@ void MainFrame::ComputeTracks()
     {
         std::for_each(m_matches.begin(i), m_matches.end(i), [&](AdjListElem val)
         {
-            auto &list = val.m_match_list;
+            auto& list = val.m_match_list;
             std::sort(list.begin(), list.end(), [](KeypointMatch k1, KeypointMatch k2) { return k1.first < k2.first; });
         });
     }
@@ -639,7 +640,7 @@ void MainFrame::ComputeTracks()
                 dummy.first = f1;
 
                 // Check all adjacent images
-                auto &nbrs = m_matches.GetNeighbors(img1);
+                auto& nbrs = m_matches.GetNeighbors(img1);
                 for (auto iter = nbrs.begin(); iter != nbrs.end(); iter++)
                 {
                     unsigned int k = iter->m_index;
@@ -647,7 +648,7 @@ void MainFrame::ComputeTracks()
 
                     MatchIndex base = GetMatchIndex(img1, k);
 
-                    auto &list = m_matches.GetMatchList(base);
+                    auto& list = m_matches.GetMatchList(base);
 
                     // Do a binary search for the feature
                     auto p = std::equal_range(list.begin(), list.end(), dummy, [](KeypointMatch k1, KeypointMatch k2) { return k1.first < k2.first; });
@@ -688,7 +689,7 @@ void MainFrame::ComputeTracks()
 
     for (int i = 0; i < num_pts; i++)
     {
-        for (const auto &view : tracks[i].m_views)
+        for (const auto& view : tracks[i].m_views)
         {
             m_images[view.first].m_visible_points.push_back(i);
             m_images[view.first].m_visible_keys.push_back(view.second);
@@ -700,7 +701,7 @@ void MainFrame::ComputeTracks()
 
     // Print track stats
     IntVec stats(num_images + 1);
-    for (const auto &track : m_tracks) stats[track.m_views.size()] += 1;
+    for (const auto& track : m_tracks) stats[track.m_views.size()] += 1;
     for (int i = 2; i < (num_images + 1); i++) wxLogMessage("[ComputeTracks] %i projections: %i", i, stats[i]);
 }
 
@@ -721,7 +722,7 @@ void MainFrame::MakeMatchListsSymmetric()
             MatchIndex idx     = GetMatchIndex(i, j);
             MatchIndex idx_rev = GetMatchIndex(j, i);
 
-            auto &list = iter->m_match_list;
+            auto& list = iter->m_match_list;
 
             m_matches.SetMatch(idx_rev);
             m_matches.ClearMatch(idx_rev);
@@ -741,13 +742,13 @@ int MainFrame::GetNumTrackMatches(int img1, int img2)
 {
     int num_intersections = 0;
 
-    const auto &tracks1 = m_images[img1].m_visible_points;
-    const auto &tracks2 = m_images[img2].m_visible_points;
+    const auto& tracks1 = m_images[img1].m_visible_points;
+    const auto& tracks2 = m_images[img2].m_visible_points;
 
     for (auto track_idx : tracks2) m_tracks[track_idx].m_extra = 0;
     for (auto track_idx : tracks1) m_tracks[track_idx].m_extra = 1;
     for (auto track_idx : tracks2) num_intersections += m_tracks[track_idx].m_extra;
-    for (auto &track : m_tracks) track.m_extra = -1;
+    for (auto& track : m_tracks) track.m_extra = -1;
 
     return num_intersections;
 }

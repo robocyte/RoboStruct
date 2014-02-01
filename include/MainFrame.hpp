@@ -90,19 +90,19 @@ private:
     void        DrawImagePreview(wxDC& dc);
     void        DrawMatches(wxDC& dc);
 
-    bool        AddImage(const std::string &filename, const std::string &filename_short);       // Try to add an image to the initial list of images
-    bool        ReadCamDBFile(const std::string &filename);
+    bool        AddImage(const std::string& filename, const std::string& filename_short);       // Try to add an image to the initial list of images
+    bool        ReadCamDBFile(const std::string& filename);
     void        AddCamDBFileEntry();
-    bool        FindCameraInDatabase(ImageData &img);
+    bool        FindCameraInDatabase(ImageData& img);
 
     void        DetectFeaturesAll();
     void        DetectFeatures(int img_idx);
 
     void        MatchAll();
     void        MatchAllAkaze();
-    int         PruneDoubleMatches(IntPairVec &matches);
-    int         ComputeEpipolarGeometry(int idx1, int idx2, IntPairVec &matches);               // Computes the fundamental matrix F and removes outliers
-    double      ComputeHomography(int idx1, int idx2, const IntPairVec &matches);               // Computes the homography H and returns the inlier ratio
+    int         PruneDoubleMatches(IntPairVec& matches);
+    int         ComputeEpipolarGeometry(int idx1, int idx2, IntPairVec& matches);               // Computes the fundamental matrix F and removes outliers
+    double      ComputeHomography(int idx1, int idx2, const IntPairVec& matches);               // Computes the homography H and returns the inlier ratio
     void        MakeMatchListsSymmetric();
     void        ComputeTracks();                                                                // Organize the matches into tracks, where a track is a connected set of matching keypoints across multiple images
 
@@ -121,29 +121,29 @@ private:
 
     void        SaveMatchFile();
     void        SaveTrackFile();
-    void        SaveProjectionMatrix(const std::string &path, int img_idx);
-    void        SaveUndistortedImage(const std::string &path, int img_idx);
-    void        ExportToCMVS(const std::string &path);
-    void        SaveBundleFile(const std::string &path);
+    void        SaveProjectionMatrix(const std::string& path, int img_idx);
+    void        SaveUndistortedImage(const std::string& path, int img_idx);
+    void        ExportToCMVS(const std::string& path);
+    void        SaveBundleFile(const std::string& path);
     void        SavePlyFile();
     void        SaveMeshLabFile();
     void        SaveMayaFile();
 
     wxThread::ExitCode  Entry();
     void                RunSFM();
-    void                PickInitialCameraPair(CamVec &cameras, IntVec &added_order);
-    void                SetupInitialCameraPair(CamVec &cameras, const IntVec &added_order, PointVec &points);
-    bool                EstimateRelativePose(int i1, int i2, Camera *camera1, Camera *camera2);
-    int                 FindCameraWithMostMatches(const IntVec &added_order, int &max_matches, const PointVec &points);
-    IntVec              FindCamerasWithNMatches(int n, const IntVec &added_order, const PointVec &points);
-    bool                FindAndVerifyCamera(const Point3Vec &points, const Point2Vec &projections, Mat3 *K, Mat3 *R, Vec3 *t, IntVec &inliers, IntVec &inliers_weak, IntVec &outliers);
-    Camera              InitializeImage(int image_idx, int camera_idx, PointVec &points);
-    void                BundleAdjust(CamVec &cameras, const IntVec &added_order, PointVec &points);
-    void                RefineCameraParameters(Camera *camera, const Point3Vec &points, const Point2Vec &projections, IntVec &inliers);
-    void                AddNewPoints(const CamVec &cameras, const IntVec &added_order, PointVec &points);
-    int                 RemoveBadPointsAndCameras(const CamVec &cameras, const IntVec &added_order, PointVec &points);
-    void                RadiusOutlierRemoval(double threshold, const IntVec &added_order, PointVec &points);
-    void                UpdateGeometryDisplay(const CamVec &cameras, const IntVec &added_order, const PointVec &points);
+    void                PickInitialCameraPair(CamVec& cameras, IntVec& added_order);
+    void                SetupInitialCameraPair(CamVec& cameras, const IntVec& added_order, PointVec& points);
+    bool                EstimateRelativePose(int i1, int i2, Camera* camera1, Camera* camera2);
+    int                 FindCameraWithMostMatches(const IntVec& added_order, int& max_matches, const PointVec& points);
+    IntVec              FindCamerasWithNMatches(int n, const IntVec& added_order, const PointVec& points);
+    bool                FindAndVerifyCamera(const Point3Vec& points, const Point2Vec& projections, Mat3* K, Mat3* R, Vec3* t, IntVec& inliers, IntVec& inliers_weak, IntVec& outliers);
+    Camera              InitializeImage(int image_idx, int camera_idx, PointVec& points);
+    void                BundleAdjust(CamVec& cameras, const IntVec& added_order, PointVec& points);
+    void                RefineCameraParameters(Camera* camera, const Point3Vec& points, const Point2Vec& projections, IntVec& inliers);
+    void                AddNewPoints(const CamVec& cameras, const IntVec& added_order, PointVec& points);
+    int                 RemoveBadPointsAndCameras(const CamVec& cameras, const IntVec& added_order, PointVec& points);
+    void                RadiusOutlierRemoval(double threshold, const IntVec& added_order, PointVec& points);
+    void                UpdateGeometryDisplay(const CamVec& cameras, const IntVec& added_order, const PointVec& points);
 
 protected:
     // Handlers for MainFrame events

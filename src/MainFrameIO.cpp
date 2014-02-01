@@ -8,7 +8,7 @@
 #include "MainFrame.hpp"
 #include "Utilities.hpp"
 
-bool MainFrame::ReadCamDBFile(const std::string &filename)
+bool MainFrame::ReadCamDBFile(const std::string& filename)
 {
     m_camDB.clear();
 
@@ -81,16 +81,16 @@ void MainFrame::SaveTrackFile()
         track_file << (int)m_tracks.size() << std::endl;
 
         // Now write each track
-        for (auto track : m_tracks)
+        for (const auto& track : m_tracks)
         {
             track_file << track.m_views.size();
-            for (const auto &view : track.m_views) track_file << " " << view.first << " " << view.second;
+            for (const auto& view : track.m_views) track_file << " " << view.first << " " << view.second;
             track_file << std::endl;
         }
     }
 }
 
-void MainFrame::SaveProjectionMatrix(const std::string &path, int img_idx)
+void MainFrame::SaveProjectionMatrix(const std::string& path, int img_idx)
 {
     if (!m_images[img_idx].m_camera.m_adjusted) return;
 
@@ -108,8 +108,8 @@ void MainFrame::SaveProjectionMatrix(const std::string &path, int img_idx)
         wxLogMessage("Writing projection matrix to %s...", filename.c_str());
 
         double focal  = m_images[img_idx].m_camera.m_focal_length;
-        const auto &R = m_images[img_idx].m_camera.m_R;
-        const auto &t = m_images[img_idx].m_camera.m_t;
+        const auto& R = m_images[img_idx].m_camera.m_R;
+        const auto& t = m_images[img_idx].m_camera.m_t;
 
         Mat3 K;
         K << -focal,   0.0,   0.5 * GetImageWidth(img_idx)  - 0.5,
@@ -129,7 +129,7 @@ void MainFrame::SaveProjectionMatrix(const std::string &path, int img_idx)
     }
 }
 
-void MainFrame::SaveUndistortedImage(const std::string &path, int img_idx)
+void MainFrame::SaveUndistortedImage(const std::string& path, int img_idx)
 {
     if (!m_images[img_idx].m_camera.m_adjusted) return;
 
@@ -159,7 +159,7 @@ void MainFrame::SaveUndistortedImage(const std::string &path, int img_idx)
     cv::imwrite(filename, img_undist);
 }
 
-void MainFrame::ExportToCMVS(const std::string &path)
+void MainFrame::ExportToCMVS(const std::string& path)
 {
     std::string pmvs_dir{  path + R"(\cmvs)"};
     std::string image_dir{ path + R"(\cmvs\visualize)"};
@@ -186,7 +186,7 @@ void MainFrame::ExportToCMVS(const std::string &path)
     wxLogMessage("Export to CMVS complete!");
 }
 
-void MainFrame::SaveBundleFile(const std::string &path)
+void MainFrame::SaveBundleFile(const std::string& path)
 {
     auto filename = path + R"(\bundle.rd.out)";
     std::ofstream bundle_file{filename};
@@ -202,14 +202,14 @@ void MainFrame::SaveBundleFile(const std::string &path)
 
         int num_points(m_points.size());
         int num_visible_points{0};
-        int num_images = std::count_if(m_images.begin(), m_images.end(), [](const ImageData &img) { return img.m_camera.m_adjusted; });
+        int num_images = std::count_if(m_images.begin(), m_images.end(), [](const ImageData& img) { return img.m_camera.m_adjusted; });
 
-        for (const auto &point : m_points) if (point.m_views.size() > 0) num_visible_points++;
+        for (const auto& point : m_points) if (point.m_views.size() > 0) num_visible_points++;
 
         bundle_file << num_images << " " << num_visible_points << std::endl;
 
         // Write cameras
-        for (const auto &image : m_images)
+        for (const auto& image : m_images)
         {
             if (!image.m_camera.m_adjusted) continue;
 
@@ -217,18 +217,18 @@ void MainFrame::SaveBundleFile(const std::string &path)
             bundle_file << image.m_camera.m_focal_length << " 0.0 0.0" << std::endl;
 
             // Rotation
-            const auto &R = image.m_camera.m_R;
+            const auto& R = image.m_camera.m_R;
             bundle_file << R(0, 0) << " " << R(0, 1) << " " << R(0, 2) << std::endl
                         << R(1, 0) << " " << R(1, 1) << " " << R(1, 2) << std::endl
                         << R(2, 0) << " " << R(2, 1) << " " << R(2, 2) << std::endl;
 
             // Translation
-            const auto &t = image.m_camera.m_t;
+            const auto& t = image.m_camera.m_t;
             bundle_file << t.x() << " " << t.y() << " " << t.z() << std::endl;
         }
 
         // Write points
-        for (const auto &point : m_points)
+        for (const auto& point : m_points)
         {
             if (point.m_views.size() > 0)
             {
@@ -242,7 +242,7 @@ void MainFrame::SaveBundleFile(const std::string &path)
 
                 // View data
                 bundle_file << point.m_views.size();
-                for (const auto &view : point.m_views)
+                for (const auto& view : point.m_views)
                 {
                     int img = view.first;
                     int key = view.second;
@@ -270,7 +270,7 @@ void MainFrame::SavePlyFile()
     {
         wxLogMessage("Writing points and cameras to %s...", filename.c_str());
 
-        int num_cameras = std::count_if(m_images.begin(), m_images.end(), [](const ImageData &img) { return img.m_camera.m_adjusted; });
+        int num_cameras = std::count_if(m_images.begin(), m_images.end(), [](const ImageData& img) { return img.m_camera.m_adjusted; });
         int num_points = (int)m_points.size();
 
         // Output the header
@@ -286,7 +286,7 @@ void MainFrame::SavePlyFile()
                  << "end_header" << std::endl;
 
         // Output the vertices
-        for (const auto &point : m_points)
+        for (const auto& point : m_points)
         {
             // Point positions
             ply_file    << point.m_pos.x() << " " << point.m_pos.y() << " " << point.m_pos.z() << " ";
@@ -298,12 +298,12 @@ void MainFrame::SavePlyFile()
         }
 
         // Output the cameras
-        for (const auto &img : m_images)
+        for (const auto& img : m_images)
         {
             if (!img.m_camera.m_adjusted) continue;
 
-            const auto &R = img.m_camera.m_R;
-            const auto &t = img.m_camera.m_t;
+            const auto& R = img.m_camera.m_R;
+            const auto& t = img.m_camera.m_t;
 
             ply_file << t.x() << " " << t.y() << " " << t.z() << " "
                      << 255   << " " << 0     << " " << 0     << std::endl;
@@ -348,12 +348,12 @@ void MainFrame::SaveMeshLabFile()
         // Write cameras as raster layers
         mlp_file << R"( <RasterGroup>)" << std::endl;
 
-        for (const auto &img : m_images)
+        for (const auto& img : m_images)
         {
             if (!img.m_camera.m_adjusted) continue;
 
-            auto Rot = img.m_camera.m_R;
-            auto t = -img.m_camera.m_t;
+            const auto& Rot =  img.m_camera.m_R;
+            const auto& t   = -img.m_camera.m_t;
 
             mlp_file << R"(  <MLRaster label=")" << img.m_filename_short << R"(">)" << std::endl
                      << R"(   <VCGCamera TranslationVector=")" << t.x() << " " << t.y() << " " << t.z() << " " << 1 << R"(" )"
@@ -412,8 +412,8 @@ void MainFrame::SaveMayaFile()
             const double ccd_width  = m_images[i].m_ccd_width;
             const double ccd_height = ccd_width * height / width;
             const double focalpx    = m_images[i].m_camera.m_focal_length;
-            const auto &R           = m_images[i].m_camera.m_R;
-            const auto &t           = m_images[i].m_camera.m_t;
+            const auto& R           = m_images[i].m_camera.m_R;
+            const auto& t           = m_images[i].m_camera.m_t;
             double focalmm;
             double cap_w;   // cap = camera aperture
             double cap_h;
@@ -494,12 +494,12 @@ void MainFrame::SaveMayaFile()
 
         // Position
         maya_file << R"(    setAttr ".pos0" -type "vectorArray" )" << std::setw(4) << std::setfill('0') << num_points;
-        for (const auto &p : m_points) maya_file << " " << p.m_pos.x() << " " << p.m_pos.y() << " " << p.m_pos.z();
+        for (const auto& p : m_points) maya_file << " " << p.m_pos.x() << " " << p.m_pos.y() << " " << p.m_pos.z();
         maya_file << ";" << std::endl;
 
         // Color
         maya_file << R"(    setAttr ".rgbPP0" -type "vectorArray" )" << std::setw(4) << std::setfill('0') << num_points;
-        for (const auto &p : m_points) maya_file << " " << p.m_color[0] << " " << p.m_color[1] << " " << p.m_color[2];
+        for (const auto& p : m_points) maya_file << " " << p.m_color[0] << " " << p.m_color[1] << " " << p.m_color[2];
         maya_file << ";" << std::endl;
 
         maya_file << R"(    setAttr -k on ".colorAccum";)" << std::endl

@@ -41,24 +41,24 @@ void MainFrame::GenerateMatchImage()
     float right_x_correction_factor = 0.5 * m_images[right_idx].GetWidth();
     float right_y_correction_factor = 0.5 * m_images[right_idx].GetHeight() - 1.0;
 
-    for (const auto &key : left_keys)
+    for (const auto& key : left_keys)
     {
         float x = key.m_coords.x() + left_x_correction_factor;
         float y = left_y_correction_factor - key.m_coords.y();
-        kpts1.push_back(cv::KeyPoint(x, y, 1.0f));
+        kpts1.push_back(cv::KeyPoint{x, y, 1.0f});
     }
 
-    for (const auto &key : right_keys)
+    for (const auto& key : right_keys)
     {
         float x = key.m_coords.x() + right_x_correction_factor;
         float y = right_y_correction_factor - key.m_coords.y();
-        kpts2.push_back(cv::KeyPoint(x, y, 1.0f));
+        kpts2.push_back(cv::KeyPoint{x, y, 1.0f});
     }
 
-    const auto &list = m_matches.GetMatchList(GetMatchIndex(left_idx, right_idx));
+    const auto& list = m_matches.GetMatchList(GetMatchIndex(left_idx, right_idx));
 
     matches.reserve(list.size());
-    for (const auto &match : list) matches.push_back(cv::DMatch(match.first, match.second, 0.0f));
+    for (const auto& match : list) matches.push_back(cv::DMatch(match.first, match.second, 0.0f));
 
     cv::Scalar_<double> line_colour;
     if (m_options.draw_coloured_lines)  line_colour = cv::Scalar_<double>::all(-1);

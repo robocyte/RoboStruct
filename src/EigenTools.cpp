@@ -1,6 +1,6 @@
 #include "EigenTools.hpp"
 
-Mat3 AngleAxisToRotationMatrix(const Vec3 &w)
+Mat3 AngleAxisToRotationMatrix(const Vec3& w)
 {
     Mat3 dR;
     double theta = w.squaredNorm();
@@ -24,7 +24,7 @@ Mat3 AngleAxisToRotationMatrix(const Vec3 &w)
     return dR;
 }
 
-Vec3 RotationMatrixToAngleAxis(const Mat3 &R)
+Vec3 RotationMatrixToAngleAxis(const Mat3& R)
 {
     Vec3 angle_axis;
     angle_axis(0) = R(2, 1) - R(1, 2);
@@ -60,22 +60,22 @@ Vec3 RotationMatrixToAngleAxis(const Mat3 &R)
     return angle_axis;
 }
 
-Point3 EuclideanToHomogenous(const Point2 &x)
+Point3 EuclideanToHomogenous(const Point2& x)
 {
-    return Point3{x.x(), x.y(), 1.0};
+    return {x.x(), x.y(), 1.0};
 }
 
-Point4 EuclideanToHomogenous(const Point3 &x)
+Point4 EuclideanToHomogenous(const Point3& x)
 {
-    return Point4{x.x(), x.y(), x.z(), 1.0};
+    return {x.x(), x.y(), x.z(), 1.0};
 }
 
-Point2 HomogenousToEuclidean(const Point3 &x)
+Point2 HomogenousToEuclidean(const Point3& x)
 {
     return x.head<2>() / x.z();
 }
 
-Point3 HomogenousToEuclidean(const Point4 &x)
+Point3 HomogenousToEuclidean(const Point4& x)
 {
     return x.head<3>() / x[3];
 }

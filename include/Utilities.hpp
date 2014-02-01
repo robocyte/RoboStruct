@@ -40,7 +40,7 @@ T deg2rad(T d)
 
 // Returns the value of the nth element
 template<typename T>
-typename T::value_type GetNthElement(int n, const T &container)
+typename T::value_type GetNthElement(int n, const T& container)
 {
     T container_copy(container);
     std::nth_element(container_copy.begin(), container_copy.begin() + n, container_copy.end());

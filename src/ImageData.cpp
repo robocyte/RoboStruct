@@ -17,7 +17,7 @@
 #include "daisy/daisy.h"
 #include "kutility/image.h"
 
-ImageData::ImageData(const std::string &filename, const std::string &filename_short)
+ImageData::ImageData(const std::string& filename, const std::string& filename_short)
     : m_filename(filename)
     , m_filename_short(filename_short)
 {
@@ -75,7 +75,7 @@ void ImageData::DetectFeatures(const Options& opts)
             m_descriptors.reserve(m_keys.size() * m_desc_size);
 
             // Compute Daisy descriptors at provided locations
-            for (const auto &key : keys)
+            for (const auto& key : keys)
             {
                 std::vector<float> descriptor(m_desc_size);
                 DaisyDesc.get_descriptor(key.pt.y, key.pt.x, 35, descriptor.data());
@@ -163,13 +163,13 @@ void ImageData::ConvertOpenCVKeys(const std::vector<cv::KeyPoint>& keys, const c
     float x_correction_factor = 0.5 * m_width;
     float y_correction_factor = 0.5 * m_height - 1.0;
 
-    for (auto &key : keys)
+    for (auto& key : keys)
     {
         float x = key.pt.x - x_correction_factor;
         float y = y_correction_factor - key.pt.y;
 
         int xf = static_cast<int>(std::floor(key.pt.x)), yf = static_cast<int>(std::floor(key.pt.y));
-        const uchar *ptr = image.ptr<uchar>(yf);
+        const uchar* ptr = image.ptr<uchar>(yf);
 
         m_keys.push_back(KeyPoint{x, y, ptr[3 * xf + 2], ptr[3 * xf + 1], ptr[3 * xf]});
     }

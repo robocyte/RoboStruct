@@ -13,7 +13,7 @@ using namespace std::chrono;
 namespace
 {
 
-    std::string DurationToHHMMSSMMM(const milliseconds &duration)
+    std::string DurationToHHMMSSMMM(const milliseconds& duration)
     {
         auto hh     = duration_cast<hours>(duration);
         auto mm     = duration_cast<minutes>(duration % 3600000);
@@ -35,7 +35,7 @@ struct ProfileManager
 {
     ProfileManager() = default;
 
-    void Add(const std::string &name, milliseconds duration)
+    void Add(const std::string& name, milliseconds duration)
     {
         m_entries[name].push_back(duration);
     }
@@ -56,11 +56,11 @@ struct ProfileManager
         std::vector<report_entry> sorted_entries;
         
         milliseconds overall_duration{0};
-        for (const auto &entry : m_entries) for (const auto &duration : entry.second) overall_duration += duration;
-        for (const auto &entry : m_entries)
+        for (const auto& entry : m_entries) for (const auto &duration : entry.second) overall_duration += duration;
+        for (const auto& entry : m_entries)
         {
             milliseconds entry_duration{0};
-            for (const auto &duration : entry.second) entry_duration += duration;
+            for (const auto& duration : entry.second) entry_duration += duration;
 
             std::stringstream line; line.setf(std::ios::left, std::ios::adjustfield);
             line    << std::setw(30) << entry.first
@@ -72,7 +72,7 @@ struct ProfileManager
             sorted_entries.push_back(report_entry{entry_duration, line.str()});
         }
 
-        auto compare_first = [&](const report_entry &a, const report_entry &b) { return a.first < b.first; };
+        auto compare_first = [&](const report_entry& a, const report_entry& b) { return a.first < b.first; };
         std::sort(sorted_entries.begin(), sorted_entries.end(), compare_first);
 
         for (const auto &entry : sorted_entries) report << entry.second << std::endl;
@@ -91,7 +91,7 @@ struct ScopedTimer
 {
     ScopedTimer() = delete;
 
-    ScopedTimer(ProfileManager &mgr, const std::string &name)
+    ScopedTimer(ProfileManager& mgr, const std::string& name)
         : m_profile_manager(mgr)
         , m_name(name)
     {
@@ -103,8 +103,8 @@ struct ScopedTimer
         m_profile_manager.Add(m_name, duration_cast<milliseconds>(high_resolution_clock::now() - m_start));
     }
 
-    ScopedTimer(const ScopedTimer&) = delete;
-    ScopedTimer& operator=(const ScopedTimer&) = delete;
+    ScopedTimer(const ScopedTimer&)              = delete;
+    ScopedTimer& operator = (const ScopedTimer&) = delete;
 
     ProfileManager&                    m_profile_manager;
     std::string                        m_name;

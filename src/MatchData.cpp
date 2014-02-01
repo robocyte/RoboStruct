@@ -48,7 +48,7 @@ void MatchTable::RemoveMatch(MatchIndex idx)
         // Remove the neighbor
         AdjListElem e;
         e.m_index = idx.second;
-        auto &l = m_match_lists[idx.first];
+        auto& l = m_match_lists[idx.first];
         auto p = equal_range(l.begin(), l.end(), e);
 
         l.erase(p.first, p.second);
@@ -57,14 +57,14 @@ void MatchTable::RemoveMatch(MatchIndex idx)
 
 void MatchTable::RemoveAll()
 {
-    for (auto &list : m_match_lists) list.clear();
+    for (auto& list : m_match_lists) list.clear();
 }
 
 bool MatchTable::Contains(MatchIndex idx) const
 {
     AdjListElem e;
     e.m_index = idx.second;
-    const auto &l = m_match_lists[idx.first];
+    const auto& l = m_match_lists[idx.first];
     auto p = equal_range(l.begin(), l.end(), e);
 
     return (p.first != p.second);
@@ -90,7 +90,7 @@ std::vector<KeypointMatch>& MatchTable::GetMatchList(MatchIndex idx)
 {
     AdjListElem e;
     e.m_index = idx.second;
-    auto &l = m_match_lists[idx.first];
+    auto& l = m_match_lists[idx.first];
     auto p = equal_range(l.begin(), l.end(), e);
 
     assert(p.first != p.second);

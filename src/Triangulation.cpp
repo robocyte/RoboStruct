@@ -8,15 +8,15 @@ namespace
 
     struct TriangulationResidual : LMFunctor<double>
     {
-        TriangulationResidual(const Observations &observations)
+        TriangulationResidual(const Observations& observations)
             : LMFunctor<double>(3, 2 * static_cast<int>(observations.size()))
             , m_observations(observations)
         {}
 
-        int operator()(const Vec &x, Vec &fvec) const
+        int operator()(const Vec& x, Vec& fvec) const
         {
             int position = 0;
-            for (const auto &observation : m_observations)
+            for (const auto& observation : m_observations)
             {
                 auto projection = Project(x, observation);
 
@@ -34,7 +34,7 @@ namespace
 
 }
 
-double ComputeRayAngle(Point2 p, Point2 q, const Camera &cam1, const Camera &cam2)
+double ComputeRayAngle(Point2 p, Point2 q, const Camera& cam1, const Camera& cam2)
 {
     Point3 p3n = cam1.GetIntrinsicMatrix().inverse() * EuclideanToHomogenous(p);
     Point3 q3n = cam2.GetIntrinsicMatrix().inverse() * EuclideanToHomogenous(q);
@@ -52,19 +52,19 @@ double ComputeRayAngle(Point2 p, Point2 q, const Camera &cam1, const Camera &cam
     return acos(util::clamp((dot / mag), (-1.0 + 1.0e-8), (1.0 - 1.0e-8)));
 }
 
-bool CheckCheirality(const Point3 p, const Camera &cam)
+bool CheckCheirality(const Point3& p, const Camera& cam)
 {
     Point3 pt = cam.m_R * (p - cam.m_t);
     return (pt.z() < 0.0);
 }
 
-Point2 Project(const Point3 &p, const Observation &observation)
+Point2 Project(const Point3& p, const Observation& observation)
 {
     Point3 projection = observation.m_R * p + observation.m_t;
     return projection.head<2>() / projection.z();
 }
 
-Point3 Triangulate(const Observations &observations, double *error, bool optimize)
+Point3 Triangulate(const Observations& observations, double* error, bool optimize)
 {
     const int num_points = static_cast<int>(observations.size());
 
@@ -109,7 +109,7 @@ Point3 Triangulate(const Observations &observations, double *error, bool optimiz
     return x;
 }
 
-bool FindExtrinsics(const Mat3 &E, const Point2Vec &pts1, const Point2Vec &pts2, Mat3 *R, Vec3 *t)
+bool FindExtrinsics(const Mat3& E, const Point2Vec& pts1, const Point2Vec& pts2, Mat3* R, Vec3* t)
 {
     const int num_correspondences = static_cast<int>(pts1.size());
 

@@ -5,7 +5,7 @@ namespace
 
     struct CameraResidual : LMFunctor<double>
     {
-        CameraResidual(const Camera &camera, const Point3Vec &points, const Point2Vec &projections, bool adjust_focal)
+        CameraResidual(const Camera& camera, const Point3Vec& points, const Point2Vec& projections, bool adjust_focal)
             : LMFunctor<double>(adjust_focal ? 9 : 6, adjust_focal ? 2 * points.size() + 3 : 2 * points.size())
             , m_camera(camera)
             , m_points(points)
@@ -15,7 +15,7 @@ namespace
             , m_constrain_distortion_weight(100.0 * points.size())
         {}
 
-        int operator()(const Vec &x, Vec &fvec) const
+        int operator()(const Vec& x, Vec& fvec) const
         {
             int num_points = static_cast<int>(m_points.size());
 
@@ -37,7 +37,7 @@ namespace
             return 0;
         }
 
-        Point2 ProjectPoint(const Vec &x, const Point3 &point) const
+        Point2 ProjectPoint(const Vec& x, const Point3& point) const
         {
             double focal_length = 0.0;
             if (m_adjust_focal) focal_length = x(6);
@@ -92,7 +92,7 @@ Mat34 Camera::GetProjectionMatrix() const
     return GetIntrinsicMatrix() * P;
 }
 
-Point2 Camera::Project(const Point3 &point) const
+Point2 Camera::Project(const Point3& point) const
 {
     // HZ p. 153f
     Point3 tmp = m_R * (point - m_t);
@@ -105,7 +105,7 @@ Point2 Camera::Project(const Point3 &point) const
     return projected * factor * m_focal_length;
 }
 
-void RefineCamera(Camera *camera, const Point3Vec &points, const Point2Vec &projections, bool adjust_focal)
+void RefineCamera(Camera* camera, const Point3Vec& points, const Point2Vec& projections, bool adjust_focal)
 {
     Vec x{adjust_focal ? 9 : 6};
     if (adjust_focal)   x << camera->m_t.x(), camera->m_t.y(), camera->m_t.z(), 0.0, 0.0, 0.0, camera->m_focal_length, camera->m_k(0), camera->m_k(1);

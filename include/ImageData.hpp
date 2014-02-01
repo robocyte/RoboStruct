@@ -14,7 +14,7 @@ struct Options;
 class ImageData
 {
 public:
-    ImageData(const std::string &filename, const std::string &filename_short);
+    ImageData(const std::string& filename, const std::string& filename_short);
 
     std::string             m_filename;             // Filename (including path)
     std::string             m_filename_undistorted; // Filename (including path) of the undistorted image

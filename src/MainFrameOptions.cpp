@@ -2,7 +2,7 @@
 
 void MainFrame::ResetOptions()
 {
-    m_options = Options();
+    m_options = Options{};
 
     // Setup the option box
     m_pg_options->Clear();
@@ -15,85 +15,85 @@ void MainFrame::ResetOptions()
     features_list.Add("AKAZE");
 
     // Feature detectors/descriptors
-    wxPGProperty* feature_category = m_pg_options->Append( new wxPropertyCategory( "Feature detection/description", wxPG_LABEL ) );
-    m_pg_options->Append( new wxEnumProperty("Feature type",    wxPG_LABEL, features_list ) );
-    m_pg_options->Append( new wxBoolProperty("Save keys",       wxPG_LABEL, m_options.save_keys ) );
+    wxPGProperty* feature_category = m_pg_options->Append( new wxPropertyCategory{ "Feature detection/description", wxPG_LABEL } );
+    m_pg_options->Append( new wxEnumProperty{"Feature type",    wxPG_LABEL, features_list } );
+    m_pg_options->Append( new wxBoolProperty{"Save keys",       wxPG_LABEL, m_options.save_keys } );
 
         // YAPE category
-        wxPGProperty* yape_category = m_pg_options->AppendIn( feature_category, new wxStringProperty( "YAPE detector", wxPG_LABEL, "<composed>" ) );
-        m_pg_options->AppendIn( yape_category, new wxIntProperty("Yape radius",                     wxPG_LABEL,     m_options.yape_radius ) );
-        m_pg_options->AppendIn( yape_category, new wxIntProperty("Yape threshold",                  wxPG_LABEL,     m_options.yape_threshold ) );
-        m_pg_options->AppendIn( yape_category, new wxIntProperty("Yape octaves",                    wxPG_LABEL,     m_options.yape_octaves ) );
-        m_pg_options->AppendIn( yape_category, new wxIntProperty("Yape views",                      wxPG_LABEL,     m_options.yape_views ) );
-        m_pg_options->AppendIn( yape_category, new wxFloatProperty("Yape base feature size",        wxPG_LABEL,     m_options.yape_base_feature_size ) );
-        m_pg_options->AppendIn( yape_category, new wxFloatProperty("Yape clustering distance",      wxPG_LABEL,     m_options.yape_clustering_distance ) );
+        wxPGProperty* yape_category = m_pg_options->AppendIn( feature_category, new wxStringProperty{ "YAPE detector", wxPG_LABEL, "<composed>" } );
+        m_pg_options->AppendIn( yape_category, new wxIntProperty{"Yape radius",                     wxPG_LABEL,     m_options.yape_radius } );
+        m_pg_options->AppendIn( yape_category, new wxIntProperty{"Yape threshold",                  wxPG_LABEL,     m_options.yape_threshold } );
+        m_pg_options->AppendIn( yape_category, new wxIntProperty{"Yape octaves",                    wxPG_LABEL,     m_options.yape_octaves } );
+        m_pg_options->AppendIn( yape_category, new wxIntProperty{"Yape views",                      wxPG_LABEL,     m_options.yape_views } );
+        m_pg_options->AppendIn( yape_category, new wxFloatProperty{"Yape base feature size",        wxPG_LABEL,     m_options.yape_base_feature_size } );
+        m_pg_options->AppendIn( yape_category, new wxFloatProperty{"Yape clustering distance",      wxPG_LABEL,     m_options.yape_clustering_distance } );
         m_pg_options->GetProperty("YAPE detector")->SetExpanded(false);
 
         // DAISY category
-        wxPGProperty* daisy_category = m_pg_options->AppendIn( feature_category, new wxStringProperty( "DAISY descriptor", wxPG_LABEL, "<composed>" ) );
-        m_pg_options->AppendIn( daisy_category, new wxIntProperty("Daisy radius",                   wxPG_LABEL,     m_options.daisy_radius ) );
-        m_pg_options->AppendIn( daisy_category, new wxIntProperty("Daisy radius quantization",      wxPG_LABEL,     m_options.daisy_radius_quantization ) );
-        m_pg_options->AppendIn( daisy_category, new wxIntProperty("Daisy angular quantization",     wxPG_LABEL,     m_options.daisy_angular_quantization ) );
-        m_pg_options->AppendIn( daisy_category, new wxIntProperty("Daisy histogram quantization",   wxPG_LABEL,     m_options.daisy_histogram_quantization ) );
+        wxPGProperty* daisy_category = m_pg_options->AppendIn( feature_category, new wxStringProperty{ "DAISY descriptor", wxPG_LABEL, "<composed>" } );
+        m_pg_options->AppendIn( daisy_category, new wxIntProperty{"Daisy radius",                   wxPG_LABEL,     m_options.daisy_radius } );
+        m_pg_options->AppendIn( daisy_category, new wxIntProperty{"Daisy radius quantization",      wxPG_LABEL,     m_options.daisy_radius_quantization } );
+        m_pg_options->AppendIn( daisy_category, new wxIntProperty{"Daisy angular quantization",     wxPG_LABEL,     m_options.daisy_angular_quantization } );
+        m_pg_options->AppendIn( daisy_category, new wxIntProperty{"Daisy histogram quantization",   wxPG_LABEL,     m_options.daisy_histogram_quantization } );
         m_pg_options->GetProperty("DAISY descriptor")->SetExpanded(false);
 
         // SURF category
-        wxPGProperty* surf_category = m_pg_options->AppendIn( feature_category, new wxStringProperty( "SURF detector/descriptor", wxPG_LABEL, "<composed>" ) );
-        m_pg_options->AppendIn( surf_category, new wxIntProperty("Surf octaves",                    wxPG_LABEL,     m_options.surf_common_octaves ) );
-        m_pg_options->AppendIn( surf_category, new wxIntProperty("Surf octave layers",              wxPG_LABEL,     m_options.surf_common_octave_layers ) );
-        m_pg_options->AppendIn( surf_category, new wxFloatProperty("Surf hessian threshold",        wxPG_LABEL,     m_options.surf_det_hessian_threshold ) );
-        m_pg_options->AppendIn( surf_category, new wxBoolProperty("Surf extended",                  wxPG_LABEL,     m_options.surf_desc_extended ) );
-        m_pg_options->AppendIn( surf_category, new wxBoolProperty("Surf upright",                   wxPG_LABEL,     m_options.surf_desc_upright ) );
+        wxPGProperty* surf_category = m_pg_options->AppendIn( feature_category, new wxStringProperty{ "SURF detector/descriptor", wxPG_LABEL, "<composed>" } );
+        m_pg_options->AppendIn( surf_category, new wxIntProperty{"Surf octaves",                    wxPG_LABEL,     m_options.surf_common_octaves } );
+        m_pg_options->AppendIn( surf_category, new wxIntProperty{"Surf octave layers",              wxPG_LABEL,     m_options.surf_common_octave_layers } );
+        m_pg_options->AppendIn( surf_category, new wxFloatProperty{"Surf hessian threshold",        wxPG_LABEL,     m_options.surf_det_hessian_threshold } );
+        m_pg_options->AppendIn( surf_category, new wxBoolProperty{"Surf extended",                  wxPG_LABEL,     m_options.surf_desc_extended } );
+        m_pg_options->AppendIn( surf_category, new wxBoolProperty{"Surf upright",                   wxPG_LABEL,     m_options.surf_desc_upright } );
         m_pg_options->GetProperty("SURF detector/descriptor")->SetExpanded(false);
 
         // AKAZE category
-        wxPGProperty* akaze_category = m_pg_options->AppendIn( feature_category, new wxStringProperty( "AKAZE detector/descriptor", wxPG_LABEL, "<composed>" ) );
-        m_pg_options->AppendIn( akaze_category, new wxIntProperty("Akaze descriptor size",          wxPG_LABEL,     m_options.akaze_descriptor_size ) );
-        m_pg_options->AppendIn( akaze_category, new wxFloatProperty("Akaze threshold",              wxPG_LABEL,     m_options.akaze_threshold ) );
+        wxPGProperty* akaze_category = m_pg_options->AppendIn( feature_category, new wxStringProperty{ "AKAZE detector/descriptor", wxPG_LABEL, "<composed>" } );
+        m_pg_options->AppendIn( akaze_category, new wxIntProperty{"Akaze descriptor size",          wxPG_LABEL,     m_options.akaze_descriptor_size } );
+        m_pg_options->AppendIn( akaze_category, new wxFloatProperty{"Akaze threshold",              wxPG_LABEL,     m_options.akaze_threshold } );
         m_pg_options->GetProperty("AKAZE detector/descriptor")->SetExpanded(false);
 
     // Feature matching category
-    m_pg_options->Append( new wxPropertyCategory( "Feature matching" ) );
-    m_pg_options->Append( new wxIntProperty("Trees",                            wxPG_LABEL,     m_options.matching_trees ) );
-    m_pg_options->Append( new wxIntProperty("Checks",                           wxPG_LABEL,     m_options.matching_checks ) );
-    m_pg_options->Append( new wxFloatProperty("Distance ratio",                 wxPG_LABEL,     m_options.matching_distance_ratio ) );
-    m_pg_options->Append( new wxIntProperty("Min matches",                      wxPG_LABEL,     m_options.matching_min_matches ) );
-    m_pg_options->Append( new wxFloatProperty("Fundamental RANSAC threshold",   wxPG_LABEL,     m_options.ransac_threshold_fundamental ) );
-    m_pg_options->Append( new wxFloatProperty("Homography RANSAC threshold",    wxPG_LABEL,     m_options.ransac_threshold_homography ) );
+    m_pg_options->Append( new wxPropertyCategory{ "Feature matching" } );
+    m_pg_options->Append( new wxIntProperty{"Trees",                            wxPG_LABEL,     m_options.matching_trees } );
+    m_pg_options->Append( new wxIntProperty{"Checks",                           wxPG_LABEL,     m_options.matching_checks } );
+    m_pg_options->Append( new wxFloatProperty{"Distance ratio",                 wxPG_LABEL,     m_options.matching_distance_ratio } );
+    m_pg_options->Append( new wxIntProperty{"Min matches",                      wxPG_LABEL,     m_options.matching_min_matches } );
+    m_pg_options->Append( new wxFloatProperty{"Fundamental RANSAC threshold",   wxPG_LABEL,     m_options.ransac_threshold_fundamental } );
+    m_pg_options->Append( new wxFloatProperty{"Homography RANSAC threshold",    wxPG_LABEL,     m_options.ransac_threshold_homography } );
 
     // Structure from motion category
-    m_pg_options->Append( new wxPropertyCategory( "Structure from motion" ) );
-    m_pg_options->Append( new wxBoolProperty("Add multiple images",                 wxPG_LABEL, m_options.add_multiple_images ) );
-    m_pg_options->Append( new wxFloatProperty("5point RANSAC threshold",            wxPG_LABEL, m_options.ransac_threshold_five_point ) );
-    m_pg_options->Append( new wxIntProperty("5point RANSAC rounds",                 wxPG_LABEL, m_options.ransac_rounds_five_point ) );
-    m_pg_options->Append( new wxIntProperty("Minimum image matches",                wxPG_LABEL, m_options.min_max_matches ) );
-    m_pg_options->Append( new wxIntProperty("Projection RANSAC rounds",             wxPG_LABEL, m_options.ransac_rounds_projection ) );
-    m_pg_options->Append( new wxFloatProperty("Focal length constrain weight",      wxPG_LABEL, m_options.focal_length_constrain_weight ) );
-    m_pg_options->Append( new wxFloatProperty("Distortion constrain weight",        wxPG_LABEL, m_options.distortion_constrain_weight ) );
-    m_pg_options->Append( new wxFloatProperty("Projection estimation threshold",    wxPG_LABEL, m_options.projection_estimation_threshold ) );
-    m_pg_options->Append( new wxFloatProperty("Min reprojection error threshold",   wxPG_LABEL, m_options.min_reprojection_error_threshold ) );
-    m_pg_options->Append( new wxFloatProperty("Max reprojection error threshold",   wxPG_LABEL, m_options.max_reprojection_error_threshold ) );
-    m_pg_options->Append( new wxFloatProperty("Ray angle threshold",                wxPG_LABEL, m_options.ray_angle_threshold ) );
-    m_pg_options->Append( new wxIntProperty("Outlier threshold BA",                 wxPG_LABEL, m_options.outlier_threshold_ba ) );
-    m_pg_options->Append( new wxFloatProperty("Outlier threshold radius",           wxPG_LABEL, m_options.outlier_threshold_radius ) );
+    m_pg_options->Append( new wxPropertyCategory{ "Structure from motion" } );
+    m_pg_options->Append( new wxBoolProperty{"Add multiple images",                 wxPG_LABEL, m_options.add_multiple_images } );
+    m_pg_options->Append( new wxFloatProperty{"5point RANSAC threshold",            wxPG_LABEL, m_options.ransac_threshold_five_point } );
+    m_pg_options->Append( new wxIntProperty{"5point RANSAC rounds",                 wxPG_LABEL, m_options.ransac_rounds_five_point } );
+    m_pg_options->Append( new wxIntProperty{"Minimum image matches",                wxPG_LABEL, m_options.min_max_matches } );
+    m_pg_options->Append( new wxIntProperty{"Projection RANSAC rounds",             wxPG_LABEL, m_options.ransac_rounds_projection } );
+    m_pg_options->Append( new wxFloatProperty{"Focal length constrain weight",      wxPG_LABEL, m_options.focal_length_constrain_weight } );
+    m_pg_options->Append( new wxFloatProperty{"Distortion constrain weight",        wxPG_LABEL, m_options.distortion_constrain_weight } );
+    m_pg_options->Append( new wxFloatProperty{"Projection estimation threshold",    wxPG_LABEL, m_options.projection_estimation_threshold } );
+    m_pg_options->Append( new wxFloatProperty{"Min reprojection error threshold",   wxPG_LABEL, m_options.min_reprojection_error_threshold } );
+    m_pg_options->Append( new wxFloatProperty{"Max reprojection error threshold",   wxPG_LABEL, m_options.max_reprojection_error_threshold } );
+    m_pg_options->Append( new wxFloatProperty{"Ray angle threshold",                wxPG_LABEL, m_options.ray_angle_threshold } );
+    m_pg_options->Append( new wxIntProperty{"Outlier threshold BA",                 wxPG_LABEL, m_options.outlier_threshold_ba } );
+    m_pg_options->Append( new wxFloatProperty{"Outlier threshold radius",           wxPG_LABEL, m_options.outlier_threshold_radius } );
 
     // Ceres category
     wxPGChoices choices;
     choices.Add("Squared", 1); choices.Add("Huber", 2); choices.Add("SoftLOne", 3); choices.Add("Cauchy", 4); choices.Add("ArcTan", 5);
-    m_pg_options->Append( new wxEnumProperty("Loss function",                       wxPG_LABEL, choices, 1) );
-    m_pg_options->Append( new wxFloatProperty("Loss function scale",                wxPG_LABEL, m_options.loss_function_scale ) );
+    m_pg_options->Append( new wxEnumProperty{"Loss function",                       wxPG_LABEL, choices, 1} );
+    m_pg_options->Append( new wxFloatProperty{"Loss function scale",                wxPG_LABEL, m_options.loss_function_scale } );
 
     // Display category
-    m_pg_options->Append( new wxPropertyCategory( "Display options" ) );
-    m_pg_options->Append( new wxColourProperty("Viewport gradient top", wxPG_LABEL, m_options.viewport_top_color ) );
-    m_pg_options->Append( new wxColourProperty("Viewport gradient bot", wxPG_LABEL, m_options.viewport_bottom_color ) );
-    m_pg_options->Append( new wxBoolProperty("Trackball visibility",    wxPG_LABEL, m_options.trackball_visibility ) );
-    m_pg_options->Append( new wxBoolProperty("Grid visibility",         wxPG_LABEL, m_options.grid_visibility ) );
-    m_pg_options->Append( new wxBoolProperty("Points visibility",       wxPG_LABEL, m_options.points_visibility ) );
-    m_pg_options->Append( new wxBoolProperty("Cameras visibility",      wxPG_LABEL, m_options.cameras_visibility ) );
-    m_pg_options->Append( new wxBoolProperty("Frustrum visibility",     wxPG_LABEL, m_options.frustrum_visibility ) );
-    m_pg_options->Append( new wxBoolProperty("Draw matches only",       wxPG_LABEL, m_options.draw_matches_only ) );
-    m_pg_options->Append( new wxBoolProperty("Draw coloured lines",     wxPG_LABEL, m_options.draw_coloured_lines ) );
+    m_pg_options->Append( new wxPropertyCategory{ "Display options" } );
+    m_pg_options->Append( new wxColourProperty{"Viewport gradient top", wxPG_LABEL, m_options.viewport_top_color } );
+    m_pg_options->Append( new wxColourProperty{"Viewport gradient bot", wxPG_LABEL, m_options.viewport_bottom_color } );
+    m_pg_options->Append( new wxBoolProperty{"Trackball visibility",    wxPG_LABEL, m_options.trackball_visibility } );
+    m_pg_options->Append( new wxBoolProperty{"Grid visibility",         wxPG_LABEL, m_options.grid_visibility } );
+    m_pg_options->Append( new wxBoolProperty{"Points visibility",       wxPG_LABEL, m_options.points_visibility } );
+    m_pg_options->Append( new wxBoolProperty{"Cameras visibility",      wxPG_LABEL, m_options.cameras_visibility } );
+    m_pg_options->Append( new wxBoolProperty{"Frustrum visibility",     wxPG_LABEL, m_options.frustrum_visibility } );
+    m_pg_options->Append( new wxBoolProperty{"Draw matches only",       wxPG_LABEL, m_options.draw_matches_only } );
+    m_pg_options->Append( new wxBoolProperty{"Draw coloured lines",     wxPG_LABEL, m_options.draw_coloured_lines } );
 }
 
 void MainFrame::OnOptionsChanged(wxPropertyGridEvent& event)
