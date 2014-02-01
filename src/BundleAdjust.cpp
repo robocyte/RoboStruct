@@ -876,7 +876,7 @@ void MainFrame::BundleAdjust(CamVec& cameras, const IntVec& added_order, PointVe
         // Remove outlying points
         for (const auto& idx : outliers)
         {
-            points[idx].m_color = {0.0, 0.0, -1.0};
+            points[idx].m_color = Vec3{0.0, 0.0, -1.0};
 
             for (const auto& view : points[idx].m_views)
             {
@@ -1102,7 +1102,7 @@ int MainFrame::RemoveBadPointsAndCameras(const CamVec& cameras, const IntVec& ad
         {
             for (const auto& view : point.m_views) GetKey(added_order[view.first], view.second).m_extra = -1;
 
-            point.m_color = {0.0, 0.0, -1.0};
+            point.m_color = Vec3{0.0, 0.0, -1.0};
             point.m_views.clear();
 
             num_pruned++;
@@ -1152,7 +1152,7 @@ void MainFrame::RadiusOutlierRemoval(double threshold, const IntVec& added_order
 
     for (const auto& idx : outliers)
     {
-        points[idx].m_color = {0.0, 0.0, -1.0};
+        points[idx].m_color = Vec3{0.0, 0.0, -1.0};
 
         for (const auto& view : points[idx].m_views)
         {

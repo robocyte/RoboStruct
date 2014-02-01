@@ -15,7 +15,7 @@ public:
     wxAuiSolidToolBarArt() = default;
     ~wxAuiSolidToolBarArt() {}
 
-    wxAuiToolBarArt *Clone();
+    wxAuiToolBarArt* Clone();
 
     void DrawBackground(wxDC& dc, wxWindow* wnd, const wxRect& rect);
 };
@@ -26,7 +26,7 @@ public:
     wxAuiSolidTabArt();
     ~wxAuiSolidTabArt() {}
 
-    wxAuiSolidTabArt *Clone();
+    wxAuiSolidTabArt* Clone();
 
     void DrawBackground(wxDC& dc, wxWindow* wnd, const wxRect& rect);
     void DrawBorder(wxDC& dc, wxWindow* wnd, const wxRect& rect);

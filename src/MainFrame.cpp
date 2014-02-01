@@ -81,8 +81,8 @@ void MainFrame::OnSFMThreadUpdate(wxThreadEvent& event)
 
         image.m_camera_mesh->GetTransform().Reset();
         image.m_camera_mesh->GetTransform().Translate(glm::vec3{image.m_camera.m_t.x(), image.m_camera.m_t.y(), image.m_camera.m_t.z()});
-        Eigen::Quaternion<double> quat{image.m_camera.m_R.transpose()};
-        image.m_camera_mesh->GetTransform().Rotate(glm::quat{quat.w(), quat.x(), quat.y(), quat.z()});
+        Eigen::Quaternion<double> quat(image.m_camera.m_R.transpose());
+        image.m_camera_mesh->GetTransform().Rotate(glm::quat(quat.w(), quat.x(), quat.y(), quat.z()));
         image.m_camera_mesh->GetTransform().Scale(glm::vec3{0.02f, 0.02f, 0.02f});
     }
 
