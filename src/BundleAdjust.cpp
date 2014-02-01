@@ -150,13 +150,11 @@ void MainFrame::PickInitialCameraPair(CamVec &cameras, IntVec &added_order)
     int     i_best_2 = -1, j_best_2 = -1;
 
     // Compute score for each image pair
-    int max_pts = 0;
     for (int i = 0; i < num_images; i++)
     {
         for (int j = i + 1; j < num_images; j++)
         {
             int num_matches = GetNumTrackMatches(i, j);
-            max_pts += num_matches;
 
             if (num_matches <= match_threshold) continue;
 
@@ -202,8 +200,8 @@ void MainFrame::PickInitialCameraPair(CamVec &cameras, IntVec &added_order)
 
     added_order.push_back(i_best);
     added_order.push_back(j_best);
-    cameras.push_back(Camera());
-    cameras.push_back(Camera());
+    cameras.push_back(Camera{});
+    cameras.push_back(Camera{});
 }
 
 void MainFrame::SetupInitialCameraPair(CamVec &cameras, const IntVec &added_order, PointVec &points)
@@ -254,7 +252,7 @@ void MainFrame::SetupInitialCameraPair(CamVec &cameras, const IntVec &added_orde
 
         if (error > m_options.projection_estimation_threshold) continue;
 
-        auto &key = GetKey(img_1, key_idx1);
+        auto& key = GetKey(img_1, key_idx1);
 
         GetKey(img_1, key_idx1).m_extra = points.size();
         GetKey(img_2, key_idx2).m_extra = points.size();
@@ -1152,6 +1150,9 @@ void MainFrame::RadiusOutlierRemoval(double threshold, const IntVec &added_order
     for (int i = 0; i < num_points; ++i) d.push_back(*(dists[i] + 1));
     double thresh = util::GetNthElement(util::iround(threshold * d.size()), d);
     for (int i = 0; i < num_points; ++i) if (d[i] > thresh) outliers.push_back(i);
+
+    delete[] indices.ptr();
+    delete[] dists.ptr();
 
     for (const auto &idx : outliers)
     {

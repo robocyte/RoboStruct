@@ -6,7 +6,7 @@ struct TransformInfo
 {
     TransformInfo() = default;
 
-    int     m_num_inliers = 0;
+    int     m_num_inliers  = 0;
     double  m_inlier_ratio = 0.0;
 };
 
