@@ -4,7 +4,6 @@
 #include <sstream>
 
 #include "opencv2/core.hpp"
-#include "opencv2/core/utility.hpp"
 #include "opencv2/calib3d.hpp"
 
 #include "wx/progdlg.h"
@@ -12,7 +11,6 @@
 
 #include "EigenTools.hpp"
 #include "MainFrame.hpp"
-#include "RoboStruct_GUI_style.hpp"
 
 #include "Eigen/Geometry"
 

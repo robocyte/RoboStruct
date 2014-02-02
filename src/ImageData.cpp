@@ -138,6 +138,7 @@ void ImageData::SaveDescriptors(bool clear)
     if (m_descriptors.empty()) return;
 
     std::string filename{m_filename};
+    std::transform(filename.begin(), filename.end(), filename.begin(), std::tolower);
 
     filename.replace(filename.find(".jpg"), 4, ".desc");
 
@@ -151,6 +152,8 @@ void ImageData::LoadDescriptors()
     if (!m_descriptors.empty()) return;
 
     std::string filename{m_filename};
+    std::transform(filename.begin(), filename.end(), filename.begin(), std::tolower);
+
     filename.replace(filename.find(".jpg"), 4, ".desc");
 
     util::LoadContainerFromFileBinary(filename, m_descriptors);
