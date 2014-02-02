@@ -272,17 +272,17 @@ void MainFrame::MatchAllAkaze()
 
         m_desc_length = m_images[i].m_descriptors_akaze.cols;
 
-        flann::Matrix<unsigned char> train(m_images[i].m_descriptors_akaze.data, m_images[i].m_keys.size(), m_desc_length);
-        flann::Index<flann::Hamming<unsigned char>> flann_index{train, flann::LshIndexParams{12, 20, 2}};
+        flann::Index<flann::Hamming<unsigned char>> flann_index{flann::Matrix<unsigned char>(m_images[i].m_descriptors_akaze.data, m_images[i].m_keys.size(), m_desc_length),
+                                                                flann::LshIndexParams{12, 20, 2}};
         flann_index.buildIndex();
 
         for (int j = 0; j < i; j++)
         {
             // Setup query data
             const int num_descriptors = m_images[j].m_descriptors_akaze.rows;
-            flann::Matrix<unsigned char> query(m_images[j].m_descriptors_akaze.data, num_descriptors, m_desc_length);
-            flann::Matrix<int>           indices(new int[num_descriptors * 2], num_descriptors, 2);
-            flann::Matrix<unsigned int>  dists(new unsigned int[num_descriptors * 2], num_descriptors, 2);
+
+            std::vector<int>          indices(num_descriptors * 2);
+            std::vector<unsigned int> dists(num_descriptors * 2);
 
             // Match!
             {
@@ -290,21 +290,21 @@ void MainFrame::MatchAllAkaze()
 
                 flann::SearchParams params{m_options.matching_checks};
                 params.cores = 0;
-                flann_index.knnSearch(query, indices, dists, 2, params);
+                flann_index.knnSearch(flann::Matrix<unsigned char>(m_images[j].m_descriptors_akaze.data, num_descriptors, m_desc_length),
+                                      flann::Matrix<int>(indices.data(), num_descriptors, 2),
+                                      flann::Matrix<unsigned int>(dists.data(), num_descriptors, 2),
+                                      2, params);
             }
 
             // Store putative matches in ptpairs
             IntPairVec tmp_matches;
             for (int k = 0; k < num_descriptors; ++k)
             {
-                if (*(dists[k]) < (m_options.matching_distance_ratio * (*(dists[k] + 1))))
+                if (dists[2 * k] < (m_options.matching_distance_ratio * dists[2 * k + 1]))
                 {
-                    tmp_matches.push_back(IntPair{*(indices[k]), k});
+                    tmp_matches.push_back(IntPair{indices[2 * k], k});
                 }
             }
-
-            delete[] indices.ptr();
-            delete[] dists.ptr();
 
             if (tmp_matches.size() < m_options.matching_min_matches)
             {
@@ -394,8 +394,9 @@ void MainFrame::MatchAll()
         m_desc_length = m_images[i].m_desc_size;
 
         // Create a search index
-        flann::Matrix<float> train(m_images[i].m_descriptors.data(), m_images[i].m_keys.size(), m_desc_length);
-        flann::Index<flann::L2<float>> flann_index{train, flann::KDTreeIndexParams{m_options.matching_trees}};
+        ;
+        flann::Index<flann::L2<float>> flann_index{flann::Matrix<float>(m_images[i].m_descriptors.data(), m_images[i].m_keys.size(), m_desc_length),
+                                                   flann::KDTreeIndexParams{m_options.matching_trees}};
         flann_index.buildIndex();
 
         for (int j = 0; j < i; j++)
@@ -404,9 +405,9 @@ void MainFrame::MatchAll()
 
             // Setup query data
             const int num_descriptors = static_cast<int>(m_images[j].m_keys.size());
-            flann::Matrix<float> query(m_images[j].m_descriptors.data(), num_descriptors, m_desc_length);
-            flann::Matrix<int>   indices(new int[num_descriptors * 2], num_descriptors, 2);
-            flann::Matrix<float> dists(new float[num_descriptors * 2], num_descriptors, 2);
+
+            std::vector<int> indices(num_descriptors * 2);
+            std::vector<float> dists(num_descriptors * 2);
 
             // Match!
             {
@@ -414,21 +415,21 @@ void MainFrame::MatchAll()
 
                 flann::SearchParams params{m_options.matching_checks};
                 params.cores = 0;
-                flann_index.knnSearch(query, indices, dists, 2, params);
+                flann_index.knnSearch(flann::Matrix<float>(m_images[j].m_descriptors.data(), num_descriptors, m_desc_length),
+                                      flann::Matrix<int>(indices.data(), num_descriptors, 2),
+                                      flann::Matrix<float>(dists.data(), num_descriptors, 2),
+                                      2, params);
             }
 
             // Store putative matches in ptpairs
             IntPairVec tmp_matches;
             for (int k = 0; k < num_descriptors; ++k)
             {
-                if (*(dists[k]) < (m_options.matching_distance_ratio * (*(dists[k] + 1))))
+                if (dists[2 * k] < (m_options.matching_distance_ratio * dists[2 * k + 1]))
                 {
-                    tmp_matches.push_back(IntPair{*(indices[k]), k});
+                    tmp_matches.push_back(IntPair{indices[2 * k], k});
                 }
             }
-
-            delete[] indices.ptr();
-            delete[] dists.ptr();
 
             int num_putative = static_cast<int>(tmp_matches.size());
 

@@ -1130,25 +1130,23 @@ void MainFrame::RadiusOutlierRemoval(double threshold, const IntVec& added_order
 
     const auto num_points = points.size();
 
-    flann::Matrix<float> train{coords.data(), num_points, 3};
-    flann::Matrix<float> query{coords.data(), num_points, 3};
-    flann::Matrix<int>   indices{new int[num_points * 2], num_points, 2};
-    flann::Matrix<float> dists{new float[num_points * 2], num_points, 2};
+    std::vector<int> indices(num_points * 2);
+    std::vector<float> dists(num_points * 2);
 
-    flann::Index<flann::L2<float>> index{train, flann::KDTreeSingleIndexParams{}};
+    flann::Index<flann::L2<float>> index{flann::Matrix<float>{coords.data(), num_points, 3}, flann::KDTreeSingleIndexParams{}};
     index.buildIndex();
 
     flann::SearchParams params{m_options.matching_checks};
     params.cores = 0;
-    index.knnSearch(query, indices, dists, 2, params);
+    index.knnSearch(flann::Matrix<float>{coords.data(), num_points, 3},
+                    flann::Matrix<int>{indices.data(),  num_points, 2},
+                    flann::Matrix<float>{dists.data(),  num_points, 2},
+                    2, params);
 
     std::vector<float> d;
-    for (int i = 0; i < num_points; ++i) d.push_back(*(dists[i] + 1));
+    for (int i = 0; i < num_points; ++i) d.push_back(dists[2 * i + 1]);
     double thresh = util::GetNthElement(util::iround(threshold * d.size()), d);
     for (int i = 0; i < num_points; ++i) if (d[i] > thresh) outliers.push_back(i);
-
-    delete[] indices.ptr();
-    delete[] dists.ptr();
 
     for (const auto& idx : outliers)
     {
