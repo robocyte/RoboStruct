@@ -57,6 +57,4 @@ public:
 private:
     int     m_width = 0;                                // Width from exif tags
     int     m_height = 0;                               // Height from exif tags
-
-    void    ConvertOpenCVKeys(const std::vector<cv::KeyPoint>& keys, const cv::Mat& image);
 };

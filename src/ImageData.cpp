@@ -81,6 +81,7 @@ void ImageData::DetectFeatures(const Options& opts)
                 DaisyDesc.get_descriptor(key.pt.y, key.pt.x, 35, descriptor.data());
                 m_descriptors.insert(m_descriptors.end(), descriptor.begin(), descriptor.end());
             }
+
             break;
         }
     case 1: // Detect SURF features
@@ -94,6 +95,7 @@ void ImageData::DetectFeatures(const Options& opts)
                           opts.surf_desc_extended,
                           opts.surf_desc_upright};
             Surf(grey_img, cv::Mat{}, keys, m_descriptors);
+
             break;
         }
     case 2: // Detect AKAZE features
@@ -129,38 +131,7 @@ void ImageData::DetectFeatures(const Options& opts)
         }
     }
 
-    ConvertOpenCVKeys(keys, img);
-    SaveDescriptors(true);
-}
-
-void ImageData::SaveDescriptors(bool clear)
-{
-    if (m_descriptors.empty()) return;
-
-    std::string filename{m_filename};
-    std::transform(filename.begin(), filename.end(), filename.begin(), std::tolower);
-
-    filename.replace(filename.find(".jpg"), 4, ".desc");
-
-    util::SaveContainerToFileBinary(filename, m_descriptors);
-
-    if (clear) ClearDescriptors();
-}
-
-void ImageData::LoadDescriptors()
-{
-    if (!m_descriptors.empty()) return;
-
-    std::string filename{m_filename};
-    std::transform(filename.begin(), filename.end(), filename.begin(), std::tolower);
-
-    filename.replace(filename.find(".jpg"), 4, ".desc");
-
-    util::LoadContainerFromFileBinary(filename, m_descriptors);
-}
-
-void ImageData::ConvertOpenCVKeys(const std::vector<cv::KeyPoint>& keys, const cv::Mat& image)
-{
+    // Convert the keypoints from OpenCV's format to internal
     m_keys.reserve(keys.size());
 
     float x_correction_factor = 0.5 * m_width;
@@ -172,10 +143,28 @@ void ImageData::ConvertOpenCVKeys(const std::vector<cv::KeyPoint>& keys, const c
         float y = y_correction_factor - key.pt.y;
 
         int xf = static_cast<int>(std::floor(key.pt.x)), yf = static_cast<int>(std::floor(key.pt.y));
-        const uchar* ptr = image.ptr<uchar>(yf);
+        const uchar* ptr = img.ptr<uchar>(yf);
 
         m_keys.push_back(KeyPoint{x, y, ptr[3 * xf + 2], ptr[3 * xf + 1], ptr[3 * xf]});
     }
+
+    SaveDescriptors(true);
+}
+
+void ImageData::SaveDescriptors(bool clear)
+{
+    if (m_descriptors.empty()) return;
+
+    util::SaveContainerToFileBinary(m_filename + ".desc", m_descriptors);
+
+    if (clear) ClearDescriptors();
+}
+
+void ImageData::LoadDescriptors()
+{
+    if (!m_descriptors.empty()) return;
+
+    util::LoadContainerFromFileBinary(m_filename + ".desc", m_descriptors);
 }
 
 void ImageData::ClearDescriptors()
