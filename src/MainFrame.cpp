@@ -170,7 +170,7 @@ bool MainFrame::AddImage(const std::string& filename, const std::string& filenam
         } else
         {
             wxString caption;
-            caption << img.m_camera_make << img.m_camera_model << ": " << "Camera model not found!";
+            caption << img.m_camera_make << " " << img.m_camera_model << ": " << "Camera model not found!";
             wxTextEntryDialog dlg{this, "Add CCD width (in mm) to database...\n(decimal point must be a dot!)", caption};
 
             CamDBEntry cam;
@@ -181,7 +181,7 @@ bool MainFrame::AddImage(const std::string& filename, const std::string& filenam
                 if (dlg.GetValue().ToCDouble(&cam.second)) break;
             }
 
-            cam.first = img.m_camera_make + img.m_camera_model;
+            cam.first = img.m_camera_make + " " + img.m_camera_model;
             m_camDB.push_back(cam);
 
             FindCameraInDatabase(img);
@@ -524,7 +524,7 @@ int MainFrame::ComputeEpipolarGeometry(int idx1, int idx2, IntPairVec& matches)
 
     // Find the fundamental matrix
     double threshold(m_options.ransac_threshold_fundamental * std::max(m_images[idx1].GetWidth(), m_images[idx1].GetHeight()));
-    auto Fmat = cv::findFundamentalMat(cv::Mat{points1, true}, cv::Mat{points2, true}, status, cv::FM_RANSAC, threshold);
+    cv::findFundamentalMat(cv::Mat{points1, true}, cv::Mat{points2, true}, status, cv::FM_RANSAC, threshold);
 
     // Remove outliers from ptpairs
     auto matches_old = matches;
@@ -549,7 +549,7 @@ double MainFrame::ComputeHomography(int idx1, int idx2, const IntPairVec& matche
     auto& keys1 = m_images[idx1].m_keys;
     auto& keys2 = m_images[idx2].m_keys;
 
-    for (const auto &match : matches)
+    for (const auto& match : matches)
     {
         points1.push_back(cv::Point2f(keys1[match.first].m_coords.x(), keys1[match.first].m_coords.y()));
         points2.push_back(cv::Point2f(keys2[match.second].m_coords.x(), keys2[match.second].m_coords.y()));
@@ -557,7 +557,7 @@ double MainFrame::ComputeHomography(int idx1, int idx2, const IntPairVec& matche
 
     // Find the homography matrix
     double threshold(m_options.ransac_threshold_homography * std::max(m_images[idx1].GetWidth(), m_images[idx1].GetHeight()));
-    cv::Mat Hmat = cv::findHomography(cv::Mat{points1, true}, cv::Mat{points2, true}, status, cv::RANSAC, threshold);
+    cv::findHomography(cv::Mat{points1, true}, cv::Mat{points2, true}, status, cv::RANSAC, threshold);
 
     // Compute and return inlier ratio
     return std::count(status.begin(), status.end(), 1) / static_cast<double>(num_matches);

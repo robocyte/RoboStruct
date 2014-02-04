@@ -35,6 +35,11 @@ struct ProfileManager
 {
     ProfileManager() = default;
 
+    void Reset()
+    {
+        m_entries.clear();
+    }
+
     void Add(const std::string& name, milliseconds duration)
     {
         m_entries[name].push_back(duration);

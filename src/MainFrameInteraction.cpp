@@ -272,6 +272,7 @@ void MainFrame::OnSelectDirectory(wxFileDirPickerEvent& event)
     wxDir dir{path};
 
     m_images.clear();
+    m_profile_manager.Reset();
 
     m_cb_matches_left->Clear();
     m_cb_matches_right->Clear();
