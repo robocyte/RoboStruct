@@ -25,9 +25,9 @@ MainFrame::MainFrame(wxWindow* parent)
     m_turntable_timer       = new wxTimer{this, ID_TIMER_TURNTABLE};
     m_reset_viewport_timer  = new wxTimer{this, ID_TIMER_RESET_VIEWPORT};
 
-    m_rotate_cursor = wxCursor{"rotate_cursor"};
-    m_pan_cursor    = wxCursor{"pan_cursor"};
-    m_zoom_cursor   = wxCursor{"zoom_cursor"};
+    m_rotate_cursor         = wxCursor{"rotate_cursor"};
+    m_pan_cursor            = wxCursor{"pan_cursor"};
+    m_zoom_cursor           = wxCursor{"zoom_cursor"};
 
     // Setup the image list
     m_img_ctrl->InsertColumn(0, "Name",         wxLIST_FORMAT_LEFT, 60);

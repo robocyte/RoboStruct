@@ -95,6 +95,7 @@ void MainFrame::SaveProjectionMatrix(const std::string& path, int img_idx)
     if (!m_images[img_idx].m_camera.m_adjusted) return;
 
     auto filename = m_images[img_idx].m_filename_short;
+    std::transform(filename.begin(), filename.end(), filename.begin(), std::tolower);
     filename.replace(filename.find(".jpg"), 4, ".txt");
     filename = path + R"(\)" + filename;
 
@@ -153,7 +154,9 @@ void MainFrame::SaveUndistortedImage(const std::string& path, int img_idx)
     cv::undistort(img, img_undist, camMat, distCoeffs);
 
     // Save the image
-    std::string filename = path + R"(\)" + m_images[img_idx].m_filename_short;
+    std::string short_name{m_images[img_idx].m_filename_short};
+    std::transform(short_name.begin(), short_name.end(), short_name.begin(), std::tolower);
+    std::string filename = path + R"(\)" + short_name;
     m_images[img_idx].m_filename_undistorted = filename;
     wxLogMessage("Saving undistorted image to %s...", filename.c_str());
     cv::imwrite(filename, img_undist);
