@@ -1130,17 +1130,22 @@ void MainFrame::RadiusOutlierRemoval(double threshold, const IntVec& added_order
 
     const auto num_points = points.size();
 
-    std::vector<int> indices(num_points * 2);
-    std::vector<float> dists(num_points * 2);
+    typedef flann::L2<float>      Distance;
+    typedef Distance::ElementType ElementType;
+    typedef Distance::ResultType  DistanceType;
 
-    flann::Index<flann::L2<float>> index{flann::Matrix<float>{coords.data(), num_points, 3}, flann::KDTreeSingleIndexParams{}};
+    std::vector<std::size_t>  indices(num_points * 2);
+    std::vector<DistanceType> dists(num_points * 2);
+
+    flann::Index<Distance> index{flann::Matrix<ElementType>{coords.data(), num_points, 3},
+                                 flann::KDTreeSingleIndexParams{}};
     index.buildIndex();
 
     flann::SearchParams params{m_options.matching_checks};
     params.cores = 0;
-    index.knnSearch(flann::Matrix<float>{coords.data(), num_points, 3},
-                    flann::Matrix<int>{indices.data(),  num_points, 2},
-                    flann::Matrix<float>{dists.data(),  num_points, 2},
+    index.knnSearch(flann::Matrix<ElementType>{coords.data(),  num_points, 3},
+                    flann::Matrix<std::size_t>{indices.data(), num_points, 2},
+                    flann::Matrix<DistanceType>{dists.data(),  num_points, 2},
                     2, params);
 
     std::vector<float> d;

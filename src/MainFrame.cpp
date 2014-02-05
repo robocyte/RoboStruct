@@ -246,6 +246,10 @@ void MainFrame::DetectFeatures(int img_idx)
 
 void MainFrame::MatchAllAkaze()
 {
+    typedef flann::Hamming<unsigned char> Distance;
+    typedef Distance::ElementType         ElementType;
+    typedef Distance::ResultType          DistanceType;
+
     int num_images = GetNumImages();
     int num_pairs = (num_images * (num_images - 1)) / 2;
     int progress_idx = 0;
@@ -272,8 +276,8 @@ void MainFrame::MatchAllAkaze()
 
         m_desc_length = m_images[i].m_descriptors_akaze.cols;
 
-        flann::Index<flann::Hamming<unsigned char>> flann_index{flann::Matrix<unsigned char>(m_images[i].m_descriptors_akaze.data, m_images[i].m_keys.size(), m_desc_length),
-                                                                flann::LshIndexParams{12, 20, 2}};
+        flann::Index<Distance> flann_index{flann::Matrix<ElementType>(m_images[i].m_descriptors_akaze.data, m_images[i].m_keys.size(), m_desc_length),
+                                           flann::LshIndexParams{12, 20, 2}};
         flann_index.buildIndex();
 
         for (int j = 0; j < i; j++)
@@ -281,8 +285,8 @@ void MainFrame::MatchAllAkaze()
             // Setup query data
             const int num_descriptors = m_images[j].m_descriptors_akaze.rows;
 
-            std::vector<int>          indices(num_descriptors * 2);
-            std::vector<unsigned int> dists(num_descriptors * 2);
+            std::vector<std::size_t>  indices(num_descriptors * 2);
+            std::vector<DistanceType> dists(num_descriptors * 2);
 
             // Match!
             {
@@ -290,9 +294,9 @@ void MainFrame::MatchAllAkaze()
 
                 flann::SearchParams params{m_options.matching_checks};
                 params.cores = 0;
-                flann_index.knnSearch(flann::Matrix<unsigned char>(m_images[j].m_descriptors_akaze.data, num_descriptors, m_desc_length),
-                                      flann::Matrix<int>(indices.data(), num_descriptors, 2),
-                                      flann::Matrix<unsigned int>(dists.data(), num_descriptors, 2),
+                flann_index.knnSearch(flann::Matrix<ElementType>(m_images[j].m_descriptors_akaze.data, num_descriptors, m_desc_length),
+                                      flann::Matrix<std::size_t>(indices.data(), num_descriptors, 2),
+                                      flann::Matrix<DistanceType>(dists.data(), num_descriptors, 2),
                                       2, params);
             }
 
@@ -366,6 +370,10 @@ void MainFrame::MatchAllAkaze()
 
 void MainFrame::MatchAll()
 {
+    typedef flann::L2<float>      Distance;
+    typedef Distance::ElementType ElementType;
+    typedef Distance::ResultType  DistanceType;
+
     int num_images = GetNumImages();
     int num_pairs = (num_images * (num_images - 1)) / 2;
     int progress_idx = 0;
@@ -395,7 +403,7 @@ void MainFrame::MatchAll()
 
         // Create a search index
         ;
-        flann::Index<flann::L2<float>> flann_index{flann::Matrix<float>(m_images[i].m_descriptors.data(), m_images[i].m_keys.size(), m_desc_length),
+        flann::Index<flann::L2<float>> flann_index{flann::Matrix<ElementType>(m_images[i].m_descriptors.data(), m_images[i].m_keys.size(), m_desc_length),
                                                    flann::KDTreeIndexParams{m_options.matching_trees}};
         flann_index.buildIndex();
 
@@ -406,8 +414,8 @@ void MainFrame::MatchAll()
             // Setup query data
             const int num_descriptors = static_cast<int>(m_images[j].m_keys.size());
 
-            std::vector<int> indices(num_descriptors * 2);
-            std::vector<float> dists(num_descriptors * 2);
+            std::vector<std::size_t>  indices(num_descriptors * 2);
+            std::vector<DistanceType> dists(num_descriptors * 2);
 
             // Match!
             {
@@ -415,9 +423,9 @@ void MainFrame::MatchAll()
 
                 flann::SearchParams params{m_options.matching_checks};
                 params.cores = 0;
-                flann_index.knnSearch(flann::Matrix<float>(m_images[j].m_descriptors.data(), num_descriptors, m_desc_length),
-                                      flann::Matrix<int>(indices.data(), num_descriptors, 2),
-                                      flann::Matrix<float>(dists.data(), num_descriptors, 2),
+                flann_index.knnSearch(flann::Matrix<ElementType>(m_images[j].m_descriptors.data(), num_descriptors, m_desc_length),
+                                      flann::Matrix<std::size_t>(indices.data(), num_descriptors, 2),
+                                      flann::Matrix<DistanceType>(dists.data(), num_descriptors, 2),
                                       2, params);
             }
 
