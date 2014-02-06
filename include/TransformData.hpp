@@ -10,6 +10,6 @@ struct TransformInfo
     double  m_inlier_ratio = 0.0;
 };
 
-typedef std::pair<unsigned int, unsigned int>   MatchIndex;
-typedef std::map<MatchIndex, TransformInfo>     TransformData;
-typedef std::pair<MatchIndex, TransformInfo>    TransformsEntry;
+typedef std::pair<std::size_t, std::size_t>  MatchIndex;
+typedef std::map<MatchIndex, TransformInfo>  TransformData;
+typedef std::pair<MatchIndex, TransformInfo> TransformsEntry;

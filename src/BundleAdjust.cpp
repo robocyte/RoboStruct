@@ -70,7 +70,7 @@ void MainFrame::UpdateGeometryDisplay(const CamVec& cameras, const IntVec& added
         m_points.push_back(PointData{point.m_pos, point.m_color, views});
     }
 
-    for (int i = 0; i < cameras.size(); i++) m_images[added_order[i]].m_camera = cameras[i];
+    for (std::size_t i = 0; i < cameras.size(); i++) m_images[added_order[i]].m_camera = cameras[i];
         
     wxQueueEvent(this, new wxThreadEvent{wxEVT_SFM_THREAD_UPDATE});
 }
@@ -332,11 +332,11 @@ void MainFrame::SetMatchesFromPoints()
 
     for (const auto& point : m_points)
     {
-        int num_views = point.m_views.size();
+        const auto num_views = point.m_views.size();
 
-        for (int j = 0; j < num_views; j++)
+        for (std::size_t j = 0; j < num_views; j++)
         {
-            for (int k = 0; k < num_views; k++)
+            for (std::size_t k = 0; k < num_views; k++)
             {
                 if (j == k) continue;
 
@@ -437,10 +437,10 @@ Camera MainFrame::InitializeImage(int image_idx, int camera_idx, PointVec& point
     IntVec      keys_solve;
 
     // Find the tracks seen by this image
-    for (int i = 0; i < image.m_visible_points.size(); i++)
+    for (std::size_t i = 0; i < image.m_visible_points.size(); i++)
     {
-        int track   = image.m_visible_points[i];
-        int key     = image.m_visible_keys[i];
+        int track = image.m_visible_points[i];
+        int key   = image.m_visible_keys[i];
 
         if (m_tracks[track].m_extra < 0) continue;
 
@@ -594,7 +594,7 @@ void MainFrame::RefineCameraParameters(Camera* camera, const Point3Vec& points, 
         RefineCamera(camera, points_curr, projs_curr, true);
 
         std::vector<double> errors;
-        for (int i = 0; i < points_curr.size(); i++)
+        for (std::size_t i = 0; i < points_curr.size(); i++)
         {
             Point2 projection = camera->Project(points_curr[i]);
             errors.push_back((projection - projs_curr[i]).norm());
@@ -610,7 +610,7 @@ void MainFrame::RefineCameraParameters(Camera* camera, const Point3Vec& points, 
         Point2Vec   projs_next;
         IntVec      inliers_next;
 
-        for (int i = 0; i < points_curr.size(); i++)
+        for (std::size_t i = 0; i < points_curr.size(); i++)
         {
             if (errors[i] < threshold)
             {
@@ -668,7 +668,7 @@ void MainFrame::BundleAdjust(CamVec& cameras, const IntVec& added_order, PointVe
         std::vector<unsigned int>	num_vis(num_cameras, 0);
 
         int nz_count = 0;
-        for (int i = 0; i < num_pts; i++)
+        for (std::size_t i = 0; i < num_pts; i++)
         {
             if (!points[i].m_views.empty())
             {
@@ -812,7 +812,7 @@ void MainFrame::BundleAdjust(CamVec& cameras, const IntVec& added_order, PointVe
         }
 
         // Insert point parameters
-        for (int i = 0; i < num_nz_points; i++)
+        for (std::size_t i = 0; i < num_nz_points; ++i)
         {
             nz_pts[i].x() = *ptr; ptr++;
             nz_pts[i].y() = *ptr; ptr++;
@@ -899,7 +899,7 @@ void MainFrame::BundleAdjust(CamVec& cameras, const IntVec& added_order, PointVe
 
         RemoveBadPointsAndCameras(cameras, added_order, points);
 
-        for (int i = 0; i < num_pts; i++) if (remap[i] != -1) points[i].m_pos = nz_pts[remap[i]];
+        for (std::size_t i = 0; i < num_pts; i++) if (remap[i] != -1) points[i].m_pos = nz_pts[remap[i]];
 
         UpdateGeometryDisplay(cameras, added_order, points);
 
@@ -940,7 +940,7 @@ void MainFrame::AddNewPoints(const CamVec& cameras, const IntVec& added_order, P
             if (seen == -1)
             {
                 // We haven't yet seen this track, create a new track
-                tracks_seen[track_idx] = (int) new_tracks.size();
+                tracks_seen[track_idx] = (int)new_tracks.size();
 
                 ImageKeyVector track;
                 track.push_back(ImageKey{i, j});
@@ -958,20 +958,20 @@ void MainFrame::AddNewPoints(const CamVec& cameras, const IntVec& added_order, P
     int num_high_reprojection   = 0;
     int num_cheirality_failed   = 0;
     int num_added               = 0;
-    int num_tracks = (int)new_tracks.size();
+    const auto num_tracks       = new_tracks.size();
 
-    for (int i = 0; i < num_tracks; i++)
+    for (std::size_t i = 0; i < num_tracks; i++)
     {
-        int num_views = (int)new_tracks[i].size();
+        const auto num_views = new_tracks[i].size();
         if (num_views < 2) continue;    // Not enough views
 
         // Check if at least two cameras fix the position of the point
         bool conditioned(false);
         double max_angle(0.0);
 
-        for (int j = 0; j < num_views; j++)
+        for (std::size_t j = 0; j < num_views; j++)
         {
-            for (int k = j + 1; k < num_views; k++)
+            for (std::size_t k = j + 1; k < num_views; k++)
             {
                 int camera_idx1(new_tracks[i][j].first);
                 int image_idx1(added_order[camera_idx1]);
@@ -1078,14 +1078,14 @@ int MainFrame::RemoveBadPointsAndCameras(const CamVec& cameras, const IntVec& ad
         if (point.m_views.empty()) continue;
 
         double max_angle = 0.0;
-        for (int j = 0; j < point.m_views.size(); j++)
+        for (std::size_t j = 0; j < point.m_views.size(); j++)
         {
             int v1{point.m_views[j].first};
 
             Point3 re1 = point.m_pos - cameras[v1].m_t;
             re1 /= re1.norm();
 
-            for (int k = j + 1; k < point.m_views.size(); k++)
+            for (std::size_t k = j + 1; k < point.m_views.size(); k++)
             {
                 int v2(point.m_views[k].first);
 
@@ -1149,9 +1149,9 @@ void MainFrame::RadiusOutlierRemoval(double threshold, const IntVec& added_order
                     2, params);
 
     std::vector<float> d;
-    for (int i = 0; i < num_points; ++i) d.push_back(dists[2 * i + 1]);
+    for (std::size_t i = 0; i < num_points; ++i) d.push_back(dists[2 * i + 1]);
     double thresh = util::GetNthElement(util::iround(threshold * d.size()), d);
-    for (int i = 0; i < num_points; ++i) if (d[i] > thresh) outliers.push_back(i);
+    for (std::size_t i = 0; i < num_points; ++i) if (d[i] > thresh) outliers.push_back(i);
 
     for (const auto& idx : outliers)
     {

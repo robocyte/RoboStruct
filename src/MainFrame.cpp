@@ -263,7 +263,7 @@ void MainFrame::MatchAllAkaze()
     }
 
     m_tracks.clear();
-    m_matches = MatchTable{num_images};
+    m_matches = MatchTable(num_images);
     m_matches.RemoveAll();
     m_transforms.clear();
 
@@ -387,7 +387,7 @@ void MainFrame::MatchAll()
     }
 
     m_tracks.clear();
-    m_matches = MatchTable{num_images};
+    m_matches = MatchTable(num_images);
     m_matches.RemoveAll();
     m_transforms.clear();
 

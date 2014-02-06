@@ -10,7 +10,7 @@ bool operator < (const AdjListElem& lhs, const AdjListElem& rhs)
 
 
 
-MatchTable::MatchTable(int num_images)
+MatchTable::MatchTable(std::size_t num_images)
     : m_match_lists(num_images)
 {
 }
@@ -70,18 +70,18 @@ bool MatchTable::Contains(MatchIndex idx) const
     return (p.first != p.second);
 }
 
-unsigned int MatchTable::GetNumMatches(MatchIndex idx)
+std::size_t MatchTable::GetNumMatches(MatchIndex idx)
 {
     if (!Contains(idx)) return 0;
     return GetMatchList(idx).size();
 }
 
-unsigned int MatchTable::GetNumNeighbors(unsigned int i)
+std::size_t MatchTable::GetNumNeighbors(std::size_t i)
 {
     return m_match_lists[i].size();
 }
 
-MatchAdjList& MatchTable::GetNeighbors(unsigned int i)
+MatchAdjList& MatchTable::GetNeighbors(std::size_t i)
 {
     return m_match_lists[i];
 }
@@ -97,12 +97,12 @@ std::vector<KeypointMatch>& MatchTable::GetMatchList(MatchIndex idx)
     return (p.first)->m_match_list;
 }
 
-MatchAdjList::iterator MatchTable::begin(unsigned int i)
+MatchAdjList::iterator MatchTable::begin(std::size_t i)
 {
     return m_match_lists[i].begin();
 }
 
-MatchAdjList::iterator MatchTable::end(unsigned int i)
+MatchAdjList::iterator MatchTable::end(std::size_t i)
 {
     return m_match_lists[i].end();
 }

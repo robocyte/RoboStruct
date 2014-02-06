@@ -2,15 +2,15 @@
 
 #include <vector>
 
-typedef std::pair<unsigned int, unsigned int>	KeypointMatch;
-typedef std::pair<unsigned int, unsigned int>	MatchIndex;
+typedef std::pair<std::size_t, std::size_t>	KeypointMatch;
+typedef std::pair<std::size_t, std::size_t>	MatchIndex;
 
 struct AdjListElem
 {
     AdjListElem() = default;
 
-    unsigned int                m_index = 0;
-    std::vector<KeypointMatch>  m_match_list;
+    std::size_t                m_index = 0;
+    std::vector<KeypointMatch> m_match_list;
 };
 
 bool operator < (const AdjListElem& lhs, const AdjListElem& rhs);
@@ -22,7 +22,7 @@ class MatchTable
 {
 public:
     MatchTable() = default;
-    MatchTable(int num_images);
+    MatchTable(std::size_t num_images);
 
     void SetMatch(MatchIndex idx);
     void AddMatch(MatchIndex idx, KeypointMatch m);
@@ -31,13 +31,13 @@ public:
     void RemoveAll();
     bool Contains(MatchIndex idx) const;
 
-    unsigned int                GetNumMatches(MatchIndex idx);
-    unsigned int                GetNumNeighbors(unsigned int i);
-    MatchAdjList&               GetNeighbors(unsigned int i);
+    std::size_t                 GetNumMatches(MatchIndex idx);
+    std::size_t                 GetNumNeighbors(std::size_t i);
+    MatchAdjList&               GetNeighbors(std::size_t i);
     std::vector<KeypointMatch>& GetMatchList(MatchIndex idx);
 
-    MatchAdjList::iterator      begin(unsigned int i);
-    MatchAdjList::iterator      end(unsigned int i);
+    MatchAdjList::iterator      begin(std::size_t i);
+    MatchAdjList::iterator      end(std::size_t i);
 
 private:
     std::vector<MatchAdjList>   m_match_lists;
@@ -46,5 +46,5 @@ private:
 // Return the match index of a pair of images
 inline MatchIndex GetMatchIndex(int i1, int i2)
 {
-    return MatchIndex((unsigned int)i1, (unsigned int)i2);
+    return MatchIndex((std::size_t)i1, (std::size_t)i2);
 }
