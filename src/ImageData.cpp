@@ -174,7 +174,7 @@ void ImageData::ClearDescriptors()
 
 void ImageData::SetTracks()
 {
-    for (unsigned int i = 0; i < m_visible_points.size(); i++)
+    for (std::size_t i = 0; i < m_visible_points.size(); i++)
     {
         int track{m_visible_points[i]};
         int key{m_visible_keys[i]};

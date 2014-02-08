@@ -224,7 +224,7 @@ namespace
         double min_resid   = std::numeric_limits<double>::min();
         double likelihood  = 0.0;
 
-        for (int i = 0; i < pts1.size(); i++)
+        for (std::size_t i = 0; i < pts1.size(); i++)
         {
             double resid = FundamentalMatrixComputeResidual(F, Point3{pts2[i].x(), pts2[i].y(), 1.0}, Point3{pts1[i].x(), pts1[i].y(), 1.0});
 
@@ -247,7 +247,7 @@ namespace
 int ComputeRelativePoseRansac(const Point2Vec& pts1, const Point2Vec& pts2, const Mat& K1, const Mat& K2,
                               double ransac_threshold, int ransac_rounds, Mat3* R, Vec3* t)
 {
-    int num_matches = static_cast<int>(pts1.size());
+    const auto num_matches = pts1.size();
 
     Point2Vec pts1_norm;    pts1_norm.reserve(num_matches);
     Point2Vec pts2_norm;    pts2_norm.reserve(num_matches);
@@ -255,7 +255,7 @@ int ComputeRelativePoseRansac(const Point2Vec& pts1, const Point2Vec& pts2, cons
     Mat3 K1_inv = K1.inverse();
     Mat3 K2_inv = K2.inverse();
 
-    for (int i = 0; i < num_matches; i++)
+    for (std::size_t i = 0; i < num_matches; i++)
     {
         Point3 r_norm = K1_inv * EuclideanToHomogenous(pts1[i]);
         Point3 l_norm = K2_inv * EuclideanToHomogenous(pts2[i]);
@@ -272,7 +272,7 @@ int ComputeRelativePoseRansac(const Point2Vec& pts1, const Point2Vec& pts2, cons
         Point2Vec sample_pts1, sample_pts2;
         int num_ident = 0;
 
-        auto sample_indices = util::GetNRandomIndices(5, num_matches);
+        auto sample_indices = util::GetNRandomIndices(5, static_cast<int>(num_matches));
         for (int i : sample_indices)
         {
             sample_pts1.push_back(pts1_norm[i]);
@@ -285,7 +285,7 @@ int ComputeRelativePoseRansac(const Point2Vec& pts1, const Point2Vec& pts2, cons
 
         auto hypotheses = GenerateEssentialMatrixHypotheses(sample_pts1, sample_pts2);
 
-        for (const auto &candidate : hypotheses)
+        for (const auto& candidate : hypotheses)
         {
             Mat3 E2 = candidate;
 

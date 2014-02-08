@@ -203,7 +203,6 @@ void MainFrame::SaveBundleFile(const std::string& path)
     {
         wxLogMessage("Writing geometry and cameras to %s...", filename.c_str());
 
-        int num_points(m_points.size());
         int num_visible_points{0};
         int num_images = std::count_if(m_images.begin(), m_images.end(), [](const ImageData& img) { return img.m_camera.m_adjusted; });
 

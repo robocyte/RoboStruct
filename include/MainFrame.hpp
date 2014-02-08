@@ -115,7 +115,7 @@ private:
     double      GetInlierRatio(int idx1, int idx2);                                             // Returns the inlier ratio for an image pair
     KeyPoint&   GetKey(int img, int key)        { return m_images[img].m_keys[key]; };
 
-    void        SetMatch(int i1, int i2)        { m_matches.SetMatch(GetMatchIndex(i1, i2)); };
+    void        SetMatch(int i1, int i2)        { m_matches.SetMatch(MatchIndex(i1, i2)); };
     void        SetMatchesFromTracks(int img1, int img2);
     void        SetMatchesFromPoints();
 

@@ -223,7 +223,7 @@ void MainFrame::SetupInitialCameraPair(CamVec& cameras, const IntVec& added_orde
     Mat3 K1_inv = cameras[0].GetIntrinsicMatrix().inverse();
     Mat3 K2_inv = cameras[1].GetIntrinsicMatrix().inverse();
 
-    auto& list = m_matches.GetMatchList(GetMatchIndex(img_1, img_2));
+    auto& list = m_matches.GetMatchList(MatchIndex(img_1, img_2));
     int num_matches = list.size();
 
     for (int i = 0; i < num_matches; i++)
@@ -270,7 +270,7 @@ bool MainFrame::EstimateRelativePose(int i1, int i2, Camera* camera1, Camera* ca
 {
     ScopedTimer timer{m_profile_manager, "[EstimateRelativePose]"};
 
-    auto &matches = m_matches.GetMatchList(GetMatchIndex(i1, i2));
+    auto &matches = m_matches.GetMatchList(MatchIndex(i1, i2));
 
     Point2Vec projections1; projections1.reserve(matches.size());
     Point2Vec projections2; projections2.reserve(matches.size());
@@ -298,7 +298,7 @@ bool MainFrame::EstimateRelativePose(int i1, int i2, Camera* camera1, Camera* ca
 
 void MainFrame::SetMatchesFromTracks(int img1, int img2)
 {
-    auto& matches = m_matches.GetMatchList(GetMatchIndex(img1, img2));
+    auto& matches = m_matches.GetMatchList(MatchIndex(img1, img2));
     auto& tracks1 = m_images[img1].m_visible_points;
     auto& tracks2 = m_images[img2].m_visible_points;
 

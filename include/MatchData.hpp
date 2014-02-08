@@ -8,6 +8,9 @@ typedef std::pair<std::size_t, std::size_t>	MatchIndex;
 struct AdjListElem
 {
     AdjListElem() = default;
+    AdjListElem(std::size_t index)
+        : m_index(index)
+    {}
 
     std::size_t                m_index = 0;
     std::vector<KeypointMatch> m_match_list;
@@ -16,6 +19,8 @@ struct AdjListElem
 bool operator < (const AdjListElem& lhs, const AdjListElem& rhs);
 
 typedef std::vector<AdjListElem> MatchAdjList;
+
+
 
 // Table containing information about which pairs of images match
 class MatchTable
@@ -42,9 +47,3 @@ public:
 private:
     std::vector<MatchAdjList>   m_match_lists;
 };
-
-// Return the match index of a pair of images
-inline MatchIndex GetMatchIndex(int i1, int i2)
-{
-    return MatchIndex((std::size_t)i1, (std::size_t)i2);
-}

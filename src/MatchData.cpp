@@ -19,11 +19,9 @@ void MatchTable::SetMatch(MatchIndex idx)
 {
     if (Contains(idx)) return;      // Already set
 
-    AdjListElem e;
-    e.m_index = idx.second;
-    auto &l = m_match_lists[idx.first];
-    auto p = lower_bound(l.begin(), l.end(), e);
-    l.insert(p, e);
+    auto& list = m_match_lists[idx.first];
+    auto p = lower_bound(list.begin(), list.end(), AdjListElem(idx.second));
+    list.insert(p, AdjListElem(idx.second));
 }
 
 void MatchTable::AddMatch(MatchIndex idx, KeypointMatch m)
@@ -46,12 +44,10 @@ void MatchTable::RemoveMatch(MatchIndex idx)
         match_list.clear();
 
         // Remove the neighbor
-        AdjListElem e;
-        e.m_index = idx.second;
-        auto& l = m_match_lists[idx.first];
-        auto p = equal_range(l.begin(), l.end(), e);
+        auto& list = m_match_lists[idx.first];
+        auto p = equal_range(list.begin(), list.end(), AdjListElem(idx.second));
 
-        l.erase(p.first, p.second);
+        list.erase(p.first, p.second);
     }
 }
 
@@ -62,10 +58,8 @@ void MatchTable::RemoveAll()
 
 bool MatchTable::Contains(MatchIndex idx) const
 {
-    AdjListElem e;
-    e.m_index = idx.second;
-    const auto& l = m_match_lists[idx.first];
-    auto p = equal_range(l.begin(), l.end(), e);
+    const auto& list = m_match_lists[idx.first];
+    auto p = equal_range(list.begin(), list.end(), AdjListElem(idx.second));
 
     return (p.first != p.second);
 }
@@ -88,10 +82,8 @@ MatchAdjList& MatchTable::GetNeighbors(std::size_t i)
 
 std::vector<KeypointMatch>& MatchTable::GetMatchList(MatchIndex idx)
 {
-    AdjListElem e;
-    e.m_index = idx.second;
-    auto& l = m_match_lists[idx.first];
-    auto p = equal_range(l.begin(), l.end(), e);
+    auto& list = m_match_lists[idx.first];
+    auto p = equal_range(list.begin(), list.end(), AdjListElem(idx.second));
 
     assert(p.first != p.second);
     return (p.first)->m_match_list;

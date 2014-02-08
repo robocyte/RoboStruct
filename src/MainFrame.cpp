@@ -339,7 +339,7 @@ void MainFrame::MatchAllAkaze()
                 m_transforms.insert(trans_entry);
 
                 SetMatch(i, j);
-                auto& matches = m_matches.GetMatchList(GetMatchIndex(i, j));
+                auto& matches = m_matches.GetMatchList(MatchIndex(i, j));
 
                 matches.clear();
                 matches.reserve(num_inliers);
@@ -459,7 +459,7 @@ void MainFrame::MatchAll()
                 m_transforms.insert(trans_entry);
 
                 SetMatch(i, j);
-                auto& matches = m_matches.GetMatchList(GetMatchIndex(i, j));
+                auto& matches = m_matches.GetMatchList(MatchIndex(i, j));
 
                 matches.clear();
                 matches.reserve(num_inliers);
@@ -538,7 +538,7 @@ int MainFrame::ComputeEpipolarGeometry(int idx1, int idx2, IntPairVec& matches)
     auto matches_old = matches;
     matches.clear();
 
-    for (int m = 0; m < (int)status.size(); m++) if (status[m] == 1) matches.push_back(matches_old[m]);
+    for (std::size_t m = 0; m < status.size(); m++) if (status[m] == 1) matches.push_back(matches_old[m]);
 
     return (int)matches.size();
 }
@@ -578,7 +578,7 @@ void MainFrame::ComputeTracks()
     int num_images = GetNumImages();
 
     // Clear all marks for new images
-    for (int i = 0; i < num_images; i++)
+    for (std::size_t i = 0; i < num_images; i++)
     {
         // If this image has no neighbors, don't worry about its keys
         if (m_matches.GetNumNeighbors(i) == 0) continue;
@@ -590,7 +590,7 @@ void MainFrame::ComputeTracks()
     int pt_idx = 0;
 
     // Sort all match lists
-    for (int i = 0; i < num_images; i++)
+    for (std::size_t i = 0; i < num_images; i++)
     {
         std::for_each(m_matches.begin(i), m_matches.end(i), [&](AdjListElem val)
         {
@@ -621,7 +621,7 @@ void MainFrame::ComputeTracks()
 
             // Reset flags
             int num_touched = touched.size();
-            for (int k = 0; k < num_touched; k++) img_marked[touched[k]] = false;
+            for (std::size_t k = 0; k < num_touched; k++) img_marked[touched[k]] = false;
             touched.clear();
 
             // Do a breadth first search given this feature
@@ -648,14 +648,12 @@ void MainFrame::ComputeTracks()
 
                 // Check all adjacent images
                 auto& nbrs = m_matches.GetNeighbors(img1);
-                for (auto iter = nbrs.begin(); iter != nbrs.end(); iter++)
+                for (auto iter = nbrs.begin(); iter != nbrs.end(); ++iter)
                 {
                     unsigned int k = iter->m_index;
                     if (img_marked[k]) continue;
 
-                    MatchIndex base = GetMatchIndex(img1, k);
-
-                    auto& list = m_matches.GetMatchList(base);
+                    auto& list = m_matches.GetMatchList(MatchIndex(img1, k));
 
                     // Do a binary search for the feature
                     auto p = std::equal_range(list.begin(), list.end(), dummy, [](KeypointMatch k1, KeypointMatch k2) { return k1.first < k2.first; });
@@ -720,14 +718,14 @@ void MainFrame::MakeMatchListsSymmetric()
 
     std::vector<MatchIndex> matches;
 
-    for (unsigned int i = 0; i < num_images; i++)
+    for (std::size_t i = 0; i < num_images; i++)
     {
         for (auto iter = m_matches.begin(i); iter != m_matches.end(i); ++iter)
         {
-            unsigned int j = iter->m_index;
+            auto j = iter->m_index;
 
-            MatchIndex idx     = GetMatchIndex(i, j);
-            MatchIndex idx_rev = GetMatchIndex(j, i);
+            MatchIndex idx{i, j};
+            MatchIndex idx_rev{j, i};
 
             auto& list = iter->m_match_list;
 
