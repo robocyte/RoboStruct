@@ -9,7 +9,7 @@ Mat3 AngleAxisToRotationMatrix(const Vec3& w)
     {
         theta = sqrt(theta);
         double wx = w.x() / theta, wy = w.y() / theta, wz = w.z() / theta;
-        double costh = cos(theta), sinth = sin(theta);
+        const double costh = cos(theta), sinth = sin(theta);
 
         dR <<   costh + wx * wx * (1.0 - costh),    wx * wy * (1.0 - costh) - wz * sinth,    wy * sinth + wx * wz * (1.0 - costh),
            wz * sinth + wx * wy * (1.0 - costh),         costh + wy * wy * (1.0 - costh),   -wx * sinth + wy * wz * (1.0 - costh),
@@ -31,11 +31,11 @@ Vec3 RotationMatrixToAngleAxis(const Mat3& R)
     angle_axis(1) = R(0, 2) - R(2, 0);
     angle_axis(2) = R(1, 0) - R(0, 1);
 
-    double costheta = std::min(std::max((R.trace() - 1.0) / 2.0, -1.0), 1.0);
-    double sintheta = std::min(angle_axis.norm() / 2.0, 1.0);
+    const double costheta = std::min(std::max((R.trace() - 1.0) / 2.0, -1.0), 1.0);
+    const double sintheta = std::min(angle_axis.norm() / 2.0, 1.0);
 
-    double theta     = atan2(sintheta, costheta);
-    double threshold = 1e-12;
+    const double theta     = atan2(sintheta, costheta);
+    const double threshold = 1e-12;
 
     // Case 1: sin(theta) is large
     if ((sintheta > threshold) || (sintheta < -threshold))
@@ -47,7 +47,7 @@ Vec3 RotationMatrixToAngleAxis(const Mat3& R)
     if (costheta > 0.0) return angle_axis * 0.5;
 
     // Case 3: theta ~ pi
-    double inv_one_minus_costheta = 1.0 / (1.0 - costheta);
+    const double inv_one_minus_costheta = 1.0 / (1.0 - costheta);
     for (int i = 0; i < 3; ++i)
     {
         angle_axis[i] = theta * sqrt((R(i, i) - costheta) * inv_one_minus_costheta);

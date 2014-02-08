@@ -15,8 +15,8 @@ void MainFrame::OnSelectMatchImage(wxCommandEvent& event)
 void MainFrame::GenerateMatchImage()
 {
     if (!m_sfm_done) return;
-    int left_idx  = m_cb_matches_left->GetSelection();
-    int right_idx = m_cb_matches_right->GetSelection();
+    const int left_idx  = m_cb_matches_left->GetSelection();
+    const int right_idx = m_cb_matches_right->GetSelection();
 
     if (left_idx == -1 || right_idx == -1 || (left_idx == right_idx)) return;
 
@@ -36,22 +36,22 @@ void MainFrame::GenerateMatchImage()
     kpts1.reserve(left_keys.size());
     kpts2.reserve(right_keys.size());
 
-    float left_x_correction_factor  = 0.5 * m_images[left_idx].GetWidth();
-    float left_y_correction_factor  = 0.5 * m_images[left_idx].GetHeight()  - 1.0;
-    float right_x_correction_factor = 0.5 * m_images[right_idx].GetWidth();
-    float right_y_correction_factor = 0.5 * m_images[right_idx].GetHeight() - 1.0;
+    const float left_x_correction_factor  = 0.5 * m_images[left_idx].GetWidth();
+    const float left_y_correction_factor  = 0.5 * m_images[left_idx].GetHeight()  - 1.0;
+    const float right_x_correction_factor = 0.5 * m_images[right_idx].GetWidth();
+    const float right_y_correction_factor = 0.5 * m_images[right_idx].GetHeight() - 1.0;
 
     for (const auto& key : left_keys)
     {
-        float x = key.m_coords.x() + left_x_correction_factor;
-        float y = left_y_correction_factor - key.m_coords.y();
+        const float x = key.m_coords.x() + left_x_correction_factor;
+        const float y = left_y_correction_factor - key.m_coords.y();
         kpts1.push_back(cv::KeyPoint{x, y, 1.0f});
     }
 
     for (const auto& key : right_keys)
     {
-        float x = key.m_coords.x() + right_x_correction_factor;
-        float y = right_y_correction_factor - key.m_coords.y();
+        const float x = key.m_coords.x() + right_x_correction_factor;
+        const float y = right_y_correction_factor - key.m_coords.y();
         kpts2.push_back(cv::KeyPoint{x, y, 1.0f});
     }
 
@@ -95,21 +95,21 @@ void MainFrame::DrawMatches(wxDC& dc)
     if (!dc.IsOk()) return;
 
     dc.Clear();
-    int win_width  = m_pane_matches_view->GetClientSize().GetX();
-    int win_height = m_pane_matches_view->GetClientSize().GetY();
+    const int win_width  = m_pane_matches_view->GetClientSize().GetX();
+    const int win_height = m_pane_matches_view->GetClientSize().GetY();
 
-    int left_idx   = m_cb_matches_left->GetSelection();
-    int right_idx  = m_cb_matches_right->GetSelection();
+    const int left_idx   = m_cb_matches_left->GetSelection();
+    const int right_idx  = m_cb_matches_right->GetSelection();
 
     if (left_idx != -1 && right_idx != -1 && (left_idx != right_idx))
     {
-        int img_width  = m_matches_image.GetWidth();
-        int img_height = m_matches_image.GetHeight();
+        const int img_width  = m_matches_image.GetWidth();
+        const int img_height = m_matches_image.GetHeight();
 
-        int new_img_width  = (img_width  * win_height)     / img_height;
-        int new_img_height = (img_height * win_width)      / img_width;
-        int width_diff     = (win_width  - new_img_width)  / 2;
-        int height_diff    = (win_height - new_img_height) / 2;
+        const int new_img_width  = (img_width  * win_height)     / img_height;
+        const int new_img_height = (img_height * win_width)      / img_width;
+        const int width_diff     = (win_width  - new_img_width)  / 2;
+        const int height_diff    = (win_height - new_img_height) / 2;
 
         if (height_diff >= 0)
         {
@@ -134,7 +134,7 @@ void MainFrame::DrawMatches(wxDC& dc)
         double txt_width;
         gc->SetFont(wxFont{wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT)}, *wxBLACK);
         gc->GetTextExtent("Select two different images", &txt_width, nullptr);
-        double offset = (win_width - (int)txt_width) / 2.0;
+        const double offset = (win_width - (int)txt_width) / 2.0;
         gc->DrawText("Select two different images", offset, 5.0);
 
         delete gc;

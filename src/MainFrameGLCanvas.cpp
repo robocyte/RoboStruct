@@ -106,10 +106,10 @@ void MainFrame::OnGLCanvasPaint(wxPaintEvent& event)
     // Must always be here
     wxPaintDC dc{m_gl_canvas};
 
-    auto start = m_clock->Now();
+    const auto start = m_clock->Now();
     m_scene->Render();
     m_gl_canvas->SwapBuffers();
-    auto end = m_clock->Now();
+    const auto end = m_clock->Now();
 
     wxString msg;
     msg.Printf("SPF: %.3f ms", gly::Clock::CyclesToSeconds(end - start) * 1000.0f);
@@ -125,8 +125,8 @@ void MainFrame::OnGLCanvasMouse(wxMouseEvent& event)
     if (m_turntable_timer->IsRunning()) return;
 
     wxSize sz{m_gl_canvas->GetClientSize()};
-    float distx = m_beginx - event.GetX();
-    float disty = m_beginy - event.GetY();
+    const float distx = m_beginx - event.GetX();
+    const float disty = m_beginy - event.GetY();
 
     auto camera = m_scene->GetCamera();
 

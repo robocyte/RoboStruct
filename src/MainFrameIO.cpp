@@ -108,9 +108,9 @@ void MainFrame::SaveProjectionMatrix(const std::string& path, int img_idx)
     {
         wxLogMessage("Writing projection matrix to %s...", filename.c_str());
 
-        double focal  = m_images[img_idx].m_camera.m_focal_length;
-        const auto& R = m_images[img_idx].m_camera.m_R;
-        const auto& t = m_images[img_idx].m_camera.m_t;
+        const double focal = m_images[img_idx].m_camera.m_focal_length;
+        const auto& R      = m_images[img_idx].m_camera.m_R;
+        const auto& t      = m_images[img_idx].m_camera.m_t;
 
         Mat3 K;
         K << -focal,   0.0,   0.5 * GetImageWidth(img_idx)  - 0.5,
@@ -138,15 +138,15 @@ void MainFrame::SaveUndistortedImage(const std::string& path, int img_idx)
     cv::Mat img_undist(img.size(), CV_8UC3);
 
     // Fill camera matrix
-    double focal = m_images[img_idx].m_camera.m_focal_length;
+    const double focal = m_images[img_idx].m_camera.m_focal_length;
     cv::Mat_<double> camMat{3, 3};
     camMat << focal,    0.0,    0.5 * img.cols - 0.5,
                 0.0,  focal,    0.5 * img.rows - 0.5,
                 0.0,    0.0,    1.0;
 
     // Distortion coefficients
-    double k1 = m_images[img_idx].m_camera.m_k[0];
-    double k2 = m_images[img_idx].m_camera.m_k[1];
+    const double k1 = m_images[img_idx].m_camera.m_k[0];
+    const double k2 = m_images[img_idx].m_camera.m_k[1];
     cv::Mat_<double> distCoeffs{1, 5};
     distCoeffs << k1, k2, 0.0, 0.0, 0.0;
 
@@ -156,7 +156,7 @@ void MainFrame::SaveUndistortedImage(const std::string& path, int img_idx)
     // Save the image
     std::string short_name{m_images[img_idx].m_filename_short};
     std::transform(short_name.begin(), short_name.end(), short_name.begin(), std::tolower);
-    std::string filename = path + R"(\)" + short_name;
+    const std::string filename = path + R"(\)" + short_name;
     m_images[img_idx].m_filename_undistorted = filename;
     wxLogMessage("Saving undistorted image to %s...", filename.c_str());
     cv::imwrite(filename, img_undist);
@@ -308,7 +308,7 @@ void MainFrame::SavePlyFile()
             ply_file << t.x() << " " << t.y() << " " << t.z() << " "
                      << 255   << " " << 0     << " " << 0     << std::endl;
 
-            Point3 p = R.transpose() * Point3{0.0, 0.0, -0.05} + t;
+            const Point3 p = R.transpose() * Point3{0.0, 0.0, -0.05} + t;
 
             ply_file << p.x() << " " << p.y() << " " << p.z() << " "
                      << 0     << " " << 255   << " " << 0     << std::endl;

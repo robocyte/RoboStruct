@@ -14,8 +14,8 @@ void MainFrame::OnSelectPreviewImage(wxListEvent& event)
 
 void MainFrame::GeneratePreviewImage(int img_idx)
 {
-    int width  = GetImageWidth(img_idx);
-    int height = GetImageHeight(img_idx);
+    const int width  = GetImageWidth(img_idx);
+    const int height = GetImageHeight(img_idx);
 
     auto image = cv::imread(m_images[img_idx].m_filename);
     cv::cvtColor(image, image, CV_BGR2RGB);
@@ -47,18 +47,18 @@ void MainFrame::DrawImagePreview(wxDC& dc)
     if (!dc.IsOk()) return;
 
     dc.Clear();
-    int win_width  = m_window_image_preview->GetClientSize().GetWidth();
-    int win_height = m_window_image_preview->GetClientSize().GetHeight();
+    const int win_width  = m_window_image_preview->GetClientSize().GetWidth();
+    const int win_height = m_window_image_preview->GetClientSize().GetHeight();
 
     if (m_img_ctrl->GetSelectedItemCount())
     {
-        int img_width  = m_preview_image.GetWidth();
-        int img_height = m_preview_image.GetHeight();
+        const int img_width  = m_preview_image.GetWidth();
+        const int img_height = m_preview_image.GetHeight();
 
-        int new_img_width  = (img_width  * win_height)     / img_height;
-        int new_img_height = (img_height * win_width)      / img_width;
-        int width_diff     = (win_width  - new_img_width)  / 2;
-        int height_diff    = (win_height - new_img_height) / 2;
+        const int new_img_width  = (img_width  * win_height)     / img_height;
+        const int new_img_height = (img_height * win_width)      / img_width;
+        const int width_diff     = (win_width  - new_img_width)  / 2;
+        const int height_diff    = (win_height - new_img_height) / 2;
 
         if (height_diff >= 0)
         {
@@ -83,7 +83,7 @@ void MainFrame::DrawImagePreview(wxDC& dc)
         double txt_width;
         gc->SetFont(wxFont{wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT)}, *wxBLACK);
         gc->GetTextExtent("Select image", &txt_width, nullptr);
-        double offset = (win_width - (int)txt_width) / 2.0;
+        const double offset = (win_width - (int)txt_width) / 2.0;
         gc->DrawText("Select image", offset, 5.0);
 
         delete gc;

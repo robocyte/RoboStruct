@@ -134,15 +134,15 @@ void ImageData::DetectFeatures(const Options& opts)
     // Convert the keypoints from OpenCV's format to internal
     m_keys.reserve(keys.size());
 
-    float x_correction_factor = 0.5 * m_width;
-    float y_correction_factor = 0.5 * m_height - 1.0;
+    const float x_correction_factor = 0.5 * m_width;
+    const float y_correction_factor = 0.5 * m_height - 1.0;
 
-    for (auto& key : keys)
+    for (const auto& key : keys)
     {
-        float x = key.pt.x - x_correction_factor;
-        float y = y_correction_factor - key.pt.y;
+        const float x = key.pt.x - x_correction_factor;
+        const float y = y_correction_factor - key.pt.y;
 
-        int xf = static_cast<int>(std::floor(key.pt.x)), yf = static_cast<int>(std::floor(key.pt.y));
+        const int xf = static_cast<int>(std::floor(key.pt.x)), yf = static_cast<int>(std::floor(key.pt.y));
         const uchar* ptr = img.ptr<uchar>(yf);
 
         m_keys.push_back(KeyPoint{x, y, ptr[3 * xf + 2], ptr[3 * xf + 1], ptr[3 * xf]});
@@ -177,8 +177,8 @@ void ImageData::SetTracks()
 {
     for (std::size_t i = 0; i < m_visible_points.size(); i++)
     {
-        int track{m_visible_points[i]};
-        int key{m_visible_keys[i]};
+        const int track{m_visible_points[i]};
+        const int key{m_visible_keys[i]};
 
         m_keys[key].m_track = track;
     }

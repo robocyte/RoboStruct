@@ -35,7 +35,7 @@ Vec6 InvertDistortion(double r0, double r1, const Vec6& k_in)
 
 Point2 UndistortNormalizedPoint(const Point2& p, const Vec6& k_inverse)
 {
-    double r = p.norm();
+    const double r = p.norm();
     if (r == 0.0) return p;
 
     double t = 1.0;

@@ -11,9 +11,7 @@
 
 void MainFrame::OnUpdateUI(wxUpdateUIEvent& event)
 {
-    int id = event.GetId();
-
-    switch(id)
+    switch(event.GetId())
     {
     case ID_RECONSTRUCT:                    event.Enable(m_has_images);         break;
 
@@ -49,9 +47,7 @@ void MainFrame::OnClose(wxCloseEvent& event)
 
 void MainFrame::OnViewWindows(wxCommandEvent& event)
 {
-    int id = event.GetId();
-
-    switch(id)
+    switch(event.GetId())
     {
     case ID_VIEW_IMAGE_BROWSER:
         m_mgr.GetPane("Image browser").Show();
@@ -155,8 +151,8 @@ void MainFrame::OnTimerUpdate(wxTimerEvent& event)
     {
     case ID_TIMER_TURNTABLE:
         {
-            auto camera   = m_scene->GetCamera();
-            auto rotation = camera->GetTrackballOrientation();
+            auto camera         = m_scene->GetCamera();
+            const auto rotation = camera->GetTrackballOrientation();
 
             camera->RotateTrackball(glm::vec2{0.0f, 0.0f}, glm::vec2{-0.0002f * m_tb_turntable_speed_slider->GetValue(), 0.0f});
 
@@ -171,29 +167,29 @@ void MainFrame::OnTimerUpdate(wxTimerEvent& event)
             m_counter += 0.02f;
             if (m_counter >= 1.0f) m_reset_viewport_timer->Stop();
 
-            auto camera = m_scene->GetCamera();
-            auto quat_x = glm::angleAxis(15.0f, glm::vec3{1, 0, 0});
-            auto quat_y = glm::angleAxis(45.0f, glm::vec3{0, 1, 0});
-            auto quat_z = glm::angleAxis(0.0f,  glm::vec3{0, 0, 1});
+            auto camera       = m_scene->GetCamera();
+            const auto quat_x = glm::angleAxis(15.0f, glm::vec3{1, 0, 0});
+            const auto quat_y = glm::angleAxis(45.0f, glm::vec3{0, 1, 0});
+            const auto quat_z = glm::angleAxis(0.0f,  glm::vec3{0, 0, 1});
 
-            auto orientation_start  = camera->GetTrackballOrientation();
-            auto orientation_target = quat_x * quat_y * quat_z;
+            const auto orientation_start  = camera->GetTrackballOrientation();
+            const auto orientation_target = quat_x * quat_y * quat_z;
 
-            auto position_start     = camera->GetTrackballPosition();
-            auto position_target    = glm::vec3{0.0f, 0.0f, 0.0f};
+            const auto position_start     = camera->GetTrackballPosition();
+            const auto position_target    = glm::vec3{0.0f, 0.0f, 0.0f};
 
-            auto zoom_start         = camera->GetTrackballZoom();
-            auto zoom_target        = 1.0f;
+            const auto zoom_start         = camera->GetTrackballZoom();
+            const auto zoom_target        = 1.0f;
 
-            auto zoom_mix           = glm::lerp(zoom_start, zoom_target, m_counter);
-            auto position_mix       = glm::lerp(position_start, position_target, m_counter);
-            auto orientation_mix    = glm::shortMix(orientation_start, orientation_target, m_counter);
+            const auto zoom_mix           = glm::lerp(zoom_start, zoom_target, m_counter);
+            const auto position_mix       = glm::lerp(position_start, position_target, m_counter);
+            const auto orientation_mix    = glm::shortMix(orientation_start, orientation_target, m_counter);
 
             camera->SetTrackballZoom(zoom_mix);
             camera->SetTrackballPosition(position_mix);
             camera->SetTrackballOrientation(orientation_mix);
 
-            auto rotation = camera->GetTrackballOrientation();
+            const auto rotation = camera->GetTrackballOrientation();
             m_scene->GetNode("Trackball X")->GetTransform().SetOrientation(orientation_mix * glm::angleAxis(90.0f, glm::vec3{0.0f, 1.0f, 0.0f}));
             m_scene->GetNode("Trackball Y")->GetTransform().SetOrientation(orientation_mix * glm::angleAxis(90.0f, glm::vec3{1.0f, 0.0f, 0.0f}));
             m_scene->GetNode("Trackball Z")->GetTransform().SetOrientation(orientation_mix);
@@ -210,9 +206,7 @@ void MainFrame::OnTimerUpdate(wxTimerEvent& event)
 
 void MainFrame::OnExport(wxCommandEvent& event)
 {
-    int id = event.GetId();
-
-    switch(id)
+    switch(event.GetId())
     {
     case ID_EXPORT_TRACKS:
         {
@@ -255,7 +249,7 @@ void MainFrame::OnExport(wxCommandEvent& event)
 
 void MainFrame::OnSaveLog(wxCommandEvent& event)
 {
-    auto target = m_path + R"(\Log.txt)";
+    const auto target = m_path + R"(\Log.txt)";
     if (m_tc_log->SaveFile(target)) wxLogMessage("Log saved to %s", target);
 }
 

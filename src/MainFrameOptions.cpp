@@ -166,8 +166,8 @@ void MainFrame::OnOptionsChanged(wxPropertyGridEvent& event)
     m_options.draw_matches_only                 = m_pg_options->GetProperty("Draw matches only")->GetValue().GetBool();
     m_options.draw_coloured_lines               = m_pg_options->GetProperty("Draw coloured lines")->GetValue().GetBool();
 
-    auto t = m_options.viewport_top_color;
-    auto b = m_options.viewport_bottom_color;
+    const auto t = m_options.viewport_top_color;
+    const auto b = m_options.viewport_bottom_color;
 
     m_scene->GetBackground()->SetGradient(glm::vec3{t.Red() / 255.0f, t.Green() / 255.0f, t.Blue() / 255.0f},
                                           glm::vec3{b.Red() / 255.0f, b.Green() / 255.0f, b.Blue() / 255.0f});

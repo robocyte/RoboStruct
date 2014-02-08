@@ -58,17 +58,17 @@ void wxAuiSolidTabArt::DrawTab(wxDC& dc, wxWindow* wnd, const wxAuiNotebookPage&
     dc.GetTextExtent(caption, &normal_textx, &normal_texty);
 
     // Figure out the size of the tab
-    wxSize  tab_size   = GetTabSize(dc, wnd, page.caption, page.bitmap, page.active, close_button_state, x_extent);
-    wxCoord tab_height = m_tabCtrlHeight;
-    wxCoord tab_width  = tab_size.x;
-    wxCoord tab_x      = in_rect.x;
-    wxCoord tab_y      = in_rect.y + in_rect.height - tab_height;
+    const wxSize  tab_size   = GetTabSize(dc, wnd, page.caption, page.bitmap, page.active, close_button_state, x_extent);
+    const wxCoord tab_height = m_tabCtrlHeight;
+    const wxCoord tab_width  = tab_size.x;
+    const wxCoord tab_x      = in_rect.x;
+    const wxCoord tab_y      = in_rect.y + in_rect.height - tab_height;
 
     caption = page.caption;
 
     dc.SetFont(m_normalFont);
 
-    int drawn_tab_height = tab_height - 2;
+    const int drawn_tab_height = tab_height - 2;
 
     if (page.active)
     {
@@ -81,10 +81,10 @@ void wxAuiSolidTabArt::DrawTab(wxDC& dc, wxWindow* wnd, const wxAuiNotebookPage&
         dc.GradientFillLinear(r, wxColour{204, 206, 219}, wxColour{204, 206, 219});
     }
 
-    int text_offset = tab_x + 8;
+    const int text_offset = tab_x + 8;
 
     // Draw tab text
-    wxString draw_text = wxAuiChopText(dc, caption, tab_width - (text_offset-tab_x));
+    const wxString draw_text = wxAuiChopText(dc, caption, tab_width - (text_offset-tab_x));
     if (page.active)
     {
         dc.SetTextForeground(wxColour{255, 255, 255});

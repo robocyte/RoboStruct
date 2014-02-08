@@ -201,19 +201,19 @@ namespace
 
     Mat3Vec GenerateEssentialMatrixHypotheses(const Point2Vec& pts1, const Point2Vec& pts2)
     {
-        auto basis          = ComputeNullspaceBasis(pts1, pts2);
-        auto constraints    = ComputeConstraintMatrix(basis);
-        auto gbasis         = ComputeGroebnerBasis(constraints);
-        auto action         = ComputeActionMatrix(gbasis);
+        const auto basis       = ComputeNullspaceBasis(pts1, pts2);
+        const auto constraints = ComputeConstraintMatrix(basis);
+        const auto gbasis      = ComputeGroebnerBasis(constraints);
+        const auto action      = ComputeActionMatrix(gbasis);
         return                ComputeEssentialMatricesGroebner(action, basis);
     }
 
     double FundamentalMatrixComputeResidual(const Mat3& F, const Point3& pt1, const Point3& pt2)
     {
-        Point3 Fl = F * pt2;
-        Point3 Fr = F * pt1;
+        const Point3 Fl = F * pt2;
+        const Point3 Fr = F * pt1;
 
-        double pt = pt1.dot(Fl);
+        const double pt = pt1.dot(Fl);
 
         return (1.0 / (Fl(0) * Fl(0) + Fl(1) * Fl(1)) + 1.0 / (Fr(0) * Fr(0) + Fr(1) * Fr(1))) * (pt * pt);
     }
@@ -226,7 +226,7 @@ namespace
 
         for (std::size_t i = 0; i < pts1.size(); i++)
         {
-            double resid = FundamentalMatrixComputeResidual(F, Point3{pts2[i].x(), pts2[i].y(), 1.0}, Point3{pts1[i].x(), pts1[i].y(), 1.0});
+            const double resid = FundamentalMatrixComputeResidual(F, Point3{pts2[i].x(), pts2[i].y(), 1.0}, Point3{pts1[i].x(), pts1[i].y(), 1.0});
 
             likelihood += log(1.0 + resid * resid / (thresh_norm));
 
@@ -252,13 +252,13 @@ int ComputeRelativePoseRansac(const Point2Vec& pts1, const Point2Vec& pts2, cons
     Point2Vec pts1_norm;    pts1_norm.reserve(num_matches);
     Point2Vec pts2_norm;    pts2_norm.reserve(num_matches);
 
-    Mat3 K1_inv = K1.inverse();
-    Mat3 K2_inv = K2.inverse();
+    const Mat3 K1_inv = K1.inverse();
+    const Mat3 K2_inv = K2.inverse();
 
     for (std::size_t i = 0; i < num_matches; i++)
     {
-        Point3 r_norm = K1_inv * EuclideanToHomogenous(pts1[i]);
-        Point3 l_norm = K2_inv * EuclideanToHomogenous(pts2[i]);
+        const Point3 r_norm = K1_inv * EuclideanToHomogenous(pts1[i]);
+        const Point3 l_norm = K2_inv * EuclideanToHomogenous(pts2[i]);
 
         pts1_norm.push_back(-r_norm.head<2>());
         pts2_norm.push_back(-l_norm.head<2>());
@@ -272,7 +272,7 @@ int ComputeRelativePoseRansac(const Point2Vec& pts1, const Point2Vec& pts2, cons
         Point2Vec sample_pts1, sample_pts2;
         int num_ident = 0;
 
-        auto sample_indices = util::GetNRandomIndices(5, static_cast<int>(num_matches));
+        const auto sample_indices = util::GetNRandomIndices(5, static_cast<int>(num_matches));
         for (int i : sample_indices)
         {
             sample_pts1.push_back(pts1_norm[i]);
@@ -283,7 +283,7 @@ int ComputeRelativePoseRansac(const Point2Vec& pts1, const Point2Vec& pts2, cons
         }
         if (num_ident >= 3) continue;   // Choose another 5
 
-        auto hypotheses = GenerateEssentialMatrixHypotheses(sample_pts1, sample_pts2);
+        const auto hypotheses = GenerateEssentialMatrixHypotheses(sample_pts1, sample_pts2);
 
         for (const auto& candidate : hypotheses)
         {
@@ -295,7 +295,7 @@ int ComputeRelativePoseRansac(const Point2Vec& pts1, const Point2Vec& pts2, cons
             E2(1, 1) = -E2(1, 1);
             E2(2, 2) = -E2(2, 2);
 
-            Mat3 F = K2_inv * E2 * K1_inv;
+            const Mat3 F = K2_inv * E2 * K1_inv;
 
             double score = 0.0;
             int num_inliers = EvaluateFundamentalMatrix(F, pts1, pts2, ransac_threshold * ransac_threshold, &score);

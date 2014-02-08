@@ -67,7 +67,7 @@ namespace
             Point3 projection = P * EuclideanToHomogenous(points[i]);
             projection /= -projection.z();
 
-            double dist = (projection.head<2>() - projections[i]).squaredNorm();
+            const double dist = (projection.head<2>() - projections[i]).squaredNorm();
 
             if (dist < threshold)
             {
@@ -95,7 +95,7 @@ namespace
         lm.parameters.xtol   = 1.0e-5;
         lm.parameters.maxfev = 200;
 
-        auto status = lm.minimize(x);
+        const auto status = lm.minimize(x);
 
         Mat34 P_refined;
         P_refined.row(0) = x.segment(0, 4);
@@ -109,7 +109,7 @@ namespace
 
 Mat34 ComputeProjectionMatrix(const Point3Vec& points, const Point2Vec& projections, bool optimize)
 {
-    int num_pts{static_cast<int>(points.size())};
+    const int num_pts{static_cast<int>(points.size())};
 
     Mat A{2 * num_pts, 11}; A.setZero();
     Vec b{2 * num_pts};
@@ -140,7 +140,7 @@ Mat34 ComputeProjectionMatrix(const Point3Vec& points, const Point2Vec& projecti
         lm.parameters.xtol   = 1.0e-10;
         lm.parameters.maxfev = 200;
 
-        auto status = lm.minimize(x);
+        const auto status = lm.minimize(x);
     }
 
     Mat34 P;
@@ -153,7 +153,7 @@ Mat34 ComputeProjectionMatrix(const Point3Vec& points, const Point2Vec& projecti
 
 int ComputeProjectionMatrixRansac(const Point3Vec& points, const Point2Vec& projections, int ransac_rounds, double ransac_threshold, Mat34* P)
 {
-    int num_pts = static_cast<int>(points.size());
+    const int num_pts = static_cast<int>(points.size());
 
     if (num_pts < 6)
     {
@@ -171,21 +171,18 @@ int ComputeProjectionMatrixRansac(const Point3Vec& points, const Point2Vec& proj
         Point3Vec sample_pts;
         Point2Vec sample_projs;
 
-        auto sample_indices = util::GetNRandomIndices(6, num_pts);
+        const auto sample_indices = util::GetNRandomIndices(6, num_pts);
         for (int i : sample_indices)
         {
             sample_pts.push_back(points[i]);
             sample_projs.push_back(projections[i]);
         }
 
-        // Solve for the parameters
-        Mat34 hypothesis = ComputeProjectionMatrix(sample_pts, sample_projs);
+        double error              = 0.0;
+        const Mat34 hypothesis    = ComputeProjectionMatrix(sample_pts, sample_projs);
+        const auto inlier_indices = EvaluateProjectionMatrix(hypothesis, points, projections, ransac_threshold, &error);
+        const int num_inliers     = static_cast<int>(inlier_indices.size());
 
-        // Count the number of inliers in all correspondences
-        double error = 0.0;
-        auto inlier_indices = EvaluateProjectionMatrix(hypothesis, points, projections, ransac_threshold, &error);
-
-        int num_inliers = static_cast<int>(inlier_indices.size());
         if (num_inliers < 6) continue;
 
         if (num_inliers > max_inliers || (num_inliers == max_inliers && error < max_error))
@@ -201,10 +198,10 @@ int ComputeProjectionMatrixRansac(const Point3Vec& points, const Point2Vec& proj
             }
 
             // Quick pseudo LO-RANSAC
-            double error_i = 0.0;
-            Mat34 Pi = ComputeProjectionMatrix(final_pts, final_projs, true);
-            auto inlier_indices_i = EvaluateProjectionMatrix(Pi, points, projections, ransac_threshold, &error_i);
-            int num_inliers_i = static_cast<int>(inlier_indices_i.size());
+            double error_i              = 0.0;
+            const Mat34 Pi              = ComputeProjectionMatrix(final_pts, final_projs, true);
+            const auto inlier_indices_i = EvaluateProjectionMatrix(Pi, points, projections, ransac_threshold, &error_i);
+            const int num_inliers_i     = static_cast<int>(inlier_indices_i.size());
 
             if (num_inliers_i > max_inliers || (num_inliers_i == max_inliers && error_i < max_error))
             {

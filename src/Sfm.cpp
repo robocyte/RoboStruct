@@ -17,11 +17,11 @@ namespace
 
         int operator()(const Vec& x, Vec& fvec) const
         {
-            int num_points = static_cast<int>(m_points.size());
+            const int num_points = static_cast<int>(m_points.size());
 
             for (int i = 0; i < num_points; ++i)
             {
-                Point2 projection = ProjectPoint(x, m_points[i]);
+                const Point2 projection = ProjectPoint(x, m_points[i]);
 
                 fvec(2 * i + 0) = m_projections[i].x() - projection.x();
                 fvec(2 * i + 1) = m_projections[i].y() - projection.y();
@@ -44,17 +44,17 @@ namespace
             else                focal_length = m_camera.m_focal_length;
 
             // Compute rotation update
-            Mat3 Rnew = AngleAxisToRotationMatrix(x.segment(3, 3)) * m_camera.m_R;
+            const Mat3 Rnew = AngleAxisToRotationMatrix(x.segment(3, 3)) * m_camera.m_R;
 
             // Project
-            Point3 tmp = Rnew * (point - x.head<3>());
+            const Point3 tmp = Rnew * (point - x.head<3>());
             Point2 projection = tmp.head<2>() / -tmp.z();
 
             if (m_adjust_focal)
             {
                 // Apply radial distortion
-                double r2 = projection.squaredNorm();
-                double factor = 1.0 + x(7) * r2 + x(8) * r2 * r2;   // Taylor expansion for L(r)
+                const double r2 = projection.squaredNorm();
+                const double factor = 1.0 + x(7) * r2 + x(8) * r2 * r2;   // Taylor expansion for L(r)
 
                 projection *= factor;
             }
@@ -95,12 +95,12 @@ Mat34 Camera::GetProjectionMatrix() const
 Point2 Camera::Project(const Point3& point) const
 {
     // HZ p. 153f
-    Point3 tmp = m_R * (point - m_t);
-    Point2 projected = tmp.head<2>() / -tmp.z();
+    const Point3 tmp = m_R * (point - m_t);
+    const Point2 projected = tmp.head<2>() / -tmp.z();
 
     // Compute radial distortion
-    double r2 = projected.squaredNorm();
-    double factor = 1.0 + m_k[0] * r2 + m_k[1] * r2 * r2;   // Taylor expansion for L(r)
+    const double r2 = projected.squaredNorm();
+    const double factor = 1.0 + m_k[0] * r2 + m_k[1] * r2 * r2;   // Taylor expansion for L(r)
 
     return projected * factor * m_focal_length;
 }
@@ -120,7 +120,7 @@ void RefineCamera(Camera* camera, const Point3Vec& points, const Point2Vec& proj
     lm.parameters.xtol   = 1.0e-12;
     lm.parameters.maxfev = 200;
 
-    auto status = lm.minimize(x);
+    const auto status = lm.minimize(x);
 
     // Copy out the parameters
     camera->m_t = x.head<3>();

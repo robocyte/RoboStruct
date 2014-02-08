@@ -79,7 +79,7 @@ void MainFrame::OnSFMThreadUpdate(wxThreadEvent& event)
 
         image.m_camera_mesh->GetTransform().Reset();
         image.m_camera_mesh->GetTransform().Translate(glm::vec3{image.m_camera.m_t.x(), image.m_camera.m_t.y(), image.m_camera.m_t.z()});
-        Eigen::Quaternion<double> quat(image.m_camera.m_R.transpose());
+        const Eigen::Quaternion<double> quat(image.m_camera.m_R.transpose());
         image.m_camera_mesh->GetTransform().Rotate(glm::quat(quat.w(), quat.x(), quat.y(), quat.z()));
         image.m_camera_mesh->GetTransform().Scale(glm::vec3{0.02f, 0.02f, 0.02f});
     }
@@ -129,7 +129,7 @@ void MainFrame::InitializeLog()
     wxLogMessage("Log initialized");
     wxLogMessage("OS: %s", wxPlatformInfo::Get().GetOperatingSystemDescription());
 
-    auto font = new wxFont{9, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, "consolas"};
+    const auto font = new wxFont{9, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, "consolas"};
     m_tc_log->SetFont(*font);
 }
 
@@ -195,7 +195,7 @@ bool MainFrame::AddImage(const std::string& filename, const std::string& filenam
 
 bool MainFrame::FindCameraInDatabase(ImageData& img)
 {
-    auto found = std::find_if(m_camDB.begin(), m_camDB.end(), [&](CamDBEntry& entry)
+    const auto found = std::find_if(m_camDB.begin(), m_camDB.end(), [&](CamDBEntry& entry)
     {
         return (entry.first.find(img.m_camera_model) != std::string::npos);
     });
@@ -214,7 +214,7 @@ bool MainFrame::FindCameraInDatabase(ImageData& img)
 
 void MainFrame::DetectFeaturesAll()
 {
-    int num_images = GetNumImages();
+    const auto num_images = GetNumImages();
 
     // Show progress dialog
     wxProgressDialog dialog{"Progress", "Detecting features...", num_images, this,
@@ -222,7 +222,7 @@ void MainFrame::DetectFeaturesAll()
                             wxPD_ESTIMATED_TIME | wxPD_REMAINING_TIME};
 
     // Detect features
-    for (int i = 0; i < num_images; i++)
+    for (std::size_t i = 0; i < num_images; i++)
     {
         DetectFeatures(i);
 
@@ -250,8 +250,8 @@ void MainFrame::MatchAllAkaze()
     typedef Distance::ElementType         ElementType;
     typedef Distance::ResultType          DistanceType;
 
-    int num_images = GetNumImages();
-    int num_pairs = (num_images * (num_images - 1)) / 2;
+    const int num_images = GetNumImages();
+    const int num_pairs = (num_images * (num_images - 1)) / 2;
     int progress_idx = 0;
 
     // Clean up
@@ -319,23 +319,22 @@ void MainFrame::MatchAllAkaze()
                 continue;
             }
 
-            int num_putative = static_cast<int>(tmp_matches.size());
+            const int num_putative = static_cast<int>(tmp_matches.size());
 
             // Find and delete double matches
-            int num_pruned = PruneDoubleMatches(tmp_matches);
+            const int num_pruned = PruneDoubleMatches(tmp_matches);
 
             // Compute the fundamental matrix and remove outliers
-            int num_inliers = ComputeEpipolarGeometry(i, j, tmp_matches);
+            const int num_inliers = ComputeEpipolarGeometry(i, j, tmp_matches);
 
             // Compute transforms
             TransformInfo tinfo;
-            ImagePair pair{i, j};
             tinfo.m_inlier_ratio = ComputeHomography(i, j, tmp_matches);
 
             // Store matches and transforms
             if (num_inliers > m_options.matching_min_matches)
             {
-                TransformsEntry trans_entry{pair, tinfo};
+                TransformsEntry trans_entry{ImagePair(i, j), tinfo};
                 m_transforms.insert(trans_entry);
 
                 SetMatch(i, j);
@@ -374,8 +373,8 @@ void MainFrame::MatchAll()
     typedef Distance::ElementType ElementType;
     typedef Distance::ResultType  DistanceType;
 
-    int num_images = GetNumImages();
-    int num_pairs = (num_images * (num_images - 1)) / 2;
+    const int num_images = GetNumImages();
+    const int num_pairs = (num_images * (num_images - 1)) / 2;
     int progress_idx = 0;
 
     // Clean up
@@ -412,7 +411,7 @@ void MainFrame::MatchAll()
             m_images[j].LoadDescriptors();
 
             // Setup query data
-            const int num_descriptors = static_cast<int>(m_images[j].m_keys.size());
+            const auto num_descriptors = m_images[j].m_keys.size();
 
             std::vector<std::size_t>  indices(num_descriptors * 2);
             std::vector<DistanceType> dists(num_descriptors * 2);
@@ -439,23 +438,22 @@ void MainFrame::MatchAll()
                 }
             }
 
-            int num_putative = static_cast<int>(tmp_matches.size());
+            const auto num_putative = tmp_matches.size();
 
             // Find and delete double matches
-            int num_pruned = PruneDoubleMatches(tmp_matches);
+            const int num_pruned = PruneDoubleMatches(tmp_matches);
 
             // Compute the fundamental matrix and remove outliers
-            int num_inliers = ComputeEpipolarGeometry(i, j, tmp_matches);
+            const int num_inliers = ComputeEpipolarGeometry(i, j, tmp_matches);
 
             // Compute transforms
             TransformInfo tinfo;
-            ImagePair pair{i, j};
             tinfo.m_inlier_ratio = ComputeHomography(i, j, tmp_matches);
 
             // Store matches and transforms
             if (num_inliers > m_options.matching_min_matches)
             {
-                TransformsEntry trans_entry{pair, tinfo};
+                TransformsEntry trans_entry{ImagePair{i, j}, tinfo};
                 m_transforms.insert(trans_entry);
 
                 SetMatch(i, j);
@@ -491,11 +489,11 @@ void MainFrame::MatchAll()
     m_matches_loaded = true;
 }
 
-int MainFrame::PruneDoubleMatches(IntPairVec& matches)
+std::size_t MainFrame::PruneDoubleMatches(IntPairVec& matches)
 {
     ScopedTimer timer{m_profile_manager, "[PruneDoubleMatches]"};
 
-    int num_before = matches.size();
+    const auto num_before = matches.size();
 
     // Mark an index as duplicate if it's registered more than once
     std::unordered_set<int> duplicates;
@@ -510,11 +508,11 @@ int MainFrame::PruneDoubleMatches(IntPairVec& matches)
     return num_before - matches.size();
 }
 
-int MainFrame::ComputeEpipolarGeometry(int idx1, int idx2, IntPairVec& matches)
+std::size_t MainFrame::ComputeEpipolarGeometry(int idx1, int idx2, IntPairVec& matches)
 {
     ScopedTimer timer{m_profile_manager, "[ComputeEpipolarGeometry]"};
 
-    auto num_putative = matches.size();
+    const auto num_putative = matches.size();
     std::vector<cv::Point2f> points1, points2;
     std::vector<uchar> status;
     points1.reserve(num_putative);
@@ -531,16 +529,16 @@ int MainFrame::ComputeEpipolarGeometry(int idx1, int idx2, IntPairVec& matches)
     }
 
     // Find the fundamental matrix
-    double threshold(m_options.ransac_threshold_fundamental * std::max(m_images[idx1].GetWidth(), m_images[idx1].GetHeight()));
+    const double threshold(m_options.ransac_threshold_fundamental * std::max(m_images[idx1].GetWidth(), m_images[idx1].GetHeight()));
     cv::findFundamentalMat(cv::Mat{points1, true}, cv::Mat{points2, true}, status, cv::FM_RANSAC, threshold);
 
     // Remove outliers from ptpairs
-    auto matches_old = matches;
+    const auto matches_old = matches;
     matches.clear();
 
     for (std::size_t m = 0; m < status.size(); m++) if (status[m] == 1) matches.push_back(matches_old[m]);
 
-    return (int)matches.size();
+    return matches.size();
 }
 
 double MainFrame::ComputeHomography(int idx1, int idx2, const IntPairVec& matches)
@@ -564,7 +562,7 @@ double MainFrame::ComputeHomography(int idx1, int idx2, const IntPairVec& matche
     }
 
     // Find the homography matrix
-    double threshold(m_options.ransac_threshold_homography * std::max(m_images[idx1].GetWidth(), m_images[idx1].GetHeight()));
+    const double threshold(m_options.ransac_threshold_homography * std::max(m_images[idx1].GetWidth(), m_images[idx1].GetHeight()));
     cv::findHomography(cv::Mat{points1, true}, cv::Mat{points2, true}, status, cv::RANSAC, threshold);
 
     // Compute and return inlier ratio
@@ -575,7 +573,7 @@ void MainFrame::ComputeTracks()
 {
     ScopedTimer timer{m_profile_manager, "[ComputeTracks]"};
 
-    int num_images = GetNumImages();
+    const int num_images = GetNumImages();
 
     // Clear all marks for new images
     for (std::size_t i = 0; i < num_images; i++)
@@ -583,7 +581,7 @@ void MainFrame::ComputeTracks()
         // If this image has no neighbors, don't worry about its keys
         if (m_matches.GetNumNeighbors(i) == 0) continue;
 
-        int num_features = m_images[i].m_keys.size();
+        const auto num_features = m_images[i].m_keys.size();
         m_images[i].m_key_flags.resize(num_features);
     }
 
@@ -609,9 +607,9 @@ void MainFrame::ComputeTracks()
         // If this image has no neighbors, skip it
         if (!m_matches.GetNumNeighbors(i)) continue;
 
-        int num_features = m_images[i].m_keys.size();
+        const auto num_features = m_images[i].m_keys.size();
 
-        for (int j = 0; j < num_features; j++)
+        for (std::size_t j = 0; j < num_features; j++)
         {
             ImageKeyVector features;
             std::queue<ImageKey> features_queue;
@@ -620,7 +618,7 @@ void MainFrame::ComputeTracks()
             if (m_images[i].m_key_flags[j]) continue;   // already visited this feature
 
             // Reset flags
-            int num_touched = touched.size();
+            const auto num_touched = touched.size();
             for (std::size_t k = 0; k < num_touched; k++) img_marked[touched[k]] = false;
             touched.clear();
 
@@ -638,19 +636,19 @@ void MainFrame::ComputeTracks()
             {
                 num_rounds++;
 
-                ImageKey feature = features_queue.front();
+                const ImageKey feature = features_queue.front();
                 features_queue.pop();
 
-                int img1 = feature.first;
-                int f1 = feature.second;
+                const int img1 = feature.first;
+                const int f1   = feature.second;
                 KeypointMatch dummy;
                 dummy.first = f1;
 
                 // Check all adjacent images
-                auto& nbrs = m_matches.GetNeighbors(img1);
-                for (auto iter = nbrs.begin(); iter != nbrs.end(); ++iter)
+                const auto& nbrs = m_matches.GetNeighbors(img1);
+                for (auto iter = nbrs.cbegin(); iter != nbrs.cend(); ++iter)
                 {
-                    unsigned int k = iter->m_index;
+                    const auto k = iter->m_index;
                     if (img_marked[k]) continue;
 
                     auto& list = m_matches.GetMatchList(ImagePair(img1, k));
@@ -660,7 +658,7 @@ void MainFrame::ComputeTracks()
 
                     if (p.first == p.second) continue;  // not found
 
-                    int idx2 = (p.first)->second;
+                    const auto idx2 = (p.first)->second;
 
                     // Check if we visited this point already
                     if (m_images[k].m_key_flags[idx2]) continue;
@@ -690,7 +688,7 @@ void MainFrame::ComputeTracks()
     // Create the new consistent match lists
     m_matches.RemoveAll();
 
-    int num_pts = pt_idx;
+    const int num_pts = pt_idx;
 
     for (int i = 0; i < num_pts; i++)
     {
@@ -714,7 +712,7 @@ void MainFrame::MakeMatchListsSymmetric()
 {
     ScopedTimer timer{m_profile_manager, "[MakeMatchListsSymmetric]"};
 
-    const unsigned int num_images = GetNumImages();
+    const auto num_images = GetNumImages();
 
     std::vector<ImagePair> matches;
 
@@ -724,10 +722,10 @@ void MainFrame::MakeMatchListsSymmetric()
         {
             auto j = iter->m_index;
 
-            ImagePair idx{i, j};
-            ImagePair idx_rev{j, i};
+            const ImagePair idx{i, j};
+            const ImagePair idx_rev{j, i};
 
-            auto& list = iter->m_match_list;
+            const auto& list = iter->m_match_list;
 
             m_matches.SetMatch(idx_rev);
             m_matches.ClearMatch(idx_rev);
@@ -750,9 +748,9 @@ int MainFrame::GetNumTrackMatches(int img1, int img2)
     const auto& tracks1 = m_images[img1].m_visible_points;
     const auto& tracks2 = m_images[img2].m_visible_points;
 
-    for (auto track_idx : tracks2) m_tracks[track_idx].m_extra = 0;
-    for (auto track_idx : tracks1) m_tracks[track_idx].m_extra = 1;
-    for (auto track_idx : tracks2) num_intersections += m_tracks[track_idx].m_extra;
+    for (const auto track_idx : tracks2) m_tracks[track_idx].m_extra = 0;
+    for (const auto track_idx : tracks1) m_tracks[track_idx].m_extra = 1;
+    for (const auto track_idx : tracks2) num_intersections += m_tracks[track_idx].m_extra;
     for (auto& track : m_tracks) track.m_extra = -1;
 
     return num_intersections;

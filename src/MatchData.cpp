@@ -20,7 +20,7 @@ void MatchTable::SetMatch(ImagePair pair)
     if (Contains(pair)) return;      // Already set
 
     auto& list = m_match_lists[pair.first];
-    auto p = lower_bound(list.begin(), list.end(), MatchingImage(pair.second));
+    const auto p = lower_bound(list.begin(), list.end(), MatchingImage(pair.second));
     list.insert(p, MatchingImage(pair.second));
 }
 
@@ -40,12 +40,11 @@ void MatchTable::RemoveMatch(ImagePair pair)
 {
     if (Contains(pair))
     {
-        auto& match_list = GetMatchList(pair);
-        match_list.clear();
+        GetMatchList(pair).clear();
 
         // Remove the neighbor
         auto& list = m_match_lists[pair.first];
-        auto p = equal_range(list.begin(), list.end(), MatchingImage(pair.second));
+        const auto p = equal_range(list.begin(), list.end(), MatchingImage(pair.second));
 
         list.erase(p.first, p.second);
     }
@@ -59,7 +58,7 @@ void MatchTable::RemoveAll()
 bool MatchTable::Contains(ImagePair pair) const
 {
     const auto& list = m_match_lists[pair.first];
-    auto p = equal_range(list.begin(), list.end(), MatchingImage(pair.second));
+    const auto p = equal_range(list.begin(), list.end(), MatchingImage(pair.second));
 
     return (p.first != p.second);
 }
@@ -67,7 +66,7 @@ bool MatchTable::Contains(ImagePair pair) const
 std::size_t MatchTable::GetNumMatches(ImagePair pair) const
 {
     const auto& list = m_match_lists[pair.first];
-    auto p = equal_range(list.begin(), list.end(), MatchingImage(pair.second));
+    const auto p = equal_range(list.begin(), list.end(), MatchingImage(pair.second));
 
     if (p.first == p.second) return 0;
     return p.first->m_match_list.size();

@@ -36,31 +36,31 @@ namespace
 
 double ComputeRayAngle(Point2 p, Point2 q, const Camera& cam1, const Camera& cam2)
 {
-    Point3 p3n = cam1.GetIntrinsicMatrix().inverse() * EuclideanToHomogenous(p);
-    Point3 q3n = cam2.GetIntrinsicMatrix().inverse() * EuclideanToHomogenous(q);
+    const Point3 p3n = cam1.GetIntrinsicMatrix().inverse() * EuclideanToHomogenous(p);
+    const Point3 q3n = cam2.GetIntrinsicMatrix().inverse() * EuclideanToHomogenous(q);
 
-    Point2 pn = p3n.head<2>() / p3n.z();
-    Point2 qn = q3n.head<2>() / q3n.z();
+    const Point2 pn = p3n.head<2>() / p3n.z();
+    const Point2 qn = q3n.head<2>() / q3n.z();
 
-    Point3 p_w = cam1.m_R.transpose() * Point3{pn.x(), pn.y(), -1.0};
-    Point3 q_w = cam2.m_R.transpose() * Point3{qn.x(), qn.y(), -1.0};
+    const Point3 p_w = cam1.m_R.transpose() * Point3{pn.x(), pn.y(), -1.0};
+    const Point3 q_w = cam2.m_R.transpose() * Point3{qn.x(), qn.y(), -1.0};
 
     // Compute the angle between the rays
-    double dot = p_w.dot(q_w);
-    double mag = p_w.norm() * q_w.norm();
+    const double dot = p_w.dot(q_w);
+    const double mag = p_w.norm() * q_w.norm();
 
     return acos(util::clamp((dot / mag), (-1.0 + 1.0e-8), (1.0 - 1.0e-8)));
 }
 
 bool CheckCheirality(const Point3& p, const Camera& cam)
 {
-    Point3 pt = cam.m_R * (p - cam.m_t);
+    const Point3 pt = cam.m_R * (p - cam.m_t);
     return (pt.z() < 0.0);
 }
 
 Point2 Project(const Point3& p, const Observation& observation)
 {
-    Point3 projection = observation.m_R * p + observation.m_t;
+    const Point3 projection = observation.m_R * p + observation.m_t;
     return projection.head<2>() / projection.z();
 }
 
@@ -96,7 +96,7 @@ Point3 Triangulate(const Observations& observations, double* error, bool optimiz
         lm.parameters.xtol   = 1.0e-5;
         lm.parameters.maxfev = 200;
 
-        auto status = lm.minimize(x);
+        const auto status = lm.minimize(x);
     }
 
     if (error != nullptr)
@@ -111,7 +111,7 @@ Point3 Triangulate(const Observations& observations, double* error, bool optimiz
 
 bool FindExtrinsics(const Mat3& E, const Point2Vec& pts1, const Point2Vec& pts2, Mat3* R, Vec3* t)
 {
-    const int num_correspondences = static_cast<int>(pts1.size());
+    const auto num_correspondences = pts1.size();
 
     // Put first camera at origin
     Mat3 R0;    R0.setIdentity();
@@ -139,14 +139,10 @@ bool FindExtrinsics(const Mat3& E, const Point2Vec& pts1, const Point2Vec& pts2,
     // Figure out which configuration is correct using the supplied points
     int c1_pos = 0, c2_pos = 0, c1_neg = 0, c2_neg = 0;
 
-    for (int i = 0; i < num_correspondences; i++)
+    for (std::size_t i = 0; i < num_correspondences; i++)
     {
-        Observations observations;
-        observations.push_back(Observation{pts1[i], R0, t0});
-        observations.push_back(Observation{pts2[i], Ra, tu});
-
-        Point3 Q = Triangulate(observations);
-        Point3 PQ = (Ra * Q) + tu;
+        const Point3 Q = Triangulate(Observations{Observation{pts1[i], R0, t0}, Observation{pts2[i], Ra, tu}});
+        const Point3 PQ = (Ra * Q) + tu;
 
         if (Q.z() > 0)  c1_pos++;
         else            c1_neg++;
@@ -168,14 +164,10 @@ bool FindExtrinsics(const Mat3& E, const Point2Vec& pts1, const Point2Vec& pts2,
         // Triangulate again
         c1_pos = c1_neg = c2_pos = c2_neg = 0;
 
-        for (int i = 0; i < num_correspondences; i++)
+        for (std::size_t i = 0; i < num_correspondences; i++)
         {
-            Observations observations;
-            observations.push_back(Observation{pts1[i], R0, t0});
-            observations.push_back(Observation{pts2[i], Rb, tu});
-
-            Point3 Q = Triangulate(observations);
-            Point3 PQ = (Rb * Q) + tu;
+            const Point3 Q = Triangulate(Observations{Observation{pts1[i], R0, t0}, Observation{pts2[i], Rb, tu}});
+            const Point3 PQ = (Rb * Q) + tu;
 
             if (Q.z() > 0)  c1_pos++;
             else            c1_neg++;
