@@ -329,17 +329,17 @@ void MainFrame::MatchAllAkaze()
 
             // Compute transforms
             TransformInfo tinfo;
-            MatchIndex midx{i, j};
+            ImagePair pair{i, j};
             tinfo.m_inlier_ratio = ComputeHomography(i, j, tmp_matches);
 
             // Store matches and transforms
             if (num_inliers > m_options.matching_min_matches)
             {
-                TransformsEntry trans_entry{midx, tinfo};
+                TransformsEntry trans_entry{pair, tinfo};
                 m_transforms.insert(trans_entry);
 
                 SetMatch(i, j);
-                auto& matches = m_matches.GetMatchList(MatchIndex(i, j));
+                auto& matches = m_matches.GetMatchList(ImagePair(i, j));
 
                 matches.clear();
                 matches.reserve(num_inliers);
@@ -449,17 +449,17 @@ void MainFrame::MatchAll()
 
             // Compute transforms
             TransformInfo tinfo;
-            MatchIndex midx{i, j};
+            ImagePair pair{i, j};
             tinfo.m_inlier_ratio = ComputeHomography(i, j, tmp_matches);
 
             // Store matches and transforms
             if (num_inliers > m_options.matching_min_matches)
             {
-                TransformsEntry trans_entry{midx, tinfo};
+                TransformsEntry trans_entry{pair, tinfo};
                 m_transforms.insert(trans_entry);
 
                 SetMatch(i, j);
-                auto& matches = m_matches.GetMatchList(MatchIndex(i, j));
+                auto& matches = m_matches.GetMatchList(ImagePair(i, j));
 
                 matches.clear();
                 matches.reserve(num_inliers);
@@ -592,7 +592,7 @@ void MainFrame::ComputeTracks()
     // Sort all match lists
     for (std::size_t i = 0; i < num_images; i++)
     {
-        std::for_each(m_matches.begin(i), m_matches.end(i), [&](AdjListElem val)
+        std::for_each(m_matches.begin(i), m_matches.end(i), [&](MatchingImage val)
         {
             auto& list = val.m_match_list;
             std::sort(list.begin(), list.end(), [](KeypointMatch k1, KeypointMatch k2) { return k1.first < k2.first; });
@@ -653,7 +653,7 @@ void MainFrame::ComputeTracks()
                     unsigned int k = iter->m_index;
                     if (img_marked[k]) continue;
 
-                    auto& list = m_matches.GetMatchList(MatchIndex(img1, k));
+                    auto& list = m_matches.GetMatchList(ImagePair(img1, k));
 
                     // Do a binary search for the feature
                     auto p = std::equal_range(list.begin(), list.end(), dummy, [](KeypointMatch k1, KeypointMatch k2) { return k1.first < k2.first; });
@@ -716,7 +716,7 @@ void MainFrame::MakeMatchListsSymmetric()
 
     const unsigned int num_images = GetNumImages();
 
-    std::vector<MatchIndex> matches;
+    std::vector<ImagePair> matches;
 
     for (std::size_t i = 0; i < num_images; i++)
     {
@@ -724,8 +724,8 @@ void MainFrame::MakeMatchListsSymmetric()
         {
             auto j = iter->m_index;
 
-            MatchIndex idx{i, j};
-            MatchIndex idx_rev{j, i};
+            ImagePair idx{i, j};
+            ImagePair idx_rev{j, i};
 
             auto& list = iter->m_match_list;
 
@@ -762,14 +762,14 @@ double MainFrame::GetInlierRatio(int idx1, int idx2)
 {
     double inlier_ratio = 0.0;
 
-    auto match = m_transforms.find(MatchIndex{idx1, idx2});
+    auto match = m_transforms.find(ImagePair{idx1, idx2});
 
     if (match != m_transforms.end())
     {
         inlier_ratio = match->second.m_inlier_ratio;
     } else
     {
-        match = m_transforms.find(MatchIndex{idx2, idx1});
+        match = m_transforms.find(ImagePair{idx2, idx1});
         if (match != m_transforms.end())
         {
             inlier_ratio = match->second.m_inlier_ratio;

@@ -223,23 +223,21 @@ void MainFrame::SetupInitialCameraPair(CamVec& cameras, const IntVec& added_orde
     Mat3 K1_inv = cameras[0].GetIntrinsicMatrix().inverse();
     Mat3 K2_inv = cameras[1].GetIntrinsicMatrix().inverse();
 
-    auto& list = m_matches.GetMatchList(MatchIndex(img_1, img_2));
-    int num_matches = list.size();
+    const auto& list = m_matches.GetMatchList(ImagePair(img_1, img_2));
 
-    for (int i = 0; i < num_matches; i++)
+    for (const auto& match : list)
     {
         // Set up the 3D point
-        int key_idx1(list[i].first);
-        int key_idx2(list[i].second);
+        int key_idx1(match.first);
+        int key_idx2(match.second);
 
         // Normalize the point
         Point3 p_norm1 = K1_inv * Point3{m_images[img_1].m_keys[key_idx1].m_coords.x(), m_images[img_1].m_keys[key_idx1].m_coords.y(), -1.0};
         Point3 p_norm2 = K2_inv * Point3{m_images[img_2].m_keys[key_idx2].m_coords.x(), m_images[img_2].m_keys[key_idx2].m_coords.y(), -1.0};
 
         // Put the translation in standard form
-        Observations observations;
-        observations.push_back(Observation{Point2{p_norm1.head<2>() / p_norm1.z()}, cameras[0]});
-        observations.push_back(Observation{Point2{p_norm2.head<2>() / p_norm2.z()}, cameras[1]});
+        Observations observations{Observation{Point2{p_norm1.head<2>() / p_norm1.z()}, cameras[0]},
+                                  Observation{Point2{p_norm2.head<2>() / p_norm2.z()}, cameras[1]}};
 
         double error;
         auto position = Triangulate(observations, &error);
@@ -256,9 +254,7 @@ void MainFrame::SetupInitialCameraPair(CamVec& cameras, const IntVec& added_orde
         int track_idx = GetKey(img_1, key_idx1).m_track;
         m_tracks[track_idx].m_extra = points.size();
 
-        ImageKeyVector views;
-        views.push_back(ImageKey{0, key_idx1});
-        views.push_back(ImageKey{1, key_idx2});
+        ImageKeyVector views{ImageKey{0, key_idx1}, ImageKey{1, key_idx2}};
 
         points.push_back(PointData{position, key.m_color, views});
     }
@@ -270,7 +266,7 @@ bool MainFrame::EstimateRelativePose(int i1, int i2, Camera* camera1, Camera* ca
 {
     ScopedTimer timer{m_profile_manager, "[EstimateRelativePose]"};
 
-    auto &matches = m_matches.GetMatchList(MatchIndex(i1, i2));
+    auto &matches = m_matches.GetMatchList(ImagePair(i1, i2));
 
     Point2Vec projections1; projections1.reserve(matches.size());
     Point2Vec projections2; projections2.reserve(matches.size());
@@ -298,7 +294,7 @@ bool MainFrame::EstimateRelativePose(int i1, int i2, Camera* camera1, Camera* ca
 
 void MainFrame::SetMatchesFromTracks(int img1, int img2)
 {
-    auto& matches = m_matches.GetMatchList(MatchIndex(img1, img2));
+    auto& matches = m_matches.GetMatchList(ImagePair(img1, img2));
     auto& tracks1 = m_images[img1].m_visible_points;
     auto& tracks2 = m_images[img2].m_visible_points;
 
@@ -344,7 +340,7 @@ void MainFrame::SetMatchesFromPoints()
                 ImageKey view2 = point.m_views[k];
 
                 SetMatch(view1.first, view2.first);
-                m_matches.AddMatch(MatchIndex{view1.first, view2.first}, KeypointMatch{view1.second, view2.second});
+                m_matches.AddMatch(ImagePair{view1.first, view2.first}, KeypointMatch{view1.second, view2.second});
             }
         }
     }
@@ -897,7 +893,7 @@ void MainFrame::BundleAdjust(CamVec& cameras, const IntVec& added_order, PointVe
 
         wxLogMessage("[BundleAdjust] Removed %d outliers", num_outliers);
 
-        RemoveBadPointsAndCameras(cameras, added_order, points);
+        //RemoveBadPointsAndCameras(cameras, added_order, points);
 
         for (std::size_t i = 0; i < num_pts; i++) if (remap[i] != -1) points[i].m_pos = nz_pts[remap[i]];
 
@@ -942,9 +938,7 @@ void MainFrame::AddNewPoints(const CamVec& cameras, const IntVec& added_order, P
                 // We haven't yet seen this track, create a new track
                 tracks_seen[track_idx] = (int)new_tracks.size();
 
-                ImageKeyVector track;
-                track.push_back(ImageKey{i, j});
-                new_tracks.push_back(track);
+                new_tracks.push_back(ImageKeyVector{ImageKey{i, j}});
                 track_idxs.push_back(track_idx);
             } else
             {
@@ -1087,7 +1081,7 @@ int MainFrame::RemoveBadPointsAndCameras(const CamVec& cameras, const IntVec& ad
 
             for (std::size_t k = j + 1; k < point.m_views.size(); k++)
             {
-                int v2(point.m_views[k].first);
+                int v2{point.m_views[k].first};
 
                 Point3 re2 = point.m_pos - cameras[v2].m_t;
                 re2 /= re2.norm();

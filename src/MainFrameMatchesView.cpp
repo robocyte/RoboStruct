@@ -55,7 +55,7 @@ void MainFrame::GenerateMatchImage()
         kpts2.push_back(cv::KeyPoint{x, y, 1.0f});
     }
 
-    const auto& list = m_matches.GetMatchList(MatchIndex(left_idx, right_idx));
+    const auto& list = m_matches.GetMatchList(ImagePair(left_idx, right_idx));
 
     matches.reserve(list.size());
     for (const auto& match : list) matches.push_back(cv::DMatch(match.first, match.second, 0.0f));

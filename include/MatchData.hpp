@@ -1,14 +1,15 @@
 #pragma once
 
+#include <numeric>
 #include <vector>
 
 typedef std::pair<std::size_t, std::size_t>	KeypointMatch;
-typedef std::pair<std::size_t, std::size_t>	MatchIndex;
+typedef std::pair<std::size_t, std::size_t>	ImagePair;
 
-struct AdjListElem
+struct MatchingImage
 {
-    AdjListElem() = default;
-    AdjListElem(std::size_t index)
+    MatchingImage() = default;
+    MatchingImage(std::size_t index)
         : m_index(index)
     {}
 
@@ -16,9 +17,9 @@ struct AdjListElem
     std::vector<KeypointMatch> m_match_list;
 };
 
-bool operator < (const AdjListElem& lhs, const AdjListElem& rhs);
+typedef std::vector<MatchingImage> NeighborList;
 
-typedef std::vector<AdjListElem> MatchAdjList;
+bool operator < (const MatchingImage& lhs, const MatchingImage& rhs);
 
 
 
@@ -29,21 +30,21 @@ public:
     MatchTable() = default;
     MatchTable(std::size_t num_images);
 
-    void SetMatch(MatchIndex idx);
-    void AddMatch(MatchIndex idx, KeypointMatch m);
-    void ClearMatch(MatchIndex idx);
-    void RemoveMatch(MatchIndex idx);
+    void SetMatch(ImagePair pair);
+    void AddMatch(ImagePair pair, KeypointMatch match);
+    void ClearMatch(ImagePair pair);
+    void RemoveMatch(ImagePair pair);
     void RemoveAll();
-    bool Contains(MatchIndex idx) const;
+    bool Contains(ImagePair pair) const;
 
-    std::size_t                 GetNumMatches(MatchIndex idx);
-    std::size_t                 GetNumNeighbors(std::size_t i);
-    MatchAdjList&               GetNeighbors(std::size_t i);
-    std::vector<KeypointMatch>& GetMatchList(MatchIndex idx);
+    std::size_t                 GetNumMatches(ImagePair pair) const;
+    std::size_t                 GetNumNeighbors(std::size_t i) const;
+    NeighborList&               GetNeighbors(std::size_t i);
+    std::vector<KeypointMatch>& GetMatchList(ImagePair pair);
 
-    MatchAdjList::iterator      begin(std::size_t i);
-    MatchAdjList::iterator      end(std::size_t i);
+    NeighborList::iterator      begin(std::size_t i);
+    NeighborList::iterator      end(std::size_t i);
 
 private:
-    std::vector<MatchAdjList>   m_match_lists;
+    std::vector<NeighborList>   m_match_lists;
 };
