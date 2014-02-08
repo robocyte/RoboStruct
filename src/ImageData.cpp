@@ -169,7 +169,8 @@ void ImageData::LoadDescriptors()
 
 void ImageData::ClearDescriptors()
 {
-    std::vector<float>{}.swap(m_descriptors);   // STL swap trick
+    m_descriptors.clear();
+    m_descriptors.shrink_to_fit();
 }
 
 void ImageData::SetTracks()

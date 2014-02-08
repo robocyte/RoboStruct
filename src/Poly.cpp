@@ -126,39 +126,25 @@ Poly3 Poly3Mult21(Poly3 a, Poly3 b)
     Poly3 r;
 
     r.v[coef_1]   = a.v[coef_1]  * b.v[coef_1];
-    r.v[coef_x]   = a.v[coef_x]  * b.v[coef_1] + a.v[coef_1] * b.v[coef_x];
-    r.v[coef_y]   = a.v[coef_y]  * b.v[coef_1] + a.v[coef_1] * b.v[coef_y];
-    r.v[coef_z]   = a.v[coef_z]  * b.v[coef_1] + a.v[coef_1] * b.v[coef_z];
+    r.v[coef_x]   = a.v[coef_x]  * b.v[coef_1] + a.v[coef_1]  * b.v[coef_x];
+    r.v[coef_y]   = a.v[coef_y]  * b.v[coef_1] + a.v[coef_1]  * b.v[coef_y];
+    r.v[coef_z]   = a.v[coef_z]  * b.v[coef_1] + a.v[coef_1]  * b.v[coef_z];
 
-    r.v[coef_xy]  = a.v[coef_xy] * b.v[coef_1] + a.v[coef_x] * b.v[coef_y] + a.v[coef_y] * b.v[coef_x];
-    r.v[coef_xz]  = a.v[coef_xz] * b.v[coef_1] + a.v[coef_x] * b.v[coef_z] + a.v[coef_z] * b.v[coef_x];
-    r.v[coef_yz]  = a.v[coef_yz] * b.v[coef_1] + a.v[coef_y] * b.v[coef_z] + a.v[coef_z] * b.v[coef_y];
+    r.v[coef_xy]  = a.v[coef_xy] * b.v[coef_1] + a.v[coef_x]  * b.v[coef_y] + a.v[coef_y]  * b.v[coef_x];
+    r.v[coef_xz]  = a.v[coef_xz] * b.v[coef_1] + a.v[coef_x]  * b.v[coef_z] + a.v[coef_z]  * b.v[coef_x];
+    r.v[coef_yz]  = a.v[coef_yz] * b.v[coef_1] + a.v[coef_y]  * b.v[coef_z] + a.v[coef_z]  * b.v[coef_y];
 
-    r.v[coef_xx]  = a.v[coef_xx] * b.v[coef_1] + a.v[coef_x] * b.v[coef_x];
-    r.v[coef_yy]  = a.v[coef_yy] * b.v[coef_1] + a.v[coef_y] * b.v[coef_y];
-    r.v[coef_zz]  = a.v[coef_zz] * b.v[coef_1] + a.v[coef_z] * b.v[coef_z];
+    r.v[coef_xx]  = a.v[coef_xx] * b.v[coef_1] + a.v[coef_x]  * b.v[coef_x];
+    r.v[coef_yy]  = a.v[coef_yy] * b.v[coef_1] + a.v[coef_y]  * b.v[coef_y];
+    r.v[coef_zz]  = a.v[coef_zz] * b.v[coef_1] + a.v[coef_z]  * b.v[coef_z];
 
-    r.v[coef_xxy] = a.v[coef_xx] * b.v[coef_y] +
-                    a.v[coef_xy] * b.v[coef_x];
-
-    r.v[coef_xxz] = a.v[coef_xx] * b.v[coef_z] +
-                    a.v[coef_xz] * b.v[coef_x];
-
-    r.v[coef_xyy] = a.v[coef_yy] * b.v[coef_x] +
-                    a.v[coef_xy] * b.v[coef_y];
-
-    r.v[coef_yyz] = a.v[coef_yy] * b.v[coef_z] +
-                    a.v[coef_yz] * b.v[coef_y];
-
-    r.v[coef_xzz] = a.v[coef_zz] * b.v[coef_x] +
-                    a.v[coef_xz] * b.v[coef_z];
-
-    r.v[coef_yzz] = a.v[coef_zz] * b.v[coef_y] +
-                    a.v[coef_yz] * b.v[coef_z];
-
-    r.v[coef_xyz] = a.v[coef_xy] * b.v[coef_z] +
-                    a.v[coef_xz] * b.v[coef_y] +
-                    a.v[coef_yz] * b.v[coef_x];
+    r.v[coef_xxy] = a.v[coef_xx] * b.v[coef_y] + a.v[coef_xy] * b.v[coef_x];
+    r.v[coef_xxz] = a.v[coef_xx] * b.v[coef_z] + a.v[coef_xz] * b.v[coef_x];
+    r.v[coef_xyy] = a.v[coef_yy] * b.v[coef_x] + a.v[coef_xy] * b.v[coef_y];
+    r.v[coef_yyz] = a.v[coef_yy] * b.v[coef_z] + a.v[coef_yz] * b.v[coef_y];
+    r.v[coef_xzz] = a.v[coef_zz] * b.v[coef_x] + a.v[coef_xz] * b.v[coef_z];
+    r.v[coef_yzz] = a.v[coef_zz] * b.v[coef_y] + a.v[coef_yz] * b.v[coef_z];
+    r.v[coef_xyz] = a.v[coef_xy] * b.v[coef_z] + a.v[coef_xz] * b.v[coef_y] + a.v[coef_yz] * b.v[coef_x];
 
     r.v[coef_xxx] = a.v[coef_xx] * b.v[coef_x];
     r.v[coef_yyy] = a.v[coef_yy] * b.v[coef_y];

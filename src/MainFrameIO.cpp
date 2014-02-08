@@ -52,7 +52,7 @@ void MainFrame::AddCamDBFileEntry()
 
 void MainFrame::SaveMatchFile()
 {
-    auto filename = m_path + R"(\Matches.txt)";
+    const auto filename = m_path + R"(\Matches.txt)";
     std::ofstream match_file{filename};
 
     if (!match_file)
@@ -67,7 +67,7 @@ void MainFrame::SaveMatchFile()
 
 void MainFrame::SaveTrackFile()
 {
-    auto filename = m_path + R"(\Tracks.txt)";
+    const auto filename = m_path + R"(\Tracks.txt)";
     std::ofstream track_file{filename};
 
     if (!track_file)
@@ -121,7 +121,7 @@ void MainFrame::SaveProjectionMatrix(const std::string& path, int img_idx)
         Rigid << R;
         Rigid.col(3) = -(R * t);
 
-        Mat34 P = -(K * Rigid);
+        const Mat34 P = -(K * Rigid);
 
         txt_file << "CONTOUR" << std::endl
                  << P(0, 0) << " " << P(0, 1) << " " << P(0, 2) << " " << P(0, 3) << std::endl
@@ -164,10 +164,10 @@ void MainFrame::SaveUndistortedImage(const std::string& path, int img_idx)
 
 void MainFrame::ExportToCMVS(const std::string& path)
 {
-    std::string pmvs_dir{  path + R"(\cmvs)"};
-    std::string image_dir{ path + R"(\cmvs\visualize)"};
-    std::string txt_dir{   path + R"(\cmvs\txt)"};
-    std::string models_dir{path + R"(\cmvs\models)"};
+    const std::string pmvs_dir{  path + R"(\cmvs)"};
+    const std::string image_dir{ path + R"(\cmvs\visualize)"};
+    const std::string txt_dir{   path + R"(\cmvs\txt)"};
+    const std::string models_dir{path + R"(\cmvs\models)"};
 
     // Create directory structure
     if (!wxDirExists(pmvs_dir))
@@ -191,7 +191,7 @@ void MainFrame::ExportToCMVS(const std::string& path)
 
 void MainFrame::SaveBundleFile(const std::string& path)
 {
-    auto filename = path + R"(\bundle.rd.out)";
+    const auto filename = path + R"(\bundle.rd.out)";
     std::ofstream bundle_file{filename};
 
     bundle_file << "# Bundle file v0.3" << std::endl;
@@ -203,12 +203,10 @@ void MainFrame::SaveBundleFile(const std::string& path)
     {
         wxLogMessage("Writing geometry and cameras to %s...", filename.c_str());
 
-        int num_visible_points{0};
-        int num_images = std::count_if(m_images.begin(), m_images.end(), [](const ImageData& img) { return img.m_camera.m_adjusted; });
+        const int num_images = std::count_if(m_images.begin(), m_images.end(), [](const ImageData& img) { return img.m_camera.m_adjusted; });
+        const int num_points = std::count_if(m_points.begin(), m_points.end(), [](const PointData& point) { return !point.m_views.empty(); });
 
-        for (const auto& point : m_points) if (point.m_views.size() > 0) num_visible_points++;
-
-        bundle_file << num_images << " " << num_visible_points << std::endl;
+        bundle_file << num_images << " " << num_points << std::endl;
 
         // Write cameras
         for (const auto& image : m_images)
@@ -232,7 +230,7 @@ void MainFrame::SaveBundleFile(const std::string& path)
         // Write points
         for (const auto& point : m_points)
         {
-            if (point.m_views.size() > 0)
+            if (!point.m_views.empty())
             {
                 bundle_file << point.m_pos[0] << " "
                             << point.m_pos[1] << " "
@@ -262,7 +260,7 @@ void MainFrame::SaveBundleFile(const std::string& path)
 
 void MainFrame::SavePlyFile()
 {
-    auto filename = m_path + R"(\Result.ply)";
+    const auto filename = m_path + R"(\Result.ply)";
     std::ofstream ply_file{filename};
 
     if (!ply_file)
@@ -272,8 +270,8 @@ void MainFrame::SavePlyFile()
     {
         wxLogMessage("Writing points and cameras to %s...", filename.c_str());
 
-        int num_cameras = std::count_if(m_images.begin(), m_images.end(), [](const ImageData& img) { return img.m_camera.m_adjusted; });
-        int num_points = (int)m_points.size();
+        const int num_cameras = std::count_if(m_images.begin(), m_images.end(), [](const ImageData& img) { return img.m_camera.m_adjusted; });
+        const auto num_points = m_points.size();
 
         // Output the header
         ply_file << "ply" << std::endl
@@ -323,7 +321,7 @@ void MainFrame::SaveMeshLabFile()
     // Export to CMVS first to get undistorted images
     ExportToCMVS(m_path);
 
-    auto filename = m_path + R"(\Result.mlp)";
+    const auto filename = m_path + R"(\Result.mlp)";
     std::ofstream mlp_file{filename};
 
     if (!mlp_file)
@@ -383,7 +381,7 @@ void MainFrame::SaveMayaFile()
     // Export to CMVS first to get undistorted images
     ExportToCMVS(m_path);
 
-    auto filename = m_path + R"(\Result.ma)";
+    const auto filename = m_path + R"(\Result.ma)";
     std::ofstream maya_file{filename};
 
     if (!maya_file)
@@ -394,8 +392,7 @@ void MainFrame::SaveMayaFile()
     {
         wxLogMessage("Writing points and cameras to %s...", filename.c_str());
 
-        int num_points = (int)m_points.size();
-        int num_cameras = std::count_if(m_images.begin(), m_images.end(), [](const ImageData &img) { return img.m_camera.m_adjusted; });
+        const auto num_points = m_points.size();
 
         // Write header
         maya_file << R"(//Maya ASCII 2008 scene)" << std::endl
@@ -405,7 +402,7 @@ void MainFrame::SaveMayaFile()
                   << R"(currentUnit -l centimeter -a degree -t film;)" << std::endl;
 
         // Write cameras
-        for (int i = 0; i < m_images.size(); i++)
+        for (std::size_t i = 0; i < m_images.size(); i++)
         {
             if (!m_images[i].m_camera.m_adjusted) continue;
 
