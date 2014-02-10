@@ -133,15 +133,15 @@ void MainFrame::RunSFM()
 
 void MainFrame::PickInitialCameraPair(CamVec& cameras, IntVec& added_order)
 {
-    const int     num_images      = GetNumImages();
-    const int     min_matches     = 80;
-    const double  min_score       = 0.1;
-    const double  score_threshold = 2.0;
-    const int     match_threshold = 32;
+    const int    num_images      = GetNumImages();
+    const int    min_matches     = 80;
+    const double min_score       = 0.1;
+    const double score_threshold = 2.0;
+    const int    match_threshold = 32;
 
-    int     max_matches     = 0;
-    double  max_score       = 0.0;
-    double  max_score_2     = 0.0;
+    int          max_matches     = 0;
+    double       max_score       = 0.0;
+    double       max_score_2     = 0.0;
 
     int     i_best   = -1, j_best   = -1;
     int     i_best_2 = -1, j_best_2 = -1;
@@ -221,20 +221,15 @@ void MainFrame::SetupInitialCameraPair(CamVec& cameras, const IntVec& added_orde
     // Triangulate the initial 3D points
     wxLogMessage("[SetupInitialCameraPair] Triangulating initial matches...");
 
-    Mat3 K1_inv = cameras[0].GetIntrinsicMatrix().inverse();
-    Mat3 K2_inv = cameras[1].GetIntrinsicMatrix().inverse();
+    const Mat3 K1_inv = cameras[0].GetIntrinsicMatrix().inverse();
+    const Mat3 K2_inv = cameras[1].GetIntrinsicMatrix().inverse();
 
-    const auto& list = m_matches.GetMatchList(ImagePair(img_1, img_2));
-
-    for (const auto& match : list)
+    const auto& matches = m_matches.GetMatchList(ImagePair(img_1, img_2));
+    for (const auto& match : matches)
     {
-        // Set up the 3D point
-        const int key_idx1(match.first);
-        const int key_idx2(match.second);
-
         // Normalize the point
-        Point3 p_norm1 = K1_inv * Point3{m_images[img_1].m_keys[key_idx1].m_coords.x(), m_images[img_1].m_keys[key_idx1].m_coords.y(), -1.0};
-        Point3 p_norm2 = K2_inv * Point3{m_images[img_2].m_keys[key_idx2].m_coords.x(), m_images[img_2].m_keys[key_idx2].m_coords.y(), -1.0};
+        Point3 p_norm1 = K1_inv * Point3{m_images[img_1].m_keys[match.first].m_coords.x(),  m_images[img_1].m_keys[match.first].m_coords.y(),  -1.0};
+        Point3 p_norm2 = K2_inv * Point3{m_images[img_2].m_keys[match.second].m_coords.x(), m_images[img_2].m_keys[match.second].m_coords.y(), -1.0};
 
         // Put the translation in standard form
         Observations observations{Observation{Point2{p_norm1.head<2>() / p_norm1.z()}, cameras[0]},
@@ -247,15 +242,12 @@ void MainFrame::SetupInitialCameraPair(CamVec& cameras, const IntVec& added_orde
 
         if (error > m_options.projection_estimation_threshold) continue;
 
-        auto& key = GetKey(img_1, key_idx1);
+        auto& key1 = GetKey(img_1, match.first);
+        auto& key2 = GetKey(img_2, match.second);
 
-        GetKey(img_1, key_idx1).m_extra = points.size();
-        GetKey(img_2, key_idx2).m_extra = points.size();
+        key1.m_extra = key2.m_extra = m_tracks[key1.m_track].m_extra = points.size();
 
-        const int track_idx = GetKey(img_1, key_idx1).m_track;
-        m_tracks[track_idx].m_extra = points.size();
-
-        points.push_back(PointData{position, key.m_color, ImageKeyVector{ImageKey{0, key_idx1}, ImageKey{1, key_idx2}}});
+        points.push_back(PointData{position, key1.m_color, ImageKeyVector{ImageKey{0, match.first}, ImageKey{1, match.second}}});
     }
 
     UpdateGeometryDisplay(cameras, added_order, points);
@@ -544,9 +536,9 @@ bool MainFrame::FindAndVerifyCamera(const Point3Vec& points, const Point2Vec& pr
     int num_behind = 0;
     for (int j = 0; j < points.size(); j++)
     {
-        Point3 q = *K * (Rigid * EuclideanToHomogenous(points[j]));
-        Point2 projection = -q.head<2>() / q.z();
-        const double error = (projection - projections[j]).norm();
+        const Point3 q          = *K * (Rigid * EuclideanToHomogenous(points[j]));
+        const Point2 projection = -q.head<2>() / q.z();
+        const double error      = (projection - projections[j]).norm();
 
         if (error < m_options.projection_estimation_threshold) inliers.push_back(j);
         if (error < (16.0 * m_options.projection_estimation_threshold))
@@ -655,8 +647,6 @@ void MainFrame::BundleAdjust(CamVec& cameras, const IntVec& added_order, PointVe
         ScopedTimer timer{m_profile_manager, "[BundleAdjust]"};
 
         // Set up the projections
-        int num_projections = 0;
-        for (const auto& point : points) num_projections += point.m_views.size();
         std::vector<double>         projections;
         IntVec                      pidx;
         IntVec                      cidx;
@@ -683,7 +673,7 @@ void MainFrame::BundleAdjust(CamVec& cameras, const IntVec& added_order, PointVe
                 nz_count++;
             }
         }
-        
+
         ceres::Problem problem;
         ceres::Solver::Options options;
         ceres::Solver::Summary summary;
@@ -739,6 +729,7 @@ void MainFrame::BundleAdjust(CamVec& cameras, const IntVec& added_order, PointVe
             }
         }
 
+        const int num_projections = projections.size() / 2;
         for (int i = 0; i < num_projections; ++i)
         {
             // Each Residual block takes a point and a camera as input and outputs a 2 dimensional residual
@@ -914,31 +905,28 @@ void MainFrame::AddNewPoints(const CamVec& cameras, const IntVec& added_order, P
     // Gather up the projections of all the new tracks
     for (int i = 0; i < cameras.size(); i++)
     {
-        int image_idx1 = added_order[i];
-        int num_keys = GetNumKeys(image_idx1);
+        const int num_keys = GetNumKeys(added_order[i]);
 
         for (int j = 0; j < num_keys; j++)
         {
-            KeyPoint& key = GetKey(image_idx1, j);
+            const KeyPoint& key = GetKey(added_order[i], j);
 
             if (key.m_track == -1) continue;    // Key belongs to no track
             if (key.m_extra != -1) continue;    // Key is outlier or has already been added
 
-            const int track_idx(key.m_track);
-
             // Check if this track is already associated with a point
-            if (m_tracks[track_idx].m_extra != -1) continue;
+            if (m_tracks[key.m_track].m_extra != -1) continue;
 
             // Check if we've seen this track
-            const int seen(tracks_seen[track_idx]);
+            const int seen(tracks_seen[key.m_track]);
 
             if (seen == -1)
             {
                 // We haven't yet seen this track, create a new track
-                tracks_seen[track_idx] = (int)new_tracks.size();
+                tracks_seen[key.m_track] = (int)new_tracks.size();
 
                 new_tracks.push_back(ImageKeyVector{ImageKey{i, j}});
-                track_idxs.push_back(track_idx);
+                track_idxs.push_back(key.m_track);
             } else
             {
                 new_tracks[seen].push_back(ImageKey{i, j});
@@ -995,10 +983,8 @@ void MainFrame::AddNewPoints(const CamVec& cameras, const IntVec& added_order, P
         Observations observations;
         for (auto& track : new_tracks[i])
         {
-            const auto cam = cameras[track.first];
-
-            const int image_idx = added_order[track.first];
-            const auto& key     = GetKey(image_idx, track.second);
+            const auto cam  = cameras[track.first];
+            const auto& key = GetKey(added_order[track.first], track.second);
 
             const Point3 pn = cam.GetIntrinsicMatrix().inverse() * EuclideanToHomogenous(key.m_coords);
             const Point2 pu = UndistortNormalizedPoint(-pn.head<2>(), cam.m_k_inv);
@@ -1011,8 +997,7 @@ void MainFrame::AddNewPoints(const CamVec& cameras, const IntVec& added_order, P
         double error = 0.0;
         for (const auto& track : new_tracks[i])
         {
-            const int image_idx = added_order[track.first];
-            const auto& key = GetKey(image_idx, track.second);
+            const auto& key = GetKey(added_order[track.first], track.second);
 
             const Point2 projection = cameras[track.first].Project(point);
             error += (projection - key.m_coords).squaredNorm();
@@ -1073,16 +1058,12 @@ int MainFrame::RemoveBadPointsAndCameras(const CamVec& cameras, const IntVec& ad
         double max_angle = 0.0;
         for (std::size_t j = 0; j < point.m_views.size(); j++)
         {
-            const int v1{point.m_views[j].first};
-
-            Point3 re1 = point.m_pos - cameras[v1].m_t;
+            Point3 re1 = point.m_pos - cameras[point.m_views[j].first].m_t;
             re1 /= re1.norm();
 
             for (std::size_t k = j + 1; k < point.m_views.size(); k++)
             {
-                const int v2{point.m_views[k].first};
-
-                Point3 re2 = point.m_pos - cameras[v2].m_t;
+                Point3 re2 = point.m_pos - cameras[point.m_views[k].first].m_t;
                 re2 /= re2.norm();
 
                 const double angle = acos(util::clamp(re1.dot(re2), (-1.0 + 1.0e-8), (1.0 - 1.0e-8)));
@@ -1111,7 +1092,7 @@ void MainFrame::RadiusOutlierRemoval(double threshold, const IntVec& added_order
 {
     ScopedTimer timer{m_profile_manager, "[RadiusOutlierRemoval]"};
 
-    std::vector<int> outliers;
+    IntVec outliers;
 
     std::vector<float> coords;
     for (const auto& point : points)
@@ -1142,7 +1123,7 @@ void MainFrame::RadiusOutlierRemoval(double threshold, const IntVec& added_order
                     2, params);
 
     std::vector<float> d;
-    for (std::size_t i = 0; i < num_points; ++i) d.push_back(dists[2 * i + 1]);
+    for (std::size_t i = 1; i < num_points * 2; i += 2) d.push_back(dists[i]);
     const double thresh = util::GetNthElement(util::iround(threshold * d.size()), d);
     for (std::size_t i = 0; i < num_points; ++i) if (d[i] > thresh) outliers.push_back(i);
 
