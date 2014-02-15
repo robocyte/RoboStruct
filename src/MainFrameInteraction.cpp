@@ -41,8 +41,6 @@ void MainFrame::OnClose(wxCloseEvent& event)
 {
     m_turntable_timer->Stop();
     m_reset_viewport_timer->Stop();
-
-    this->Destroy();
 }
 
 void MainFrame::OnViewWindows(wxCommandEvent& event)
