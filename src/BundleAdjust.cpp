@@ -65,9 +65,9 @@ void MainFrame::UpdateGeometryDisplay(const CamVec& cameras, const IntVec& added
         if (point.m_views.empty()) continue; // Invisible
 
         ImageKeyVector views;
-        for (const auto& view : point.m_views) views.push_back(ImageKey{added_order[view.first], view.second});
+        for (const auto& view : point.m_views) views.emplace_back(added_order[view.first], view.second);
 
-        m_points.push_back(PointData{point.m_pos, point.m_color, views});
+        m_points.emplace_back(point.m_pos, point.m_color, views);
     }
 
     for (std::size_t i = 0; i < cameras.size(); i++) m_images[added_order[i]].m_camera = cameras[i];
@@ -197,8 +197,8 @@ void MainFrame::PickInitialCameraPair(CamVec& cameras, IntVec& added_order)
 
     added_order.push_back(i_best);
     added_order.push_back(j_best);
-    cameras.push_back(Camera{});
-    cameras.push_back(Camera{});
+    cameras.emplace_back();
+    cameras.emplace_back();
 }
 
 void MainFrame::SetupInitialCameraPair(CamVec& cameras, const IntVec& added_order, PointVec& points)
@@ -247,7 +247,7 @@ void MainFrame::SetupInitialCameraPair(CamVec& cameras, const IntVec& added_orde
 
         key1.m_extra = key2.m_extra = m_tracks[key1.m_track].m_extra = points.size();
 
-        points.push_back(PointData{position, key1.m_color, ImageKeyVector{ImageKey{0, match.first}, ImageKey{1, match.second}}});
+        points.emplace_back(position, key1.m_color, ImageKeyVector{ImageKey{0, match.first}, ImageKey{1, match.second}});
     }
 
     UpdateGeometryDisplay(cameras, added_order, points);
@@ -308,7 +308,7 @@ void MainFrame::SetMatchesFromTracks(int img1, int img2)
         offset         = std::distance(tracks2.begin(), p);
         const int key2 = m_images[img2].m_visible_keys[offset];
 
-        matches.push_back(KeypointMatch{key1, key2});
+        matches.emplace_back(key1, key2);
     }
 }
 
@@ -494,7 +494,7 @@ Camera MainFrame::InitializeImage(int image_idx, int camera_idx, PointVec& point
     for (const auto& i : inliers)
     {
         image.m_keys[keys_final[i]].m_extra = idxs_final[i];
-        points[idxs_final[i]].m_views.push_back(ImageKey{camera_idx, keys_final[i]});
+        points[idxs_final[i]].m_views.emplace_back(camera_idx, keys_final[i]);
     }
 
     camera_new.m_adjusted = true;
@@ -925,11 +925,11 @@ void MainFrame::AddNewPoints(const CamVec& cameras, const IntVec& added_order, P
                 // We haven't yet seen this track, create a new track
                 tracks_seen[key.m_track] = (int)new_tracks.size();
 
-                new_tracks.push_back(ImageKeyVector{ImageKey{i, j}});
+                new_tracks.emplace_back(ImageKeyVector{ImageKey{i, j}});
                 track_idxs.push_back(key.m_track);
             } else
             {
-                new_tracks[seen].push_back(ImageKey{i, j});
+                new_tracks[seen].emplace_back(i, j);
             }
         }
     }
@@ -989,7 +989,7 @@ void MainFrame::AddNewPoints(const CamVec& cameras, const IntVec& added_order, P
             const Point3 pn = cam.GetIntrinsicMatrix().inverse() * EuclideanToHomogenous(key.m_coords);
             const Point2 pu = UndistortNormalizedPoint(-pn.head<2>(), cam.m_k_inv);
 
-            observations.push_back(Observation{pu, cam});
+            observations.emplace_back(pu, cam);
         }
 
         const auto point = Triangulate(observations);
@@ -1029,7 +1029,7 @@ void MainFrame::AddNewPoints(const CamVec& cameras, const IntVec& added_order, P
         // All tests succeeded, so let's add the point
         const auto& key = GetKey(added_order[new_tracks[i][0].first], new_tracks[i][0].second);
 
-        points.push_back(PointData{point, key.m_color, new_tracks[i]});
+        points.emplace_back(point, key.m_color, new_tracks[i]);
 
         // Set the point index on the keys
         for (const auto& track : new_tracks[i]) GetKey(added_order[track.first], track.second).m_extra = points.size() - 1;
