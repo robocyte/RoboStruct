@@ -1133,8 +1133,8 @@ void MainFrame::RadiusOutlierRemoval(double threshold, const IntVec& added_order
 
         for (const auto& view : points[idx].m_views)
         {
-            int v = view.first;
-            int k = view.second;
+            const int v = view.first;
+            const int k = view.second;
 
             // Sanity check
             if (GetKey(added_order[v], k).m_extra != idx) wxLogMessage("[RadiusOutlierRemoval] Error! Entry for (%d,%d) should be %d, but is %d", added_order[v], k, idx, GetKey(added_order[v], k).m_extra);
