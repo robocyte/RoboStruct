@@ -145,11 +145,12 @@ void MainFrame::OnToggleVisibility(wxCommandEvent& event)
 
 void MainFrame::OnTimerUpdate(wxTimerEvent& event)
 {
+    auto camera = m_scene->GetCamera();
+
     switch (event.GetId())
     {
     case ID_TIMER_TURNTABLE:
         {
-            auto camera         = m_scene->GetCamera();
             const auto rotation = camera->GetTrackballOrientation();
 
             camera->RotateTrackball(glm::vec2{0.0f, 0.0f}, glm::vec2{-0.0002f * m_tb_turntable_speed_slider->GetValue(), 0.0f});
@@ -165,7 +166,6 @@ void MainFrame::OnTimerUpdate(wxTimerEvent& event)
             m_counter += 0.02f;
             if (m_counter >= 1.0f) m_reset_viewport_timer->Stop();
 
-            auto camera       = m_scene->GetCamera();
             const auto quat_x = glm::angleAxis(15.0f, glm::vec3{1, 0, 0});
             const auto quat_y = glm::angleAxis(45.0f, glm::vec3{0, 1, 0});
             const auto quat_z = glm::angleAxis(0.0f,  glm::vec3{0, 0, 1});
@@ -199,6 +199,7 @@ void MainFrame::OnTimerUpdate(wxTimerEvent& event)
     default: event.Skip();
     }
 
+    camera->Update();
     m_gl_canvas->Refresh(false);
 }
 

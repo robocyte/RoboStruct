@@ -36,11 +36,11 @@ public:
     MainFrame(wxWindow* parent = nullptr);
     ~MainFrame();
 
-    void InitializeGuiStyle();
     void InitializeLog();
     void InitializeOpenGL();
     void InitializeScene();
     void InitializeCameraDatabase();
+    void InitializeGuiStyle();
 
     void ResetOptions();
     void ResetGLCanvas();

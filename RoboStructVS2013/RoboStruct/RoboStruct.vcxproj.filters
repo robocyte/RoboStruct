@@ -83,11 +83,11 @@
     <ClCompile Include="..\..\src\MainFrameMatchesView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\RoboStruct_GUI_style.cpp">
-      <Filter>wxFormBuilder</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\MatchData.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\wxfb\RoboStruct_GUI_style.cpp">
+      <Filter>wxFormBuilder</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
