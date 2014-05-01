@@ -1,5 +1,5 @@
 ﻿///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Nov  6 2013)
+// C++ code generated with wxFormBuilder (version Feb 26 2014)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO "NOT" EDIT THIS FILE!
@@ -92,6 +92,7 @@ class MainFrame_base : public wxFrame
 		wxChoice* m_tb_camera_mesh_choice;
 		wxAuiMyNotebook* m_window_viewport;
 		wxPanel* m_panel8;
+		wxAuiToolBar* m_toolbar_viewport;
 		wxGLCanvas *m_gl_canvas;
 		wxPanel* m_pane_matches;
 		wxPanel* m_pane_matches_view;

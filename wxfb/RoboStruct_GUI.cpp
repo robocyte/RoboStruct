@@ -1,5 +1,5 @@
 ﻿///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Nov  6 2013)
+// C++ code generated with wxFormBuilder (version Feb 26 2014)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO "NOT" EDIT THIS FILE!
@@ -17,7 +17,7 @@ MainFrame_base::MainFrame_base( wxWindow* parent, wxWindowID id, const wxString&
 	this->SetForegroundColour( wxColour( 238, 238, 242 ) );
 	this->SetBackgroundColour( wxColour( 238, 238, 242 ) );
 	m_mgr.SetManagedWindow(this);
-	m_mgr.SetFlags(wxAUI_MGR_ALLOW_FLOATING|wxAUI_MGR_HINT_FADE|wxAUI_MGR_LIVE_RESIZE|wxAUI_MGR_NO_VENETIAN_BLINDS_FADE|wxAUI_MGR_TRANSPARENT_DRAG|wxAUI_MGR_TRANSPARENT_HINT|wxAUI_MGR_ALLOW_ACTIVE_PANE);
+	m_mgr.SetFlags(wxAUI_MGR_ALLOW_ACTIVE_PANE|wxAUI_MGR_ALLOW_FLOATING|wxAUI_MGR_HINT_FADE|wxAUI_MGR_LIVE_RESIZE|wxAUI_MGR_NO_VENETIAN_BLINDS_FADE|wxAUI_MGR_TRANSPARENT_DRAG|wxAUI_MGR_TRANSPARENT_HINT);
 	
 	m_statusbar = this->CreateStatusBar( 4, wxST_SIZEGRIP, wxID_ANY );
 	m_statusbar->SetForegroundColour( wxColour( 238, 238, 242 ) );
@@ -206,14 +206,6 @@ MainFrame_base::MainFrame_base( wxWindow* parent, wxWindowID id, const wxString&
 	m_toolbar->AddControl( m_tb_turntable_speed_slider );
 	m_toolbar->AddSeparator(); 
 	
-	m_toolbar->AddTool( ID_TOGGLE_TRACKBALL_VISIBILITY, wxT("Trackball"), wxICON( trackball_icon ), wxNullBitmap, wxITEM_NORMAL, wxT("Toggle trackball visibility"), wxT("Toggle trackball visibility"), NULL ); 
-	
-	m_toolbar->AddTool( ID_TOGGLE_GRID_VISIBILITY, wxT("Grid"), wxICON( grid_icon ), wxNullBitmap, wxITEM_NORMAL, wxT("Toggle grid visibility"), wxT("Toggle grid visibility"), NULL ); 
-	
-	m_toolbar->AddTool( ID_TOGGLE_POINTS_VISIBILITY, wxT("Points"), wxICON( points_icon ), wxNullBitmap, wxITEM_NORMAL, wxT("Toggle points visibility"), wxT("Toggle points visibility"), NULL ); 
-	
-	m_toolbar->AddTool( ID_TOGGLE_CAMERAS_VISIBILITY, wxT("Cameras"), wxICON( camera_icon ), wxNullBitmap, wxITEM_NORMAL, wxT("Toggle cameras visibility"), wxT("Toggle cameras visibility"), NULL ); 
-	
 	m_toolbar->AddTool( ID_TOGGLE_FRUSTRUM_VISIBILITY, wxT("Frustrum"), wxICON( frustrum_icon ), wxNullBitmap, wxITEM_NORMAL, wxT("Toggle frustrum visibility"), wxT("Toggle frustrum visibility"), NULL ); 
 	
 	m_toolbar->AddSeparator(); 
@@ -244,6 +236,16 @@ MainFrame_base::MainFrame_base( wxWindow* parent, wxWindowID id, const wxString&
 	m_panel8 = new wxPanel( m_window_viewport, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER|wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizer8;
 	bSizer8 = new wxBoxSizer( wxVERTICAL );
+	
+	m_toolbar_viewport = new wxAuiToolBar( m_panel8, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_HORZ_LAYOUT ); 
+	m_toolbar_viewport->AddTool( ID_TOGGLE_GRID_VISIBILITY,      "Grid",      wxIcon("grid_icon", wxBITMAP_TYPE_ICO_RESOURCE, 22, 22),      wxNullBitmap, wxITEM_NORMAL, "Toggle grid visibility",      "Toggle grid visibility", NULL); 
+	m_toolbar_viewport->AddTool( ID_TOGGLE_TRACKBALL_VISIBILITY, "Trackball", wxIcon("trackball_icon", wxBITMAP_TYPE_ICO_RESOURCE, 22, 22), wxNullBitmap, wxITEM_NORMAL, "Toggle trackball visibility", "Toggle trackball visibility", NULL); 
+	m_toolbar_viewport->AddTool( ID_TOGGLE_POINTS_VISIBILITY,    "Points",    wxIcon("points_icon", wxBITMAP_TYPE_ICO_RESOURCE, 22, 22),    wxNullBitmap, wxITEM_NORMAL, "Toggle points visibility",    "Toggle points visibility", NULL); 
+	m_toolbar_viewport->AddTool( ID_TOGGLE_CAMERAS_VISIBILITY,   "Cameras",   wxIcon("camera_icon", wxBITMAP_TYPE_ICO_RESOURCE, 22, 22),    wxNullBitmap, wxITEM_NORMAL, "Toggle cameras visibility",   "Toggle cameras visibility", NULL); 
+
+	m_toolbar_viewport->Realize(); 
+	
+	bSizer8->Add( m_toolbar_viewport, 0, wxEXPAND, 5 );
 	
 	int GLCanvasAttributes[] = {WX_GL_RGBA, 1, WX_GL_DOUBLEBUFFER, 1, WX_GL_SAMPLES, 8, 0};
 	m_gl_canvas = new wxGLCanvas(m_panel8, -1, GLCanvasAttributes);
@@ -321,9 +323,9 @@ MainFrame_base::MainFrame_base( wxWindow* parent, wxWindowID id, const wxString&
 	wxBoxSizer* bSizer2;
 	bSizer2 = new wxBoxSizer( wxVERTICAL );
 	
-	m_toolbar_options = new wxAuiToolBar( m_window_options, wxID_ANY, wxDefaultPosition, wxDefaultSize,  wxAUI_TB_HORZ_LAYOUT|wxNO_BORDER);
-	m_toolbar_options->SetToolBitmapSize(wxSize(22, 22));
-	m_toolbar_options->SetToolPacking(2);
+	m_toolbar_options = new wxAuiToolBar( m_window_options, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_HORZ_LAYOUT|wxNO_BORDER );
+	m_toolbar_options->SetToolBitmapSize( wxSize( 22,22 ) );
+	m_toolbar_options->SetToolPacking( 2 );
 	m_toolbar_options->SetBackgroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOW ) );
 	
 	m_toolbar_options->AddTool(ID_RESET_OPTIONS, wxT("Reset options"), wxIcon("reset_icon", wxBITMAP_TYPE_ICO_RESOURCE, 22, 22), wxNullBitmap, wxITEM_NORMAL, "Reset options", "Reset options", NULL); 
@@ -359,12 +361,12 @@ MainFrame_base::MainFrame_base( wxWindow* parent, wxWindowID id, const wxString&
 	
 	bSizer3->Add( m_tc_log, 1, wxEXPAND, 5 );
 	
-	m_toolbar_log = new wxAuiToolBar( m_window_log, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_VERTICAL|wxNO_BORDER);
-	m_toolbar_log->SetToolBitmapSize( wxSize(22, 22) );
+	m_toolbar_log = new wxAuiToolBar( m_window_log, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_VERTICAL|wxNO_BORDER );
+	m_toolbar_log->SetToolBitmapSize( wxSize( 22,22 ) );
 	m_toolbar_log->SetToolPacking( 2 );
 	m_toolbar_log->SetBackgroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOW ) );
 	
-	m_toolbar_log->AddTool(ID_SAVE_LOG,	 "Save Log",  wxIcon("floppy_icon", wxBITMAP_TYPE_ICO_RESOURCE, 22, 22),	 wxNullBitmap, wxITEM_NORMAL, "Save the log to a .txt file", "Save the log to a .txt file", NULL);
+	m_toolbar_log->AddTool(ID_SAVE_LOG,	 "Save Log",  wxIcon("floppy_icon", wxBITMAP_TYPE_ICO_RESOURCE, 22, 22),	wxNullBitmap, wxITEM_NORMAL, "Save the log to a .txt file", "Save the log to a .txt file", NULL);
 	m_toolbar_log->AddTool(ID_CLEAR_LOG, "Clear log", wxIcon("clear_log_icon", wxBITMAP_TYPE_ICO_RESOURCE, 22, 22), wxNullBitmap, wxITEM_NORMAL, "Clear the log window", "Clear the log window", NULL);
 	
 	m_toolbar_log->Realize(); 
@@ -418,15 +420,15 @@ MainFrame_base::MainFrame_base( wxWindow* parent, wxWindowID id, const wxString&
 	this->Connect( ID_RECONSTRUCT, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnReconstruct ) );
 	this->Connect( ID_RESET_3D_VIEWPORT, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnReset3dViewport ) );
 	this->Connect( ID_TOGGLE_TURNTABLE_ANIMATION, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnToggleTurntableAnimation ) );
-	this->Connect( ID_TOGGLE_TRACKBALL_VISIBILITY, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnToggleVisibility ) );
-	this->Connect( ID_TOGGLE_GRID_VISIBILITY, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnToggleVisibility ) );
-	this->Connect( ID_TOGGLE_POINTS_VISIBILITY, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnToggleVisibility ) );
-	this->Connect( ID_TOGGLE_CAMERAS_VISIBILITY, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnToggleVisibility ) );
 	this->Connect( ID_TOGGLE_FRUSTRUM_VISIBILITY, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnToggleVisibility ) );
 	this->Connect( ID_VIEW_IMAGE_BROWSER, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnViewWindows ) );
 	this->Connect( ID_VIEW_IMAGE_PREVIEW, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnViewWindows ) );
 	this->Connect( ID_VIEW_OPTIONS, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnViewWindows ) );
 	this->Connect( ID_VIEW_LOG, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnViewWindows ) );
+	this->Connect( ID_TOGGLE_GRID_VISIBILITY, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnToggleVisibility ) );
+	this->Connect( ID_TOGGLE_TRACKBALL_VISIBILITY, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnToggleVisibility ) );
+	this->Connect( ID_TOGGLE_POINTS_VISIBILITY, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnToggleVisibility ) );
+	this->Connect( ID_TOGGLE_CAMERAS_VISIBILITY, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnToggleVisibility ) );
 	m_gl_canvas->Connect( wxEVT_ERASE_BACKGROUND, wxEraseEventHandler( MainFrame_base::OnGLCanvasEraseBackground ), NULL, this );
 	m_gl_canvas->Connect( wxEVT_LEFT_DOWN, wxMouseEventHandler( MainFrame_base::OnGLCanvasMouse ), NULL, this );
 	m_gl_canvas->Connect( wxEVT_LEFT_UP, wxMouseEventHandler( MainFrame_base::OnGLCanvasMouse ), NULL, this );
@@ -497,15 +499,15 @@ MainFrame_base::~MainFrame_base()
 	this->Disconnect( ID_RECONSTRUCT, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnReconstruct ) );
 	this->Disconnect( ID_RESET_3D_VIEWPORT, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnReset3dViewport ) );
 	this->Disconnect( ID_TOGGLE_TURNTABLE_ANIMATION, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnToggleTurntableAnimation ) );
-	this->Disconnect( ID_TOGGLE_TRACKBALL_VISIBILITY, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnToggleVisibility ) );
-	this->Disconnect( ID_TOGGLE_GRID_VISIBILITY, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnToggleVisibility ) );
-	this->Disconnect( ID_TOGGLE_POINTS_VISIBILITY, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnToggleVisibility ) );
-	this->Disconnect( ID_TOGGLE_CAMERAS_VISIBILITY, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnToggleVisibility ) );
 	this->Disconnect( ID_TOGGLE_FRUSTRUM_VISIBILITY, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnToggleVisibility ) );
 	this->Disconnect( ID_VIEW_IMAGE_BROWSER, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnViewWindows ) );
 	this->Disconnect( ID_VIEW_IMAGE_PREVIEW, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnViewWindows ) );
 	this->Disconnect( ID_VIEW_OPTIONS, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnViewWindows ) );
 	this->Disconnect( ID_VIEW_LOG, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnViewWindows ) );
+	this->Disconnect( ID_TOGGLE_GRID_VISIBILITY, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnToggleVisibility ) );
+	this->Disconnect( ID_TOGGLE_TRACKBALL_VISIBILITY, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnToggleVisibility ) );
+	this->Disconnect( ID_TOGGLE_POINTS_VISIBILITY, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnToggleVisibility ) );
+	this->Disconnect( ID_TOGGLE_CAMERAS_VISIBILITY, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MainFrame_base::OnToggleVisibility ) );
 	m_gl_canvas->Disconnect( wxEVT_ERASE_BACKGROUND, wxEraseEventHandler( MainFrame_base::OnGLCanvasEraseBackground ), NULL, this );
 	m_gl_canvas->Disconnect( wxEVT_LEFT_DOWN, wxMouseEventHandler( MainFrame_base::OnGLCanvasMouse ), NULL, this );
 	m_gl_canvas->Disconnect( wxEVT_LEFT_UP, wxMouseEventHandler( MainFrame_base::OnGLCanvasMouse ), NULL, this );

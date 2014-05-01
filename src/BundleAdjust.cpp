@@ -257,7 +257,7 @@ bool MainFrame::EstimateRelativePose(int i1, int i2, Camera* camera1, Camera* ca
 {
     ScopedTimer timer{m_profile_manager, "[EstimateRelativePose]"};
 
-    const auto& matches = m_matches.GetMatchList(ImagePair(i1, i2));
+    const auto& matches = m_matches.GetMatchList(ImagePair{i1, i2});
 
     Point2Vec projections1; projections1.reserve(matches.size());
     Point2Vec projections2; projections2.reserve(matches.size());
@@ -285,7 +285,7 @@ bool MainFrame::EstimateRelativePose(int i1, int i2, Camera* camera1, Camera* ca
 
 void MainFrame::SetMatchesFromTracks(int img1, int img2)
 {
-    auto& matches = m_matches.GetMatchList(ImagePair(img1, img2));
+    auto& matches = m_matches.GetMatchList(ImagePair{img1, img2});
     const auto& tracks1 = m_images[img1].m_visible_points;
     const auto& tracks2 = m_images[img2].m_visible_points;
 
