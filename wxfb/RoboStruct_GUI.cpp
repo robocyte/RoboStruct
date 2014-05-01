@@ -198,9 +198,16 @@ MainFrame_base::MainFrame_base( wxWindow* parent, wxWindowID id, const wxString&
 	
 	m_panel8 = new wxPanel( m_window_viewport, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER|wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizer8;
-	bSizer8 = new wxBoxSizer( wxVERTICAL );
+	bSizer8 = new wxBoxSizer( wxHORIZONTAL );
 	
-	m_toolbar_viewport = new wxAuiToolBar( m_panel8, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_HORZ_LAYOUT ); 
+	int GLCanvasAttributes[] = {WX_GL_RGBA, 1, WX_GL_DOUBLEBUFFER, 1, WX_GL_SAMPLES, 8, 0};
+	m_gl_canvas = new wxGLCanvas(m_panel8, -1, GLCanvasAttributes);
+	m_gl_canvas->SetBackgroundColour( wxColour( 238, 238, 242 ) );
+	
+	bSizer8->Add( m_gl_canvas, 1, wxEXPAND, 5 );
+
+    
+    m_toolbar_viewport = new wxAuiToolBar( m_panel8, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_VERTICAL ); 
 	m_toolbar_viewport->AddTool(ID_RESET_3D_VIEWPORT,           "Reset 3d viewport", wxIcon("home_icon", wxBITMAP_TYPE_ICO_RESOURCE, 22, 22),      wxNullBitmap, wxITEM_NORMAL, "Reset the 3d viewport",       "Reset the 3d viewport", NULL);
 	m_toolbar_viewport->AddTool(ID_TOGGLE_TURNTABLE_ANIMATION,  "Turntable",         wxIcon("turntable_icon", wxBITMAP_TYPE_ICO_RESOURCE, 22, 22), wxNullBitmap, wxITEM_NORMAL, "Toggle turntable animation",  "Toggle turntable animation", NULL);
 	m_toolbar_viewport->AddTool(ID_TOGGLE_GRID_VISIBILITY,      "Grid",              wxIcon("grid_icon", wxBITMAP_TYPE_ICO_RESOURCE, 22, 22),      wxNullBitmap, wxITEM_NORMAL, "Toggle grid visibility",      "Toggle grid visibility", NULL);
@@ -212,14 +219,8 @@ MainFrame_base::MainFrame_base( wxWindow* parent, wxWindowID id, const wxString&
 	
 	bSizer8->Add( m_toolbar_viewport, 0, wxEXPAND, 5 );
 	
-	int GLCanvasAttributes[] = {WX_GL_RGBA, 1, WX_GL_DOUBLEBUFFER, 1, WX_GL_SAMPLES, 8, 0};
-	m_gl_canvas = new wxGLCanvas(m_panel8, -1, GLCanvasAttributes);
-	m_gl_canvas->SetBackgroundColour( wxColour( 238, 238, 242 ) );
-	
-	bSizer8->Add( m_gl_canvas, 1, wxEXPAND, 5 );
-	
-	
-	m_panel8->SetSizer( bSizer8 );
+
+    m_panel8->SetSizer( bSizer8 );
 	m_panel8->Layout();
 	bSizer8->Fit( m_panel8 );
 	m_window_viewport->AddPage( m_panel8, wxT("3d view"), true, wxNullBitmap );
