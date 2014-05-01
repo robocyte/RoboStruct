@@ -118,7 +118,7 @@ void MainFrame::OnGLCanvasPaint(wxPaintEvent& event)
 
 void MainFrame::OnGLCanvasMouse(wxMouseEvent& event)
 {
-    // Set focus, otherwise mousewheel zoom not working!
+    // Set focus, otherwise mousewheel zoom is not working!
     m_gl_canvas->SetFocus();
 
     // Disable viewport navigation in turntable mode
@@ -134,7 +134,7 @@ void MainFrame::OnGLCanvasMouse(wxMouseEvent& event)
     if (event.m_leftDown)
     {
         m_gl_canvas->SetCursor(m_rotate_cursor);
-        camera->RotateTrackball(glm::vec2{0.8f * (2.0f * m_beginx - sz.x)     / sz.y, 0.8f * (sz.y - 2.0f * m_beginy)     / sz.y},
+        camera->RotateTrackball(glm::vec2{0.8f * (2.0f * m_beginx     - sz.x) / sz.y, 0.8f * (sz.y - 2.0f * m_beginy)     / sz.y},
                                 glm::vec2{0.8f * (2.0f * event.GetX() - sz.x) / sz.y, 0.8f * (sz.y - 2.0f * event.GetY()) / sz.y});
     }
 

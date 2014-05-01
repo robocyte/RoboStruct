@@ -22,8 +22,6 @@ class wxAuiMyNotebook;
 #include <wx/image.h>
 #include <wx/icon.h>
 #include <wx/menu.h>
-#include <wx/slider.h>
-#include <wx/choice.h>
 #include <wx/aui/aui.h>
 #include <wx/aui/auibar.h>
 #include <wx/glcanvas.h>
@@ -62,7 +60,6 @@ class MainFrame_base : public wxFrame
 			ID_TOGGLE_GRID_VISIBILITY,
 			ID_TOGGLE_POINTS_VISIBILITY,
 			ID_TOGGLE_CAMERAS_VISIBILITY,
-			ID_TOGGLE_FRUSTRUM_VISIBILITY,
 			ID_EXPORT_TRACKS,
 			ID_EXPORT_MATCHES,
 			ID_EXPORT_CMVS,
@@ -71,8 +68,6 @@ class MainFrame_base : public wxFrame
 			ID_EXPORT_MESHLAB_FILE,
 			ID_EXPORT_MAYA_FILE,
 			ID_VIEW_ABOUT,
-			ID_TURNTABLE_SPEED_SLIDER,
-			ID_CAMERA_MESH_CHOICE,
 			ID_PANE_MATCHES,
 			ID_RESET_OPTIONS,
 			ID_SAVE_OPTIONS,
@@ -88,8 +83,6 @@ class MainFrame_base : public wxFrame
 		wxMenu* m_export_menu;
 		wxMenu* m_help_menu;
 		wxAuiToolBar* m_toolbar;
-		wxSlider* m_tb_turntable_speed_slider;
-		wxChoice* m_tb_camera_mesh_choice;
 		wxAuiMyNotebook* m_window_viewport;
 		wxPanel* m_panel8;
 		wxAuiToolBar* m_toolbar_viewport;

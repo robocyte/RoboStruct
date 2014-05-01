@@ -23,7 +23,7 @@ void MainFrame::OnUpdateUI(wxUpdateUIEvent& event)
     case ID_EXPORT_MESHLAB_FILE:            event.Enable(m_sfm_done);           break;
     case ID_EXPORT_MAYA_FILE:               event.Enable(m_sfm_done);           break;
 
-    case ID_TOGGLE_FRUSTRUM_VISIBILITY:     event.Enable(m_sfm_done);           break;
+    //case ID_TOGGLE_FRUSTRUM_VISIBILITY:     event.Enable(m_sfm_done);           break;
     case ID_TOGGLE_POINTS_VISIBILITY:       event.Enable(m_sfm_done);           break;
     case ID_TOGGLE_CAMERAS_VISIBILITY:      event.Enable(m_sfm_done);           break;
 
@@ -153,7 +153,7 @@ void MainFrame::OnTimerUpdate(wxTimerEvent& event)
         {
             const auto rotation = camera->GetTrackballOrientation();
 
-            camera->RotateTrackball(glm::vec2{0.0f, 0.0f}, glm::vec2{-0.0002f * m_tb_turntable_speed_slider->GetValue(), 0.0f});
+            camera->RotateTrackball(glm::vec2{0.0f, 0.0f}, glm::vec2{-0.0002f * 50.0f, 0.0f});
 
             m_scene->GetNode("Trackball X")->GetTransform().SetOrientation(rotation * glm::angleAxis(90.0f, glm::vec3{0.0f, 1.0f, 0.0f}));
             m_scene->GetNode("Trackball Y")->GetTransform().SetOrientation(rotation * glm::angleAxis(90.0f, glm::vec3{1.0f, 0.0f, 0.0f}));
